@@ -187,3 +187,27 @@ def ato_gune(prakriya: Prakriya):
         if vikarana.text.endswith('a') and suffix.text.startswith('a'):
             suffix.text = suffix.text[1:] # Delete the second 'a' to merge them
             prakriya.log("Rule 6.1.97: Pararupa Sandhi applied ('a' + 'a' -> 'a')")
+
+def jhonta(prakriya: Prakriya):
+    """Rule 7.1.3: jho'ntaH - Replaces 'Jh' in a suffix with 'ant'"""
+    suffix = prakriya.terms[-1]
+    if suffix.text.startswith('J'):
+        # E.g., Ji -> anti, Jha -> antha (which becomes anta via another rule, but we simplify here)
+        # Note: If it's Atmanepada 'Ja' that became 'Je', 'J' becomes 'ant' so 'Je' -> 'ante'
+        suffix.text = 'ant' + suffix.text[1:]
+        prakriya.log(f"Rule 7.1.3: Replaced 'Jh' with 'ant' -> {suffix.text}")
+
+def ato_gune(prakriya: Prakriya):
+    """
+    Rule 6.1.97: ato guNe 
+    When 'a' is followed by a Guna vowel ('a', 'e', 'o'), they merge into the second vowel.
+    This fixes Bav + a + anti -> Bavanti, and aMh + a + e -> aMhe.
+    """
+    if len(prakriya.terms) >= 3:
+        vikarana = prakriya.terms[1]
+        suffix = prakriya.terms[2]
+        
+        if vikarana.text.endswith('a') and suffix.text and suffix.text[0] in ['a', 'e', 'o']:
+            # Delete the first 'a' (the Vikarana's 'a') to merge them into the suffix's vowel
+            vikarana.text = vikarana.text[:-1]
+            prakriya.log(f"Rule 6.1.97 (Ato Gune): Merged 'a' + '{suffix.text[0]}' -> '{suffix.text[0]}'")
