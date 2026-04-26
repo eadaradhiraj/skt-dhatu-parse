@@ -14,7 +14,8 @@ TIN_ATMANEPADA = {
 }
 # Phonological sets for quick lookup
 IK_VOWELS = set(get_pratyahara('i', 'k') +['I', 'U', 'F', 'X'])
-EC_VOWELS = get_pratyahara('e', 'c') #['e', 'o', 'E', 'O']
+EC_VOWELS = get_pratyahara('e', 'c')
+YAY_CONSONANTS = set(get_pratyahara('y', 'Y')) # 'yaY' pratyahara for 7.3.101
 
 def apply_guna(char: str) -> str:
     if char in ['i', 'I']: return 'e'
@@ -142,3 +143,31 @@ def eco_yayavayah(prakriya: Prakriya):
             
             dhatu.text = text[:-1] + rep
             prakriya.log(f"Rule 6.1.78 (Sandhi): eco'yavAyAvaH applied '{last_char}' -> '{rep}'")
+
+def ato_dirgho_yayi(prakriya: Prakriya):
+    """
+    Rule 7.3.101: ato dIrgho yaYi
+    Lengthens the short 'a' of an anga (stem) before a Sarvadhatuka affix beginning with 'yaY'.
+    """
+    # In our engine, the 'a' currently sits in the Vikarana term (e.g., 'a' from 'Sap')
+    if len(prakriya.terms) >= 3:
+        vikarana = prakriya.terms[1]
+        suffix = prakriya.terms[2]
+        
+        # Check if Vikarana ends in 'a' AND Suffix starts with a 'yaY' letter
+        if vikarana.text.endswith('a') and suffix.text and suffix.text[0] in YAY_CONSONANTS:
+            # Lengthen 'a' to 'A'
+            vikarana.text = vikarana.text[:-1] + 'A'
+            prakriya.log(f"Rule 7.3.101: Lengthened 'a' to 'A' before 'yaY' letter '{suffix.text[0]}'")
+
+
+def rutva_visarga(prakriya: Prakriya):
+    """
+    Rule 8.2.66 / 8.3.15 (Simplified): sasajuSo ruH -> kharavasAnayor visarjanIyaH
+    Changes a word-final 's' into a Visarga ('H').
+    """
+    suffix = prakriya.terms[-1] # The final term
+    
+    if suffix.text.endswith('s'):
+        suffix.text = suffix.text[:-1] + 'H'
+        prakriya.log("Rule 8.3.15: Terminal 's' converted to Visarga 'H'")
