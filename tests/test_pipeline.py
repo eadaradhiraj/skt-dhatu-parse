@@ -20,7 +20,8 @@ class TestPipeline(unittest.TestCase):
         # aMh (Gana 1, Atmanepada) - Original upadesha is ahi!
         mock_data =[
             ('akz', 1, 'parasmaipada', 'vyAptau', '0742', 'akzU!'),
-            ('aMh', 1, 'atmanepada', 'gatau', '0722', 'ahi!')
+            ('aMh', 1, 'atmanepada', 'gatau', '0722', 'ahi!'),
+            ('BU', 1, 'parasmaipada', 'sattAyAm', '0001', 'BU') # <-- ADD THIS LINE
         ]
         c.executemany("INSERT INTO dhatu VALUES (?, ?, ?, ?, ?, ?)", mock_data)
         conn.commit()

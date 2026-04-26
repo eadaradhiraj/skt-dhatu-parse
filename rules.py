@@ -1,5 +1,5 @@
 from models import Term, Prakriya
-from shivasutras import is_vowel
+from shivasutras import get_pratyahara, is_vowel, SLP1_VOWELS
 
 TIN_PARASMAIPADA = {
     'prathama': ['tip', 'tas', 'Ji'],
@@ -12,6 +12,16 @@ TIN_ATMANEPADA = {
     'madhyama': ['TAs', 'ATAm', 'Dvam'],
     'uttama':   ['iw', 'vahi', 'mahiN']
 }
+# Phonological sets for quick lookup
+IK_VOWELS = set(get_pratyahara('i', 'k') +['I', 'U', 'F', 'X'])
+EC_VOWELS = get_pratyahara('e', 'c') #['e', 'o', 'E', 'O']
+
+def apply_guna(char: str) -> str:
+    if char in ['i', 'I']: return 'e'
+    if char in ['u', 'U']: return 'o'
+    if char in ['f', 'F']: return 'ar'
+    if char in['x']: return 'al'
+    return char
 
 def substitute_lakara(prakriya: Prakriya, purusha: str = 'prathama', vacana: int = 0):
     dhatu = prakriya.terms[0]
@@ -87,3 +97,48 @@ def idito_num_dhatoh(prakriya: Prakriya):
                 dhatu.text = text[:i+1] + 'M' + text[i+1:]
                 prakriya.log(f"Rule 7.1.58: Applied 'num' augment -> {dhatu.text}")
                 break
+
+def sarvadhatuka_ardhadhatukayoh(prakriya: Prakriya):
+    """
+    Rule 7.3.84: sArvadhAtukArdhadhAtukayoH
+    If a Sarvadhatuka suffix follows, the 'ik' vowel of the stem gets Guna.
+    """
+    dhatu = prakriya.terms[0]
+    
+    if len(prakriya.terms) > 1:
+        next_term = prakriya.terms[1] # This is usually the Vikarana (e.g., 'a' from 'Sap')
+        
+        # Rule 3.4.113: tiN-Sit sArvadhAtukam (Affixes with 'Sit' or 'tiN' are Sarvadhatuka)
+        is_sarvadhatuka = 'tin' in next_term.tags or 'Sit' in next_term.tags
+        
+        if is_sarvadhatuka:
+            text = dhatu.text
+            if text and text[-1] in IK_VOWELS:
+                old_vowel = text[-1]
+                new_vowel = apply_guna(old_vowel)
+                # Replace the last vowel with its Guna equivalent
+                dhatu.text = text[:-1] + new_vowel
+                prakriya.log(f"Rule 7.3.84 (Guna): '{old_vowel}' -> '{new_vowel}' before Sarvadhatuka")
+
+
+def eco_yayavayah(prakriya: Prakriya):
+    """
+    Rule 6.1.78: eco'yavAyAvaH
+    'ec' vowels (e, o, E, O) followed by a vowel ('ac') become ay, av, Ay, Av.
+    """
+    dhatu = prakriya.terms[0]
+    
+    if len(prakriya.terms) > 1:
+        next_term = prakriya.terms[1]
+        
+        text = dhatu.text
+        # If Dhatu ends in ec, and the next term starts with a vowel
+        if text and text[-1] in EC_VOWELS and next_term.text and is_vowel(next_term.text[0]):
+            last_char = text[-1]
+            if last_char == 'e': rep = 'ay'
+            elif last_char == 'o': rep = 'av'
+            elif last_char == 'E': rep = 'Ay'
+            elif last_char == 'O': rep = 'Av'
+            
+            dhatu.text = text[:-1] + rep
+            prakriya.log(f"Rule 6.1.78 (Sandhi): eco'yavAyAvaH applied '{last_char}' -> '{rep}'")
