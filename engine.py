@@ -7,7 +7,7 @@ from anubandha import resolve_it_markers
 from rules import (
     substitute_lakara, insert_vikarana, atmanepada_tere, 
     idito_num_dhatoh, sarvadhatuka_ardhadhatukayoh, eco_yayavayah,
-    ato_dirgho_yayi, rutva_visarga, jhonta, ato_gune
+    ato_dirgho_yayi, rutva_visarga, jhonta, ato_gune, thasah_se, ato_nitah
 )
 
 def derive(dhatu_slp1: str, lakara_name: str = 'laW', 
@@ -35,6 +35,7 @@ def derive(dhatu_slp1: str, lakara_name: str = 'laW',
     
     # 6. Apply Jhonta (Jh -> ant) IMMEDIATELY after substitution
     jhonta(prakriya)
+    thasah_se(prakriya)    # <-- Changes TAs to se BEFORE 'tere' can ruin it!
     
     # 7. Suffix It-Lopa & Atmanepada Morphing
     resolve_it_markers(suffix)
@@ -54,7 +55,8 @@ def derive(dhatu_slp1: str, lakara_name: str = 'laW',
     ato_dirgho_yayi(prakriya)
     
     # 11. Final Vowel Merges (a + anti -> anti)
-    ato_gune(prakriya)
+    ato_nitah(prakriya)    # <-- NEW: Resolves a + Ate -> ete
+    ato_gune(prakriya)     # Resolves a + anti -> anti
     
     # 12. Word-Final Rules (s -> H)
     rutva_visarga(prakriya)

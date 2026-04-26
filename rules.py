@@ -211,3 +211,28 @@ def ato_gune(prakriya: Prakriya):
             # Delete the first 'a' (the Vikarana's 'a') to merge them into the suffix's vowel
             vikarana.text = vikarana.text[:-1]
             prakriya.log(f"Rule 6.1.97 (Ato Gune): Merged 'a' + '{suffix.text[0]}' -> '{suffix.text[0]}'")
+
+def thasah_se(prakriya: Prakriya):
+    """Rule 3.4.80: thAsaH se - Replaces Atmanepada 'TAs' with 'se' in a Wit lakara."""
+    suffix = prakriya.terms[-1]
+    if suffix.text == 'TAs' and 'Wit' in suffix.tags:
+        suffix.text = 'se'
+        prakriya.log("Rule 3.4.80: Replaced 'TAs' with 'se'")
+
+
+def ato_nitah(prakriya: Prakriya):
+    """
+    Rules 1.2.4 & 7.2.81: Ato NitaH 
+    An 'A' of an apit Sarvadhatuka following an 'a' becomes 'iy'.
+    Combined with Sandhi (6.1.66, 6.1.87), 'a' + 'Ate'/'ATe' becomes 'ete'/'eTe'.
+    """
+    if len(prakriya.terms) >= 3:
+        vikarana = prakriya.terms[1]
+        suffix = prakriya.terms[-1]
+        
+        # If Vikarana ends in 'a', Suffix starts with 'A', and Suffix is 'apit' (no 'pit' tag)
+        if vikarana.text.endswith('a') and suffix.text.startswith('A') and 'pit' not in suffix.tags:
+            # We execute the final phonetic result of the chain: a + A -> e
+            vikarana.text = vikarana.text[:-1]      # Remove 'a'
+            suffix.text = 'e' + suffix.text[1:]     # Replace 'A' with 'e'
+            prakriya.log("Rule 7.2.81 (Ato NitaH + Sandhi): Merged 'a' + 'A' -> 'e'")
