@@ -1,7 +1,7 @@
 from dhatu_loader import get_dhatu, DEFAULT_DB_PATH
 from models import Term, Prakriya
 from anubandha import resolve_it_markers
-from rules import substitute_lakara, insert_vikarana, atmanepada_tere
+from rules import substitute_lakara, insert_vikarana, atmanepada_tere, idito_num_dhatoh
 
 def derive(dhatu_slp1: str, lakara_name: str = 'laW', db_path: str = DEFAULT_DB_PATH):
     prakriya = Prakriya()
@@ -14,6 +14,9 @@ def derive(dhatu_slp1: str, lakara_name: str = 'laW', db_path: str = DEFAULT_DB_
     
     # 2. Resolve Dhatu Anubandhas
     resolve_it_markers(dhatu)
+
+    # 2.5 Apply Num augment if Dhatu is 'idit'
+    idito_num_dhatoh(prakriya)
     
     # 3. Add Lakara
     lakara = Term(lakara_name, 'lakara')

@@ -50,33 +50,29 @@ class TestPipeline(unittest.TestCase):
         self.assertEqual(suffix.text, 'ti')
         self.assertIn('pit', suffix.tags) # Ensures 1.3.3 fired
 
-    def test_derive_ahata(self):
+    def test_derive_aMhate(self):
         """
-        Full pipeline test: ahi! + laW -> ah + a + ta = ahata.
-        (Note: Later rules will turn 'ah' into 'aMh' and 'ta' into 'te',
-        but right now 'ahata' is mathematically correct based on what we've built!)
+        Full pipeline test: ahi! + laW -> aMh + a + te = aMhate.
+        This tests:
+        1. It-lopa (ahi! -> ah + 'idit')
+        2. Idito Num DhAtoH (ah -> aMh)
+        3. Lakara substitution & Inheritance (laW -> ta + 'Wit')
+        4. Atmanepada Tere (ta -> te)
         """
         prakriya = derive('aMh', 'laW', db_path=self.test_db_path)
         
         self.assertIsNotNone(prakriya)
-        self.assertEqual(prakriya.get_current_string(), 'ahata')
+        self.assertEqual(prakriya.get_current_string(), 'aMhate')
         
+        # Verify that the Dhatu got its 'm' augment and 'idit' tag
         dhatu = prakriya.terms[0]
-        self.assertEqual(dhatu.text, 'ah')
-        self.assertIn('idit', dhatu.tags) # Remember this 'idit' tag! It triggers 'num' (M) later!
-    
-    def test_derive_ahate(self):
-        """
-        Full pipeline test: ahi! + laW -> ah + a + te = ahate.
-        """
-        prakriya = derive('aMh', 'laW', db_path=self.test_db_path)
+        self.assertEqual(dhatu.text, 'aMh')
+        self.assertIn('idit', dhatu.tags) 
         
-        self.assertIsNotNone(prakriya)
-        self.assertEqual(prakriya.get_current_string(), 'ahate') # NOW EXPECTING 'ahate'
-        
+        # Verify that the suffix became 'te' and inherited 'Wit'
         suffix = prakriya.terms[2]
         self.assertEqual(suffix.text, 'te')
-        self.assertIn('Wit', suffix.tags) # Proves Sthānivadbhāva inheritance worked!
+        self.assertIn('Wit', suffix.tags)
 
 if __name__ == '__main__':
     unittest.main()

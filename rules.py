@@ -66,3 +66,24 @@ def atmanepada_tere(prakriya: Prakriya):
                 suffix.text = text[:i] + 'e'
                 prakriya.log(f"Rule 3.4.79: Replaced 'wi' ({original_ti}) with 'e' -> {suffix.text}")
                 break
+
+def idito_num_dhatoh(prakriya: Prakriya):
+    """
+    Rule 7.1.58: idito num dhAtoH
+    Adds the 'num' augment to roots tagged with 'idit'.
+    The 'm' is inserted immediately after the last vowel of the root (Rule 1.1.47: midaco'ntyātparaḥ).
+    """
+    dhatu = prakriya.terms[0]
+    
+    if 'idit' in dhatu.tags:
+        text = dhatu.text
+        
+        # Find the last vowel in the dhatu
+        for i in range(len(text)-1, -1, -1):
+            if is_vowel(text[i]):
+                # Insert 'M' (anusvara) right after the vowel
+                # Note: Technically 'num' is 'n', which becomes 'M' via Sandhi (8.3.24), 
+                # but we'll insert 'M' directly here for simplicity at this stage.
+                dhatu.text = text[:i+1] + 'M' + text[i+1:]
+                prakriya.log(f"Rule 7.1.58: Applied 'num' augment -> {dhatu.text}")
+                break

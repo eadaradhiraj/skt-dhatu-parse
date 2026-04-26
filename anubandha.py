@@ -33,7 +33,7 @@ def resolve_it_markers(term: Term):
     # -----------------------------------------------------------------------
     # Rules specific to Pratyayas (Suffixes/Infixes)
     # -----------------------------------------------------------------------
-    if term.term_type in['pratyaya', 'vikaraRa']:
+    if term.term_type in['pratyaya', 'vikaraRa', 'lakara']:
         
         # Rule 1.3.3: hal antyam 
         # "A final consonant in an upadeza is an 'it'."
