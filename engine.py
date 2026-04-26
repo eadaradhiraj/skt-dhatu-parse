@@ -8,13 +8,15 @@ from rules import (
 )
 
 def derive(dhatu_slp1: str, lakara_name: str = 'laW', 
-           purusha: str = 'prathama', vacana: int = 0, # <-- Add these params!
+           purusha: str = 'prathama', vacana: int = 0,
+           gana: int = None,
            db_path: str = DEFAULT_DB_PATH):
            
     prakriya = Prakriya()
     
     # 1-4. Fetch, It-Lopa, Add Lakara, Resolve Lakara Anubandhas
-    dhatus = get_dhatu(dhatu_slp1, db_path=db_path)
+    # Pass gana to the loader!
+    dhatus = get_dhatu(dhatu_slp1, gana=gana, db_path=db_path) 
     if not dhatus: return None
     dhatu = dhatus[0] 
     prakriya.add_term(dhatu)

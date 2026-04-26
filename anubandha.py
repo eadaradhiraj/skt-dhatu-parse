@@ -39,13 +39,12 @@ def resolve_it_markers(term: Term):
         # "A final consonant in an upadeza is an 'it'."
         if term.text and term.text[-1] in SLP1_CONSONANTS:
             final_char = term.text[-1]
-            term.tags.add(f"{final_char}it")
-            term.text = term.text[:-1] # Remove the final consonant
             
-        # Rule 1.3.8: laśakvataddhite
-        # "Initial l, ś(S), or ku (velars) in a non-taddhita affix are 'it'."
-        if term.text:
-            initial_char = term.text[0]
-            if initial_char in['l', 'S', 'k', 'K', 'g', 'G', 'N']:
-                term.tags.add(f"{initial_char}it")
-                term.text = term.text[1:] # Remove the initial consonant
+            # --- NEW: Rule 1.3.4 ---
+            # 'na vibhaktau tusmAH': Protects dentals, s, and m in Tin/Sup affixes
+            is_vibhakti = 'tin' in term.tags
+            is_tusmah = final_char in['t', 'T', 'd', 'D', 'n', 's', 'm']
+            
+            if not (is_vibhakti and is_tusmah):
+                term.tags.add(f"{final_char}it")
+                term.text = term.text[:-1] # Remove the final consonant

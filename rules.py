@@ -171,3 +171,19 @@ def rutva_visarga(prakriya: Prakriya):
     if suffix.text.endswith('s'):
         suffix.text = suffix.text[:-1] + 'H'
         prakriya.log("Rule 8.3.15: Terminal 's' converted to Visarga 'H'")
+
+def jhonta(prakriya: Prakriya):
+    """Rule 7.1.3: jho'ntaH - Replaces 'Jh' in a suffix with 'ant'"""
+    suffix = prakriya.terms[-1]
+    if suffix.text.startswith('J'):
+        suffix.text = 'ant' + suffix.text[1:]
+        prakriya.log("Rule 7.1.3: Replaced 'Jh' with 'ant'")
+
+def ato_gune(prakriya: Prakriya):
+    """Rule 6.1.97: ato guNe - a + a = a (Pararupa Sandhi)"""
+    if len(prakriya.terms) >= 3:
+        vikarana = prakriya.terms[1]
+        suffix = prakriya.terms[2]
+        if vikarana.text.endswith('a') and suffix.text.startswith('a'):
+            suffix.text = suffix.text[1:] # Delete the second 'a' to merge them
+            prakriya.log("Rule 6.1.97: Pararupa Sandhi applied ('a' + 'a' -> 'a')")

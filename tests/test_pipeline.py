@@ -75,5 +75,11 @@ class TestPipeline(unittest.TestCase):
         self.assertEqual(suffix.text, 'te')
         self.assertIn('Wit', suffix.tags)
 
+    def test_bhavami(self):
+        # Pass the uttama purusha to get 'mi'!
+        prakriya = derive('BU', 'laW', purusha='uttama', vacana=0, gana=1, db_path=self.test_db_path)
+        
+        self.assertEqual(prakriya.get_current_string(), 'BavAmi')
+
 if __name__ == '__main__':
     unittest.main()

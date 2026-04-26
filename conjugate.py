@@ -12,9 +12,9 @@ def print_conjugation(dhatu_slp1: str, lakara_name: str = 'laW'):
     print("-" * 50)
     
     for p in purushas:
-        eka = derive(dhatu_slp1, lakara_name, purusha=p, vacana=0)
-        dvi = derive(dhatu_slp1, lakara_name, purusha=p, vacana=1)
-        bahu = derive(dhatu_slp1, lakara_name, purusha=p, vacana=2)
+        eka = derive(dhatu_slp1, lakara_name, purusha=p, vacana=0, gana=1)
+        dvi = derive(dhatu_slp1, lakara_name, purusha=p, vacana=1, gana=1)
+        bahu = derive(dhatu_slp1, lakara_name, purusha=p, vacana=2, gana=1)
         
         # Format the output beautifully
         if eka and dvi and bahu:
