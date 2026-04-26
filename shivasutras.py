@@ -44,3 +44,11 @@ def get_pratyahara(start_letter: str, it_marker: str) -> list[str]:
             return phonemes
             
     raise ValueError(f"Invalid Pratyahara: {start_letter}{it_marker}")
+
+# Create a global set of vowels (ac) for fast lookup in other files
+# Note: we add long vowels manually because Shiva Sutras only list short ones!
+AC_PRATYAHARA = get_pratyahara('a', 'c')
+SLP1_VOWELS = set(AC_PRATYAHARA +['A', 'I', 'U', 'F', 'X'])
+
+def is_vowel(char: str) -> bool:
+    return char in SLP1_VOWELS
