@@ -1,52 +1,102 @@
+"""
+engine.py
+The main orchestrator for the Paninian derivation pipeline (Prakriya).
+"""
 from dhatu_loader import get_dhatu, DEFAULT_DB_PATH
 from models import Term, Prakriya
 from anubandha import resolve_it_markers
-from rules import *
+from rules import (
+    substitute_lakara, insert_vikarana, atmanepada_tere, 
+    idito_num_dhatoh, sarvadhatuka_ardhadhatukayoh, eco_yayavayah,
+    ato_dirgho_yayi, rutva_visarga, jhonta, ato_gune, 
+    at_agama, itasca, it_agama, adesa_pratyayayoh, hali_ca,
+    tasthasthamipam, samyogantasya_lopah
+)
 
-def derive(dhatu_slp1: str, lakara_name: str = 'laW', purusha: str = 'prathama', vacana: int = 0, gana: int = None, db_path: str = DEFAULT_DB_PATH):
+def derive(dhatu_slp1: str, lakara_name: str = 'laW', 
+           purusha: str = 'prathama', vacana: int = 0,
+           gana: int = None,
+           db_path: str = DEFAULT_DB_PATH):
+           
     prakriya = Prakriya()
     
-    # 1. Fetch Dhatu
+    # ==========================================
+    # PHASE 1: INITIALIZATION & DATA FETCHING
+    # ==========================================
+    
+    # 1. Fetch Dhatu from DB
     dhatus = get_dhatu(dhatu_slp1, gana=gana, db_path=db_path)
-    if not dhatus: return None
+    if not dhatus: 
+        return None
     dhatu = dhatus[0] 
     prakriya.add_term(dhatu)
-    resolve_it_markers(dhatu)
-    idito_num_dhatoh(prakriya)
     
-    # 2. Add Lakara and Past Tense Prefix (aW)
+    # 2. Resolve Dhatu Anubandhas and Apply Root Augments
+    resolve_it_markers(dhatu)
+    idito_num_dhatoh(prakriya)  # idit -> num augment (e.g., ah -> aMh)
+    
+    # 3. Add Lakara (Tense/Mood) and Past Tense Prefix (aW)
     lakara = Term(lakara_name, 'lakara')
     lakara.tags.add(lakara_name) # Ensure tags like 'laN' or 'lfW' are passed down
     prakriya.add_term(lakara)
-    at_agama(prakriya)           # <-- NEW: Past tense prefix
+    at_agama(prakriya)           # 6.4.71: Adds 'aW' prefix for laN
+    
+    # 4. Resolve Initial Meta-Markers for Prefix/Lakara
     for term in prakriya.terms:
         resolve_it_markers(term)
     
-    # 3. Lakara Substitutions
-    substitute_lakara(prakriya, purusha=purusha, vacana=vacana)
-    jhonta(prakriya)
-    thasah_se(prakriya)
+    # ==========================================
+    # PHASE 2: SUFFIX SUBSTITUTIONS
+    # ==========================================
     
-    # 4. Suffix Anubandhas & Past Tense drops
+    # 5. Substitute Lakara with 18 Tiṅ Suffixes (ti/tas/Ji etc.)
+    substitute_lakara(prakriya, purusha=purusha, vacana=vacana)
+    
+    # 6. Early Suffix Replacements
+    jhonta(prakriya)            # 7.1.3: Jh -> ant
+    thasah_se(prakriya)         # 3.4.80: ThAs -> se
+    tasthasthamipam(prakriya)   # 3.4.101: tas/Thas/Tha/mip -> tAm/tam/ta/am (Past Tense)
+    
+    # 7. Resolve Suffix Markers and apply Voice Morphing
     suffix = prakriya.terms[-1]
     resolve_it_markers(suffix)
-    atmanepada_tere(prakriya)
-    itasca(prakriya)             # <-- NEW: Drops 'i' for Past Tense
+    atmanepada_tere(prakriya)   # 3.4.79: ta -> te
+    itasca(prakriya)            # 3.4.100: Drops terminal 'i' for Past Tense
     
-    # 5. Insert Vikarana & Future Tense Augment
+    # ==========================================
+    # PHASE 3: VIKARANA (CLASS INFIXES) & AUGMENTS
+    # ==========================================
+    
+    # 8. Insert Vikarana (Sap, Syan, Sa, or sya)
     insert_vikarana(prakriya)
-    vikarana = prakriya.terms[-2]
-    resolve_it_markers(vikarana)
-    it_agama(prakriya)           # <-- NEW: Adds 'i' to 'sya'
     
-    # 6. Guna and Sandhi
-    hali_ca(prakriya)            # <-- NEW: div -> dIv
-    sarvadhatuka_ardhadhatukayoh(prakriya) # Has built-in Gana 6 prevention!
-    eco_yayavayah(prakriya)
-    ato_dirgho_yayi(prakriya)
-    ato_nitah(prakriya)
-    ato_gune(prakriya)
-    adesa_pratyayayoh(prakriya)  # <-- NEW: 'isya' -> 'izya'
-    rutva_visarga(prakriya)
+    # 9. Resolve Vikarana Markers and add Future Tense Augment
+    if len(prakriya.terms) > 2:
+        vikarana = prakriya.terms[-2]
+        resolve_it_markers(vikarana)
+    it_agama(prakriya)          # 7.2.35: Adds 'i' to 'sya'
+    
+    # ==========================================
+    # PHASE 4: PHONETICS, GUNA, AND SANDHI
+    # ==========================================
+    
+    # 10. Core Phonetic Morphing
+    hali_ca(prakriya)                       # 8.2.77: div -> dIv
+    sarvadhatuka_ardhadhatukayoh(prakriya)  # 7.3.84: Guna (with built-in Gana 6 blocking)
+    eco_yayavayah(prakriya)                 # 6.1.78: o + a -> av
+    
+    # 11. Vowel Sandhi and Consonant Shifts
+    ato_dirgho_yayi(prakriya)               # 7.3.101: a -> A (before y, v, m)
+    ato_nitah(prakriya)                     # 7.2.81: a + Ate -> ete
+    ato_gune(prakriya)                      # 6.1.97: a + anti -> anti
+    adesa_pratyayayoh(prakriya)             # 8.3.59: isya -> izya
+    
+    # ==========================================
+    # PHASE 5: WORD-FINAL OPERATIONS
+    # ==========================================
+    
+    # 12. Terminal Consonant Rules
+    samyogantasya_lopah(prakriya)           # 8.2.23: Drops 't' from 'nt'
+    rutva_visarga(prakriya)                 # 8.3.15: Terminal 's' -> 'H'
     
     return prakriya

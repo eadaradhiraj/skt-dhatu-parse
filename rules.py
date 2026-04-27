@@ -161,14 +161,6 @@ def ato_dirgho_yayi(prakriya: Prakriya):
         vikarana.text = vikarana.text[:-1] + 'A'
         prakriya.log(f"Rule 7.3.101: Lengthened 'a' to 'A'")
 
-def ato_gune(prakriya: Prakriya):
-    vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa'), None)
-    suffix = prakriya.terms[-1]
-    
-    if vikarana and vikarana.text.endswith('a') and suffix.text and suffix.text[0] in ['a', 'e', 'o']:
-        vikarana.text = vikarana.text[:-1]
-        prakriya.log(f"Rule 6.1.97 (Ato Gune): Merged 'a' + '{suffix.text[0]}' -> '{suffix.text[0]}'")
-
 def rutva_visarga(prakriya: Prakriya):
     """
     Rule 8.2.66 / 8.3.15 (Simplified): sasajuSo ruH -> kharavasAnayor visarjanIyaH
@@ -187,7 +179,6 @@ def jhonta(prakriya: Prakriya):
         suffix.text = 'ant' + suffix.text[1:]
         prakriya.log("Rule 7.1.3: Replaced 'Jh' with 'ant'")
 
-def ato_gune(prakriya: Prakriya):
     """Rule 6.1.97: ato guNe - a + a = a (Pararupa Sandhi)"""
     if len(prakriya.terms) >= 3:
         vikarana = prakriya.terms[1]
@@ -212,6 +203,16 @@ def thasah_se(prakriya: Prakriya):
         suffix.text = 'se'
         prakriya.log("Rule 3.4.80: Replaced 'TAs' with 'se'")
 
+def ato_gune(prakriya: Prakriya):
+    """Rule 6.1.97: ato guNe"""
+    vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa'), None)
+    suffix = prakriya.terms[-1]
+    
+    if vikarana and vikarana.text.endswith('a') and suffix.text and suffix.text[0] in ['a', 'e', 'o']:
+        # If 'a' meets 'a', 'e', or 'o', they merge into the second vowel.
+        # We simply delete the 'a' from the Vikarana!
+        vikarana.text = vikarana.text[:-1] 
+        prakriya.log(f"Rule 6.1.97 (Ato Gune): Merged 'a' + '{suffix.text[0]}' -> '{suffix.text[0]}'")
 
 def ato_nitah(prakriya: Prakriya):
     """
@@ -269,3 +270,40 @@ def hali_ca(prakriya: Prakriya):
     if dhatu and dhatu.text == 'div':
         dhatu.text = 'dIv'
         prakriya.log("Rule 8.2.77: Lengthened 'div' to 'dIv'")
+
+def tasthasthamipam(prakriya: Prakriya):
+    """
+    Rule 3.4.101: tasthasthamipAM tAMtaMtAmaH
+    In a Nit lakara (like laN), the suffixes tas, Thas, Tha, and mip 
+    are replaced by tAm, tam, ta, and am.
+    """
+    lakara = next((t for t in prakriya.terms if t.term_type == 'lakara' or 'laN' in t.tags), None)
+    suffix = prakriya.terms[-1]
+    
+    # Check if we are dealing with a past tense (laN) suffix
+    if lakara and 'laN' in lakara.tags:
+        if suffix.text == 'tas': 
+            suffix.text = 'tAm'
+            prakriya.log("Rule 3.4.101: Replaced 'tas' with 'tAm'")
+        elif suffix.text == 'Tas': 
+            suffix.text = 'tam'
+            prakriya.log("Rule 3.4.101: Replaced 'Tas' with 'tam'")
+        elif suffix.text == 'Ta': 
+            suffix.text = 'ta'
+            prakriya.log("Rule 3.4.101: Replaced 'Ta' with 'ta'")
+        elif suffix.text == 'mip': 
+            suffix.text = 'am'
+            prakriya.log("Rule 3.4.101: Replaced 'mip' with 'am'")
+
+def samyogantasya_lopah(prakriya: Prakriya):
+    """
+    Rule 8.2.23: saMyogAntasya lopaH
+    If a word ends in a conjunct consonant (like 'nt'), the final consonant drops.
+    Example: aBavant -> aBavan
+    """
+    suffix = prakriya.terms[-1]
+    text = suffix.text
+    # Check if the last two characters are both consonants
+    if len(text) >= 2 and text[-1] in SLP1_CONSONANTS and text[-2] in SLP1_CONSONANTS:
+        suffix.text = text[:-1]
+        prakriya.log(f"Rule 8.2.23: Dropped final consonant of cluster '{text[-2:]}'")

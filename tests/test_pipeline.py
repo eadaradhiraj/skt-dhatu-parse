@@ -81,5 +81,31 @@ class TestPipeline(unittest.TestCase):
         
         self.assertEqual(prakriya.get_current_string(), 'BavAmi')
 
+    def test_past_tense_dual(self):
+        """
+        Rule 3.4.101 (tasthasthamipAM tAMtaMtAmaH): 
+        'Tas' should become 'tam' in a Nit lakara (laN).
+        BU + laN (Madhyama, Dual) -> aBavatam (Not aBavaTaH)
+        """
+        prakriya = derive('BU', 'laN', purusha='madhyama', vacana=1, gana=1, db_path=self.test_db_path)
+        self.assertEqual(prakriya.get_current_string(), 'aBavatam')
+
+    def test_past_tense_plural_consonant_drop(self):
+        """
+        Rule 8.2.23 (saMyogAntasya lopaH):
+        Terminal consonant clusters drop the last consonant.
+        BU + laN (Prathama, Plural) -> aBav + a + ant -> aBavant -> aBavan
+        """
+        prakriya = derive('BU', 'laN', purusha='prathama', vacana=2, gana=1, db_path=self.test_db_path)
+        self.assertEqual(prakriya.get_current_string(), 'aBavan')
+
+    def test_atmanepada_uttama_singular(self):
+        """
+        Tests that 'a' + 'e' merges properly for the 1st person singular.
+        aMh + laW (Uttama, Singular) -> aMhe (Not aMhae)
+        """
+        prakriya = derive('aMh', 'laW', purusha='uttama', vacana=0, gana=1, db_path=self.test_db_path)
+        self.assertEqual(prakriya.get_current_string(), 'aMhe')
+
 if __name__ == '__main__':
     unittest.main()
