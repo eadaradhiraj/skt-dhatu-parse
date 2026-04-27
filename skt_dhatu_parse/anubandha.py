@@ -16,6 +16,13 @@ def resolve_it_markers(term: Term) -> None:
             term.text = term.text[:idx-1] + term.text[idx+1:]
 
     if term.term_type in ['pratyaya', 'vikaraRa', 'lakara', 'Agama']:
+
+        # Rule 1.3.7: cuwU (INITIAL CONSONANT) ---
+        if len(term.text) > 0:
+            initial_char = term.text[0]
+            if initial_char in['c', 'C', 'j', 'J', 'Y', 'w', 'W', 'q', 'Q', 'R']:
+                term.tags.add(f"{initial_char}it")
+                term.text = term.text[1:]
         
         # Rule 1.3.8: laśakvataddhite (INITIAL CONSONANT)
         if len(term.text) > 0:

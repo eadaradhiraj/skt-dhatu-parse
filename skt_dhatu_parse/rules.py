@@ -502,3 +502,56 @@ def rashabhyam_no_nah(prakriya: Prakriya) -> None:
     if dhatu and ('r' in dhatu.text or 'z' in dhatu.text) and 'n' in suffix.text:
         suffix.text = suffix.text.replace('n', 'R')
         prakriya.log("Rule 8.4.1 (Natva Sandhi): Changed 'n' to 'R'")
+
+def apply_vrddhi(char: str) -> str:
+    """Returns the Vrddhi equivalent of a vowel."""
+    if char in ['a']: return 'A'
+    if char in ['i', 'I', 'e']: return 'E'
+    if char in['u', 'U', 'o']: return 'O'
+    if char in ['f', 'F']: return 'Ar'
+    if char in ['x']: return 'Al'
+    return char
+
+# ==========================================
+# SANADI (SECONDARY ROOTS)
+# ==========================================
+
+def aco_nniti(prakriya: Prakriya) -> None:
+    """
+    Rule 7.2.115: aco YRiti
+    A root ending in a vowel gets vrddhi when followed by a Yit or Rit affix.
+    """
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    if not dhatu: return
+    idx = prakriya.terms.index(dhatu)
+    if idx + 1 >= len(prakriya.terms): return
+    suffix = prakriya.terms[idx + 1]
+
+    # Check if the suffix has the Rit or Yit tag
+    if 'Rit' in suffix.tags or 'Yit' in suffix.tags:
+        text = dhatu.text
+        # If the root ends in a vowel
+        if text and text[-1] in SLP1_VOWELS:
+            old_vowel = text[-1]
+            new_vowel = apply_vrddhi(old_vowel)
+            dhatu.text = text[:-1] + new_vowel
+            prakriya.log(f"Rule 7.2.115 (aco YRiti): Vrddhi applied '{old_vowel}' -> '{new_vowel}'")
+
+
+def sanadyanta_dhatavah(prakriya: Prakriya) -> None:
+    """
+    Rule 3.1.32: sanAdyantA dhAtavaH
+    Roots formed with san, Ric, etc., are classified as a new 'dhatu'.
+    This merges the Dhatu and Suffix into a single term.
+    """
+    if len(prakriya.terms) >= 2:
+        dhatu = prakriya.terms[0]
+        suffix = prakriya.terms[1]
+        
+        # Merge the strings
+        merged_text = dhatu.text + suffix.text
+        dhatu.text = merged_text
+        
+        # Collapse the Prakriya state to just the new Dhatu
+        prakriya.terms = [dhatu]
+        prakriya.log(f"Rule 3.1.32: Merged into new secondary dhatu -> '{dhatu.text}'")
