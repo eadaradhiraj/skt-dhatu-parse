@@ -458,3 +458,47 @@ def jhalam_jas_jhasi(prakriya: Prakriya) -> None:
             if jas_char != last_char:
                 dhatu.text = dhatu.text[:-1] + jas_char
                 prakriya.log(f"Rule 8.4.53: Changed '{last_char}' to '{jas_char}' (jaS Sandhi)")
+
+def yuvor_anakau(prakriya: Prakriya):
+    """
+    Rule 7.1.1: yuvor anAkau
+    The affixes 'yu' and 'vu' are replaced by 'ana' and 'aka'.
+    (This happens after the 'l' and 'w' of 'lyuW' are stripped, leaving 'yu')
+    """
+    for term in prakriya.terms:
+        if term.term_type == 'pratyaya':
+            if term.text == 'yu':
+                term.text = 'ana'
+                prakriya.log("Rule 7.1.1: Replaced 'yu' with 'ana'")
+            elif term.text == 'vu':
+                term.text = 'aka'
+                prakriya.log("Rule 7.1.1: Replaced 'vu' with 'aka'")
+
+def ata_upadhayah(prakriya: Prakriya) -> None:
+    """
+    Rule 7.2.116: ata upadhAyAH
+    A penultimate short 'a' (upadhA) gets Vrddhi ('A') before a Yit (ñ) or Rit (ṇ) affix.
+    """
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    suffix = prakriya.terms[-1] 
+    
+    if dhatu and ('Yit' in suffix.tags or 'Rit' in suffix.tags):
+        text = dhatu.text
+        # Find the penultimate letter (Rule 1.1.65: alo'ntyAt pUrva upadhA)
+        if len(text) >= 2 and text[-2] == 'a':
+            dhatu.text = text[:-2] + 'A' + text[-1]
+            prakriya.log(f"Rule 7.2.116: Vrddhi of penultimate 'a' -> 'A' (Yit/Rit affix). Result: {dhatu.text}")
+
+def rashabhyam_no_nah(prakriya: Prakriya) -> None:
+    """
+    Rule 8.4.1 & 8.4.2: raSAbhyAM no NaH samAnapade (Natva Sandhi)
+    An 'n' becomes 'R' (ṇ) if it follows 'r' or 'S' (ṣ), even if separated by vowels/velars/labials.
+    (This turns ram + ana into ramaRa).
+    """
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    suffix = prakriya.terms[-1]
+    
+    # If the root contains 'r' or 'z' (ṣ) and the suffix has 'n'
+    if dhatu and ('r' in dhatu.text or 'z' in dhatu.text) and 'n' in suffix.text:
+        suffix.text = suffix.text.replace('n', 'R')
+        prakriya.log("Rule 8.4.1 (Natva Sandhi): Changed 'n' to 'R'")

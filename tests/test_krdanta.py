@@ -15,9 +15,10 @@ class TestKrdanta(unittest.TestCase):
             meaning_en TEXT, number TEXT, dhatu_with_anubandha TEXT
         )''')
         
-        # Insert our test root: buD (to know/awaken)
+        # Insert buD and ram
         mock_data =[
-            ('buD', 1, 'parasmaipada', 'avagamane', '0994', 'buDa~')
+            ('buD', 1, 'parasmaipada', 'avagamane', '0994', 'buDa~'),
+            ('ram', 1, 'atmanepada', 'krIDAyAm', '0989', 'ramu~')  # <--- NEW
         ]
         c.executemany("INSERT INTO dhatu VALUES (?, ?, ?, ?, ?, ?)", mock_data)
         conn.commit()
@@ -48,6 +49,33 @@ class TestKrdanta(unittest.TestCase):
         self.assertEqual(dhatu.text, 'bud')
         self.assertEqual(suffix.text, 'Da')
         self.assertIn('kit', suffix.tags)
+
+    def test_rama_ghany(self) -> None:
+        """
+        Tests ram + GaY -> rAma.
+        Verifies:
+        1. 'GaY' loses 'G' (Rule 1.3.8) and 'Y' (Rule 1.3.3) -> 'a', tagged 'Yit'
+        2. Penultimate 'a' gets Vrddhi because of 'Yit' (Rule 7.2.116) -> rAm + a
+        """
+        # Fixed: 'GaY' is the strict SLP1 encoding for 'ghañ'
+        prakriya = derive_krdanta('ram', 'GaY', gana=1, db_path=self.test_db_path)
+        
+        self.assertIsNotNone(prakriya)
+        self.assertEqual(prakriya.get_current_string(), 'rAma')
+        self.assertIn('Yit', prakriya.terms[1].tags)
+
+    def test_ramana_lyut(self):
+        """
+        Tests ram + lyuW -> ramaRa.
+        Verifies:
+        1. 'lyuW' loses 'l' and 'W' -> 'yu'
+        2. 'yu' becomes 'ana' (Rule 7.1.1)
+        3. 'n' becomes 'R' due to Natva Sandhi (Rule 8.4.1)
+        """
+        prakriya = derive_krdanta('ram', 'lyuW', gana=1, db_path=self.test_db_path)
+        
+        self.assertIsNotNone(prakriya)
+        self.assertEqual(prakriya.get_current_string(), 'ramaRa')
 
 if __name__ == '__main__':
     unittest.main()

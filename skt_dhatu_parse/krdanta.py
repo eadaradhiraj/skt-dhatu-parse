@@ -8,38 +8,42 @@ from .anubandha import resolve_it_markers
 from .rules import (
     idito_num_dhatoh,
     jhasas_tathor_dho_dhah,
-    jhalam_jas_jhasi
+    jhalam_jas_jhasi,
+    yuvor_anakau,        # <--- NEW
+    ata_upadhayah,       # <--- NEW
+    rashabhyam_no_nah    # <--- NEW
 )
 
-
-def derive_krdanta(
-    dhatu_slp1: str,
-    pratyaya_upadeza: str,
-    gana: int = None,
-    db_path: str = DEFAULT_DB_PATH
-) -> list[Term]:
+def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_path: str = DEFAULT_DB_PATH):
     prakriya = Prakriya()
-
+    
     # 1. Fetch Dhatu
     dhatus = get_dhatu(dhatu_slp1, gana=gana, db_path=db_path)
-    if not dhatus:
+    if not dhatus: 
         return None
-    dhatu = dhatus[0]
+    dhatu = dhatus[0] 
     prakriya.add_term(dhatu)
-
+    
     # 2. Resolve Dhatu Meta-Markers
     resolve_it_markers(dhatu)
     idito_num_dhatoh(prakriya)
-
-    # 3. Add Krt Pratyaya (e.g., 'kta')
+    
+    # 3. Add Krt Pratyaya
     pratyaya = Term(pratyaya_upadeza, 'pratyaya')
     prakriya.add_term(pratyaya)
-
-    # 4. Resolve Pratyaya Markers (e.g., 'kta' loses 'k' -> 'ta', tagged 'kit')
+    
+    # 4. Resolve Pratyaya Markers (e.g., GhaY -> a + Yit)
     resolve_it_markers(pratyaya)
-
-    # 5. Apply Consonant Sandhi
-    jhasas_tathor_dho_dhah(prakriya)  # t -> dh
-    jhalam_jas_jhasi(prakriya)        # dh -> d
-
+    
+    # 5. Suffix Text Replacements
+    yuvor_anakau(prakriya)    # lyuW -> yu -> ana
+    
+    # 6. Internal Root Vowel Morphing
+    ata_upadhayah(prakriya)   # Yit/Rit causes penultimate 'a' -> 'A'
+    
+    # 7. Consonant Sandhi
+    jhasas_tathor_dho_dhah(prakriya)  
+    jhalam_jas_jhasi(prakriya)        
+    rashabhyam_no_nah(prakriya)       # n -> R
+    
     return prakriya
