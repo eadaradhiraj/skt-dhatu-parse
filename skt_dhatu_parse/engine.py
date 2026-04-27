@@ -14,11 +14,11 @@ from .rules import (
     thasah_se, ato_nitah
 )
 
-def derive(dhatu_slp1: str, lakara_name: str = 'laW', 
+def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', 
            purusha: str = 'prathama', vacana: int = 0,
            gana: int = None,
-           db_path: str = DEFAULT_DB_PATH
-    ) -> Prakriya:
+           db_path: str = DEFAULT_DB_PATH,
+           custom_dhatu: Term = None) -> Prakriya:
            
     prakriya = Prakriya()
     
@@ -26,11 +26,21 @@ def derive(dhatu_slp1: str, lakara_name: str = 'laW',
     # PHASE 1: INITIALIZATION & DATA FETCHING
     # ==========================================
     
-    # 1. Fetch Dhatu from DB
-    dhatus = get_dhatu(dhatu_slp1, gana=gana, db_path=db_path)
-    if not dhatus: 
-        return None
-    dhatu = dhatus[0] 
+    # 1. Fetch or Receive Dhatu
+    if custom_dhatu:
+        dhatu = custom_dhatu
+        # Secondary roots act like Gana 1 (taking 'Sap' infix)
+        if not any(tag.startswith('gana_') for tag in dhatu.tags):
+            dhatu.tags.add('gana_1')
+        # Default to Parasmaipada for standard causative active voice
+        if 'parasmaipada' not in dhatu.tags and 'atmanepada' not in dhatu.tags:
+            dhatu.tags.add('parasmaipada')
+    else:
+        dhatus = get_dhatu(dhatu_slp1, gana=gana, db_path=db_path)
+        if not dhatus: 
+            return None
+        dhatu = dhatus[0] 
+        
     prakriya.add_term(dhatu)
     
     # 2. Resolve Dhatu Anubandhas and Apply Root Augments
