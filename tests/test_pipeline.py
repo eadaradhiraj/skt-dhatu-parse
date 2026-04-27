@@ -133,5 +133,24 @@ class TestPipeline(unittest.TestCase):
         prakriya = derive('tud', 'laW', purusha='prathama', vacana=0, gana=6, db_path=self.test_db_path)
         self.assertEqual(prakriya.get_current_string(), 'tudati')
 
+    # ==========================================
+    # PERFECT TENSE (liW) REDUPLICATION TESTS
+    # ==========================================
+
+    def test_perfect_tense_singular(self) -> None:
+        """Test liW Reduplication: BU + liW -> baBUva"""
+        prakriya = derive('BU', 'liW', purusha='prathama', vacana=0, gana=1, db_path=self.test_db_path)
+        self.assertEqual(prakriya.get_current_string(), 'baBUva')
+
+    def test_perfect_tense_dual(self) -> None:
+        """Test liW Dual (atus): BU + liW -> baBUvatuH"""
+        prakriya = derive('BU', 'liW', purusha='prathama', vacana=1, gana=1, db_path=self.test_db_path)
+        self.assertEqual(prakriya.get_current_string(), 'baBUvatuH')
+
+    def test_perfect_tense_plural(self) -> None:
+        """Test liW Plural (us): BU + liW -> baBUvuH"""
+        prakriya = derive('BU', 'liW', purusha='prathama', vacana=2, gana=1, db_path=self.test_db_path)
+        self.assertEqual(prakriya.get_current_string(), 'baBUvuH')
+
 if __name__ == '__main__':
     unittest.main()

@@ -30,6 +30,12 @@ TIN_ATMANEPADA = {
     'uttama': ['iw', 'vahi', 'mahiN']
 }
 
+TIN_PARASMAIPADA_LIT = {
+    'prathama':['Ral', 'atus', 'us'],
+    'madhyama': ['Tal', 'aTus', 'a'],
+    'uttama':   ['Ral', 'va', 'ma']
+}
+
 # ... your substitute_lakara function and the rest of the code remains below ...
 
 
@@ -44,40 +50,38 @@ def apply_guna(char: str) -> str:
         return 'al'
     return char
 
-
-def substitute_lakara(
-    prakriya: Prakriya,
-    purusha: str = 'prathama',
-    vacana: int = 0
-) -> None:
+def substitute_lakara(prakriya: Prakriya, purusha: str = 'prathama', vacana: int = 0) -> None:
     dhatu = prakriya.terms[0]
-    lakara = prakriya.terms[-1]
-
+    lakara = prakriya.terms[-1] 
+    
+    is_lit = 'liW' in lakara.tags
+    
     if 'parasmaipada' in dhatu.tags:
-        new_suffix = TIN_PARASMAIPADA[purusha][vacana]
+        new_suffix = TIN_PARASMAIPADA_LIT[purusha][vacana] if is_lit else TIN_PARASMAIPADA[purusha][vacana]
     elif 'atmanepada' in dhatu.tags:
         new_suffix = TIN_ATMANEPADA[purusha][vacana]
     else:
-        new_suffix = TIN_PARASMAIPADA[purusha][vacana]
-
+        new_suffix = TIN_PARASMAIPADA_LIT[purusha][vacana] if is_lit else TIN_PARASMAIPADA[purusha][vacana]
+        
     lakara.text = new_suffix
     lakara.upadeza = new_suffix
     lakara.term_type = 'pratyaya'
-
-    # RULE 1.1.56: sthānivadādeśo'nalvidhau (The substitute behaves like the substituted)
-    # The new suffix inherits the tags of the Lakara (e.g., 'Wit' from 'laW')
-    lakara.tags.add('tin')  # Mark it as a tin affix
-
-    prakriya.log(
-        f"Rule 3.4.78: Substituted lakara with '{new_suffix}'. Tags inherited: {lakara.tags}")
-
+    lakara.tags.add('tin') 
+    
+    # Rule 3.4.115: liW is Ardhadhatuka!
+    if is_lit:
+        lakara.tags.add('ardhadhatuka')
+    else:
+        lakara.tags.add('sarvadhatuka')
+        
+    prakriya.log(f"Rule 3.4.78: Substituted lakara with '{new_suffix}'. Tags: {lakara.tags}")
 # --- VIKARANAS (Gana 4, Gana 6, and Future Tense) ---
 
 
 def insert_vikarana(prakriya: Prakriya) -> None:
     dhatu = next(t for t in prakriya.terms if t.term_type == 'dhatu')
     suffix = prakriya.terms[-1]
-    idx = prakriya.terms.index(dhatu) + 1  # Insert right after Dhatu
+    idx = prakriya.terms.index(dhatu) + 1
 
     # Future Tense (lṛṭ)
     if 'lfW' in suffix.tags:
@@ -85,6 +89,10 @@ def insert_vikarana(prakriya: Prakriya) -> None:
         vik.tags.add('ardhadhatuka')  # 'sya' is an Ardhadhatuka affix!
         prakriya.terms.insert(idx, vik)
         prakriya.log("Rule 3.1.33: Inserted 'sya' for Future Tense")
+        return
+
+    # Block standard vikaranas (Sap, etc.) for Ardhadhatuka (like liW) ---
+    if 'ardhadhatuka' in suffix.tags:
         return
 
     # Present/Past Tense (SArvadhatuka lakaras)
@@ -555,3 +563,59 @@ def sanadyanta_dhatavah(prakriya: Prakriya) -> None:
         # Collapse the Prakriya state to just the new Dhatu
         prakriya.terms = [dhatu]
         prakriya.log(f"Rule 3.1.32: Merged into new secondary dhatu -> '{dhatu.text}'")
+
+# ==========================================
+# ABHYASA (REDUPLICATION)
+# ==========================================
+
+def liti_dhator_anabhyasasya(prakriya: Prakriya) -> None:
+    """Rule 6.1.8: Reduplicate the root before liW."""
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    suffix = prakriya.terms[-1]
+    
+    if dhatu and 'liW' in suffix.tags:
+        abhyasa = Term(dhatu.upadeza, 'abhyasa')
+        abhyasa.text = dhatu.text
+        idx = prakriya.terms.index(dhatu)
+        prakriya.terms.insert(idx, abhyasa)
+        prakriya.log(f"Rule 6.1.8: Reduplicated root into Abhyasa -> '{abhyasa.text}'")
+
+def hrasvah(prakriya: Prakriya) -> None:
+    """Rule 7.4.59: hrasvaH - The vowel of the abhyasa is shortened."""
+    abhyasa = next((t for t in prakriya.terms if t.term_type == 'abhyasa'), None)
+    if abhyasa:
+        text = abhyasa.text
+        short_map = {'A':'a', 'I':'i', 'U':'u', 'F':'f', 'X':'x', 'e':'i', 'o':'u', 'E':'i', 'O':'u'}
+        for long_v, short_v in short_map.items():
+            text = text.replace(long_v, short_v)
+        abhyasa.text = text
+        prakriya.log(f"Rule 7.4.59: Shortened Abhyasa -> '{abhyasa.text}'")
+
+def bhavater_ah(prakriya: Prakriya) -> None:
+    """Rule 7.4.73: bhavater aH - The vowel of BU's abhyasa becomes 'a'."""
+    abhyasa = next((t for t in prakriya.terms if t.term_type == 'abhyasa'), None)
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    if abhyasa and dhatu and dhatu.upadeza == 'BU':
+        abhyasa.text = abhyasa.text.replace('u', 'a').replace('U', 'a')
+        prakriya.log(f"Rule 7.4.73: 'BU' Abhyasa vowel becomes 'a' -> '{abhyasa.text}'")
+
+def abhyase_car_ca(prakriya: Prakriya) -> None:
+    """Rule 8.4.54: abhyAse car ca - De-aspirate consonants in the abhyasa."""
+    abhyasa = next((t for t in prakriya.terms if t.term_type == 'abhyasa'), None)
+    if abhyasa:
+        text = abhyasa.text
+        deaspirate = {'B':'b', 'D':'d', 'G':'g', 'J':'j', 'Q':'q', 'P':'p', 'T':'t', 'K':'k', 'C':'c', 'W':'w'}
+        new_text = "".join([deaspirate.get(c, c) for c in text])
+        if new_text != text:
+            abhyasa.text = new_text
+            prakriya.log(f"Rule 8.4.54 (abhyAse car ca): De-aspirated -> '{abhyasa.text}'")
+
+def bhuvo_vug_lunlitoh(prakriya: Prakriya) -> None:
+    """Rule 6.4.88: Adds 'v' to BU before vowel-initial luN or liW affixes."""
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    suffix = prakriya.terms[-1]
+    
+    if dhatu and dhatu.upadeza == 'BU' and 'liW' in suffix.tags:
+        if suffix.text and is_vowel(suffix.text[0]):
+            dhatu.text = dhatu.text + 'v'
+            prakriya.log("Rule 6.4.88: Added 'v' augment to 'BU'")

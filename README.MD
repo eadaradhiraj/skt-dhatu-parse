@@ -13,7 +13,7 @@ It is designed to be fully `pip`-installable, highly usable as a standalone CLI 
 
 To install the engine locally in editable mode (recommended for development):
 ```bash
-git clone https://github.com/yourusername/skt-dhatu-parse.git
+git clone https://github.com/eadaradhiraj/skt-dhatu-parse.git
 cd skt-dhatu-parse
 pip install -e .
 ```

@@ -11,7 +11,8 @@ from .rules import (
     ato_dirgho_yayi, rutva_visarga, jhonta, ato_gune, 
     at_agama, itasca, it_agama, adesa_pratyayayoh, hali_ca,
     tasthasthamipam, samyogantasya_lopah,
-    thasah_se, ato_nitah
+    thasah_se, ato_nitah,
+    liti_dhator_anabhyasasya, hrasvah, bhavater_ah, abhyase_car_ca, bhuvo_vug_lunlitoh
 )
 
 def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', 
@@ -83,13 +84,23 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW',
     insert_vikarana(prakriya)
     
     # 9. Resolve Vikarana Markers and add Future Tense Augment
-    if len(prakriya.terms) > 2:
-        vikarana = prakriya.terms[-2]
+    vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa'), None)
+    if vikarana:
         resolve_it_markers(vikarana)
     it_agama(prakriya)          # 7.2.35: Adds 'i' to 'sya'
     
     # ==========================================
-    # PHASE 4: PHONETICS, GUNA, AND SANDHI
+    # PHASE 4: REDUPLICATION (ABHYASA)
+    # ==========================================
+    
+    liti_dhator_anabhyasasya(prakriya) # 6.1.8: Clones root (BU -> BU + BU)
+    hrasvah(prakriya)                  # 7.4.59: Shortens clone (BU -> Bu)
+    bhavater_ah(prakriya)              # 7.4.73: Bu -> Ba (Exception for bhū)
+    abhyase_car_ca(prakriya)           # 8.4.54: De-aspirates (Ba -> ba)
+    bhuvo_vug_lunlitoh(prakriya)       # 6.4.88: Appends 'v' augment before vowels
+    
+    # ==========================================
+    # PHASE 5: PHONETICS, GUNA, AND SANDHI
     # ==========================================
     
     # 10. Core Phonetic Morphing
@@ -104,7 +115,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW',
     adesa_pratyayayoh(prakriya)             # 8.3.59: isya -> izya
     
     # ==========================================
-    # PHASE 5: WORD-FINAL OPERATIONS
+    # PHASE 6: WORD-FINAL OPERATIONS
     # ==========================================
     
     # 12. Terminal Consonant Rules
