@@ -11,17 +11,26 @@ from .rules import (
     ato_dirgho_yayi, rutva_visarga, jhonta, ato_gune, 
     at_agama, itasca, it_agama, adesa_pratyayayoh, hali_ca,
     tasthasthamipam, samyogantasya_lopah,
-    thasah_se, ato_nitah,
-    liti_dhator_anabhyasasya, hrasvah, bhavater_ah, abhyase_car_ca, bhuvo_vug_lunlitoh
+    thasah_se, ato_nitah, upasarga_satva,
+    liti_dhator_anabhyasasya, hrasvah, bhavater_ah, abhyase_car_ca, bhuvo_vug_lunlitoh,
+    upasarga_sandhi, dhatvadeh_sah_sah_no_nah, paghra_sthadi_adesha
 )
 
-def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', 
-           purusha: str = 'prathama', vacana: int = 0,
-           gana: int = None,
-           db_path: str = DEFAULT_DB_PATH,
-           custom_dhatu: Term = None) -> Prakriya:
+def derive(
+    dhatu_slp1: str = None, lakara_name: str = 'laW', 
+    purusha: str = 'prathama', vacana: int = 0,
+    gana: int = None,
+    db_path: str = DEFAULT_DB_PATH,
+    custom_dhatu: Term = None,
+    upasarga: str = None
+) -> Prakriya:
            
     prakriya = Prakriya()
+
+    # Add Upasarga FIRST ---
+    if upasarga:
+        up_term = Term(upasarga, 'upasarga')
+        prakriya.add_term(up_term)
     
     # ==========================================
     # PHASE 1: INITIALIZATION & DATA FETCHING
@@ -46,6 +55,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW',
     
     # 2. Resolve Dhatu Anubandhas and Apply Root Augments
     resolve_it_markers(dhatu)
+    dhatvadeh_sah_sah_no_nah(prakriya)
     idito_num_dhatoh(prakriya)  # idit -> num augment (e.g., ah -> aMh)
     
     # 3. Add Lakara (Tense/Mood) and Past Tense Prefix (aW)
@@ -87,6 +97,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW',
     vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa'), None)
     if vikarana:
         resolve_it_markers(vikarana)
+    paghra_sthadi_adesha(prakriya)
     it_agama(prakriya)          # 7.2.35: Adds 'i' to 'sya'
     
     # ==========================================
@@ -120,6 +131,9 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW',
     
     # 12. Terminal Consonant Rules
     samyogantasya_lopah(prakriya)           # 8.2.23: Drops 't' from 'nt'
+    upasarga_satva(prakriya)                # prati + sTA -> pratizWA
+    upasarga_sandhi(prakriya)               # 6.1.101: Merge the prefix vowels
+
     rutva_visarga(prakriya)                 # 8.3.15: Terminal 's' -> 'H'
     
     return prakriya

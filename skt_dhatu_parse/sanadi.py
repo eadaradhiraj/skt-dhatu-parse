@@ -10,7 +10,9 @@ from .rules import (
     ata_upadhayah,
     aco_nniti,
     eco_yayavayah,
-    sanadyanta_dhatavah
+    sanadyanta_dhatavah,
+    dhatvadeh_sah_sah_no_nah,
+    pug_nau
 )
 
 def derive_secondary_root(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_path: str = DEFAULT_DB_PATH) -> Prakriya:
@@ -24,8 +26,9 @@ def derive_secondary_root(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = No
     dhatu = dhatus[0] 
     prakriya.add_term(dhatu)
     
-    # 2. Resolve Root Markers
+    # 2. Resolve Root Markers & Preprocessing
     resolve_it_markers(dhatu)
+    dhatvadeh_sah_sah_no_nah(prakriya)  # <--- NEW: Fixes zWA -> sTA
     idito_num_dhatoh(prakriya)
     
     # 3. Add Secondary Affix (e.g., 'Ric')
@@ -35,7 +38,8 @@ def derive_secondary_root(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = No
     # 4. Resolve Affix Markers ('Ric' loses 'R' and 'c' -> 'i')
     resolve_it_markers(pratyaya)
     
-    # 5. Apply Vrddhi Rules
+    # 5. Apply Vrddhi & Augment Rules
+    pug_nau(prakriya)        # <--- NEW: Adds 'puk' augment (sTA + Ric -> sTAp + i)
     ata_upadhayah(prakriya)  # Vṛddhi for penultimate 'a' (e.g., ram + i -> rAmi)
     aco_nniti(prakriya)      # Vṛddhi for terminal vowels (e.g., BU + i -> BO + i)
     

@@ -45,48 +45,62 @@ def resolve_gana(dhatu_slp1: str, user_gana: int = None) -> int:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="🕉️  Paninian Sanskrit Derivation Engine")
-    
-    # Core Positional Argument
     parser.add_argument("dhatu", help="The SLP1 root to conjugate (e.g., BU, aMh, div, tud)")
     parser.add_argument("-g", "--gana", type=int, help="Specify the Gaṇa (1-10) for homonyms")
-    
-    # Verb (Tiṅanta) Arguments
     parser.add_argument("-l", "--lakara", default="laW", help="Lakāra (Tense/Mood). Default: laW (Present)")
     parser.add_argument("-p", "--purusha", default="prathama", choices=["prathama", "madhyama", "uttama"], help="Person")
     parser.add_argument("-v", "--vacana", type=int, default=0, choices=[0, 1, 2], help="Number (0=Sing, 1=Dual, 2=Plur)")
     parser.add_argument("-t", "--table", action="store_true", help="Print the full 3x3 conjugation table")
-    
-    # NEW: Participle & Secondary Root Arguments
     parser.add_argument("--krt", type=str, help="Generate a Primary Derivative (Kṛdanta) with given suffix (e.g., kta, GaY, lyuW)")
     parser.add_argument("--causative", action="store_true", help="Generate the Causative (Ṇic) secondary root")
-    
     parser.add_argument("--history", action="store_true", help="Show the step-by-step Pāṇinian derivation history")
-
+    
     args = parser.parse_args()
-    gana = resolve_gana(args.dhatu, args.gana)
 
+    # Hyphen parsing logic for Upasargas
+    raw_dhatu = args.dhatu
+    upasarga = None
+    if '-' in raw_dhatu:
+        parts = raw_dhatu.split('-', 1)
+        upasarga = parts[0]
+        raw_dhatu = parts[1]
+
+    gana = resolve_gana(raw_dhatu, args.gana)
+    
+    custom_root = None
     prakriya = None
 
-    # Route the computation to the correct pipeline
+    # 1. Check if we need to generate a Causative root first
+    if args.causative:
+        causative_prakriya = derive_secondary_root(raw_dhatu, 'Ric', gana=gana)
+        if causative_prakriya:
+            custom_root = causative_prakriya.terms[0]
+            print(f"\n✨ Forged Secondary Root (Ṇic): {custom_root.text}\n")
+            if args.history:
+                print("[Ṇic Derivation History]")
+                causative_prakriya.print_history()
+                print("-" * 40)
+        else:
+            print("❌ Failed to generate causative root.")
+            sys.exit(1)
+
+    # 2. Route to the correct output pipeline
     if args.krt:
-        prakriya = derive_krdanta(args.dhatu, args.krt, gana=gana)
+        prakriya = derive_krdanta(raw_dhatu, args.krt, gana=gana) 
         if prakriya:
             print(f"\n✨ Kṛdanta Result: {prakriya.get_current_string()}\n")
             
-    elif args.causative:
-        prakriya = derive_secondary_root(args.dhatu, 'Ric', gana=gana)
-        if prakriya:
-            print(f"\n✨ Causative Root (Ṇic): {prakriya.get_current_string()}\n")
-            
     elif args.table:
-        print_conjugation(args.dhatu, lakara_name=args.lakara, gana=gana)
+        # Pass custom_root (which will be None unless --causative was used)
+        print_conjugation(raw_dhatu, lakara_name=args.lakara, gana=gana, upasarga=upasarga, custom_dhatu=custom_root) 
         
     else:
-        prakriya = derive(args.dhatu, lakara_name=args.lakara, purusha=args.purusha, vacana=args.vacana, gana=gana)
+        # Single derivation (Pass custom_root if available)
+        prakriya = derive(raw_dhatu, lakara_name=args.lakara, purusha=args.purusha, vacana=args.vacana, gana=gana, upasarga=upasarga, custom_dhatu=custom_root)
         if prakriya:
             print(f"\n✨ Tiṅanta Result: {prakriya.get_current_string()}\n")
             
-    # Print the math if requested
+    # Print Tiṅanta History if requested
     if prakriya and args.history:
         prakriya.print_history()
 

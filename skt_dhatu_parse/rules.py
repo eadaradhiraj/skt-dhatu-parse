@@ -5,9 +5,11 @@ from .models import Term, Prakriya
 IK_VOWELS = set(get_pratyahara('i', 'k') + ['I', 'U', 'F', 'X'])
 EC_VOWELS = get_pratyahara('e', 'c')
 YAY_CONSONANTS = set(get_pratyahara('y', 'Y'))
-IN_VOWELS = set(get_pratyahara('i', 'R') + ['I', 'U', 'F', 'X'])
-# ADD THIS LINE: Ask the Shivasutras for all consonants ('hal')
-SLP1_CONSONANTS = set(get_pratyahara('h', 'l'))
+IN_VOWELS = set(get_pratyahara('i', 'R') +['I', 'U', 'F', 'X'])
+SLP1_CONSONANTS = set(get_pratyahara('h', 'l')) 
+
+# ADD THIS LINE: Ask the Shivasutras for 'val' (all consonants except y)
+VAL_CONSONANTS = set(get_pratyahara('v', 'l'))
 
 # jhaṣ: J, B, G, Q, D (Voiced aspirates)
 JHAS_CONSONANTS = set(get_pratyahara('J', 'z'))
@@ -38,6 +40,26 @@ TIN_PARASMAIPADA_LIT = {
 
 # ... your substitute_lakara function and the rest of the code remains below ...
 
+def dhatvadeh_sah_sah_no_nah(prakriya: Prakriya) -> None:
+    """
+    Rules 6.1.64 & 6.1.65: dhAtvAdeH SaH saH / No naH
+    Initial 'z' (S) becomes 's', and initial 'R' (N) becomes 'n'.
+    Also reverses the retroflexion (zW -> sT) caused by the initial 'z'.
+    """
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    if dhatu and dhatu.text:
+        text = dhatu.text
+        if text.startswith('z'):
+            text = 's' + text[1:]
+            # Reverse natural retroflexion (e.g., zWA -> sTA, zRA -> snA)
+            if text.startswith('sW'): text = 'sT' + text[2:]
+            elif text.startswith('sR'): text = 'sn' + text[2:]
+            dhatu.text = text
+            prakriya.log("Rule 6.1.64: Initial 'z' (ṣ) converted to 's'")
+            
+        elif text.startswith('R'):
+            dhatu.text = 'n' + text[1:]
+            prakriya.log("Rule 6.1.65: Initial 'R' (ṇ) converted to 'n'")
 
 def apply_guna(char: str) -> str:
     if char in ['i', 'I']:
@@ -51,7 +73,7 @@ def apply_guna(char: str) -> str:
     return char
 
 def substitute_lakara(prakriya: Prakriya, purusha: str = 'prathama', vacana: int = 0) -> None:
-    dhatu = prakriya.terms[0]
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     lakara = prakriya.terms[-1] 
     
     is_lit = 'liW' in lakara.tags
@@ -108,6 +130,28 @@ def insert_vikarana(prakriya: Prakriya) -> None:
     prakriya.terms.insert(idx, vik)
     prakriya.log(f"Inserted Vikarana '{vik.upadeza}'")
 
+def paghra_sthadi_adesha(prakriya: Prakriya) -> None:
+    """
+    Rule 7.3.78: Substitutes specific roots before 'Sit' affixes (like Sap).
+    e.g., sTA -> tizWa, pA -> piba, dfS -> pazya.
+    """
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    if not dhatu: return
+    
+    idx = prakriya.terms.index(dhatu)
+    if idx + 1 >= len(prakriya.terms): return
+    next_term = prakriya.terms[idx + 1]
+    
+    if 'Sit' in next_term.tags:
+        adesha_map = {
+            'pA': 'piba', 'GrA': 'jiGra', 'DmA': 'Dama', 
+            'sTA': 'tizWa', 'mnA': 'mana', 'dfS': 'pazya', 
+            'f': 'fcCa', 'sf': 'DAva', 'Sad': 'zIya', 'sad': 'sIda'
+        }
+        if dhatu.text in adesha_map:
+            new_stem = adesha_map[dhatu.text]
+            dhatu.text = new_stem
+            prakriya.log(f"Rule 7.3.78: '{dhatu.upadeza}' -> '{new_stem}' before Sit affix")
 
 def atmanepada_tere(prakriya: Prakriya) -> None:
     """
@@ -115,7 +159,7 @@ def atmanepada_tere(prakriya: Prakriya) -> None:
     If the lakara was 'Wit' (ṭit) and the suffix is Atmanepada, 
     replace its 'wi' (ṭi) portion with 'e'.
     """
-    dhatu = prakriya.terms[0]
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     suffix = prakriya.terms[-1]
 
     # Only apply if it's Atmanepada AND the Lakara had a 'W' (ṭ) marker
@@ -262,20 +306,21 @@ def thasah_se(prakriya: Prakriya) -> None:
         suffix.text = 'se'
         prakriya.log("Rule 3.4.80: Replaced 'TAs' with 'se'")
 
-
 def ato_gune(prakriya: Prakriya) -> None:
-    """Rule 6.1.97: ato guNe"""
-    vikarana = next(
-        (t for t in prakriya.terms if t.term_type == 'vikaraRa'), None)
+    """Rule 6.1.97: ato guNe - Pararupa Sandhi (a + a/e/o -> a/e/o)"""
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa'), None)
     suffix = prakriya.terms[-1]
-
+    
+    # 1. Merge Dhatu 'a' with Vikarana 'a' (e.g., tizWa + a -> tizWa)
+    if dhatu and vikarana and dhatu.text.endswith('a') and vikarana.text.startswith('a'):
+        dhatu.text = dhatu.text[:-1]
+        prakriya.log("Rule 6.1.97: Merged Dhatu 'a' + Vikarana 'a'")
+        
+    # 2. Merge Vikarana 'a' with Suffix 'a/e/o' (e.g., Bava + anti -> Bavanti)
     if vikarana and vikarana.text.endswith('a') and suffix.text and suffix.text[0] in ['a', 'e', 'o']:
-        # If 'a' meets 'a', 'e', or 'o', they merge into the second vowel.
-        # We simply delete the 'a' from the Vikarana!
         vikarana.text = vikarana.text[:-1]
-        prakriya.log(
-            f"Rule 6.1.97 (Ato Gune): Merged 'a' + '{suffix.text[0]}' -> '{suffix.text[0]}'")
-
+        prakriya.log(f"Rule 6.1.97: Merged Vikarana 'a' + Suffix '{suffix.text[0]}'")
 
 def ato_nitah(prakriya: Prakriya) -> None:
     """
@@ -297,14 +342,17 @@ def ato_nitah(prakriya: Prakriya) -> None:
 
 # --- PAST TENSE AUGMENT ---
 
-
 def at_agama(prakriya: Prakriya) -> None:
     """Rule 6.4.71: luNlaNlfNkzvaq udAttaH - Adds 'aw' before the root for laN (Past Tense)."""
     lakara = prakriya.terms[-1]
-    if 'laN' in lakara.tags:
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    
+    if dhatu and 'laN' in lakara.tags:
         agama = Term('aw', 'Agama')
-        prakriya.terms.insert(0, agama)
-        prakriya.log("Rule 6.4.71: Inserted 'aw' augment for Past Tense")
+        # Insert it EXACTLY where the dhatu is (pushing the dhatu one spot to the right)
+        idx = prakriya.terms.index(dhatu)
+        prakriya.terms.insert(idx, agama)
+        prakriya.log("Rule 6.4.71: Inserted 'aw' augment before the root")
 
 # --- TERMINAL DELETION FOR PAST TENSE ---
 
@@ -367,59 +415,58 @@ def samyogantasya_lopah(prakriya: Prakriya) -> None:
 
 # --- FUTURE TENSE AUGMENT ---
 
-
 def it_agama(prakriya: Prakriya) -> None:
     """
-    Rules 7.2.35 & 7.2.10: Applies 'iw' augment, blocked for anudatta (AniW) roots.
+    Rules 7.2.35 & 7.2.10: Applies 'iw' augment to ANY val-initial Ardhadhatuka suffix,
+    but blocks it for anudatta (AniW) roots.
     """
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
-
-    # We emulate the anudatta accent data with a known AniW set
-    # (In a production app, you would add an 'anit' boolean column to your SQLite DB)
-    ANIT_ROOTS = ['ji', 'dA', 'Sru', 'pA', 'han', 'dfS']
-
+    
+    # In a production DB, this would be a boolean column.
+    ANIT_ROOTS =['ji', 'dA', 'Sru', 'pA', 'han', 'dfS', 'buD']
     is_anit = dhatu and (dhatu.text in ANIT_ROOTS)
-
-    for term in prakriya.terms:
-        if term.upadeza == 'sya':
+    
+    # We check all terms after the dhatu
+    for term in prakriya.terms[1:]:
+        # If the term is an Ardhadhatuka and starts with a 'val' consonant
+        if 'ardhadhatuka' in term.tags and term.text and term.text[0] in VAL_CONSONANTS:
             if not is_anit:
                 term.text = 'i' + term.text
-                prakriya.log("Rule 7.2.35: Added 'iw' augment to 'sya'")
+                prakriya.log(f"Rule 7.2.35: Added 'iw' augment to '{term.upadeza}'")
             else:
-                prakriya.log(
-                    "Rule 7.2.10 (AniW): 'iw' augment blocked for anudatta root")
+                prakriya.log(f"Rule 7.2.10 (AniW): 'iw' augment blocked for '{term.upadeza}'")
 
 # --- SANDHI FOR FUTURE TENSE ---
-
-
 def adesa_pratyayayoh(prakriya: Prakriya) -> None:
     """
     Rule 8.3.59: AdeSapratyayayoH 
-    An 's' belonging to an affix becomes 'z' if preceded by an iR vowel or a velar.
-    Handles both cross-term (je + sya) and intra-term (Bav + isya) boundaries.
+    An 's' belonging to an AFFIX becomes 'z' if preceded by an iR vowel or a velar.
     """
     for i, curr_term in enumerate(prakriya.terms):
+        # --- NEW: Skip dhatus, upasargas, and abhyasas! Only mutate affixes! ---
+        if curr_term.term_type in['dhatu', 'upasarga', 'abhyasa']:
+            continue
+            
         text = curr_term.text
         if 's' in text:
-            # Find the index of the 's'
             idx = text.find('s')
-
-            # Check what character comes immediately before the 's'
+            
+            is_last_term = (i == len(prakriya.terms) - 1)
+            is_last_char = (idx == len(text) - 1)
+            if is_last_term and is_last_char:
+                continue 
+            
             if idx > 0:
-                # The 's' is inside the term (e.g., 'isya'). Look at the letter before it.
                 prev_char = text[idx-1]
             else:
-                # The 's' is at the very beginning (e.g., 'sya'). Look at the end of the previous term.
                 if i > 0 and prakriya.terms[i-1].text:
                     prev_char = prakriya.terms[i-1].text[-1]
                 else:
-                    continue  # Nothing precedes this 's'
-
-            # If the preceding character is an iR vowel or a velar (ku)
-            if prev_char in IN_VOWELS or prev_char in ['k', 'K', 'g', 'G', 'N']:
+                    continue 
+            
+            if prev_char in IN_VOWELS or prev_char in['k', 'K', 'g', 'G', 'N']:
                 curr_term.text = text[:idx] + 'z' + text[idx+1:]
-                prakriya.log(
-                    f"Rule 8.3.59 (Satva): Changed 's' to 'z' after '{prev_char}'")
+                prakriya.log(f"Rule 8.3.59 (Satva): Changed 's' to 'z' after '{prev_char}'")
 
 # ==========================================
 # CONSONANT SANDHI
@@ -619,3 +666,72 @@ def bhuvo_vug_lunlitoh(prakriya: Prakriya) -> None:
         if suffix.text and is_vowel(suffix.text[0]):
             dhatu.text = dhatu.text + 'v'
             prakriya.log("Rule 6.4.88: Added 'v' augment to 'BU'")
+
+def upasarga_sandhi(prakriya: Prakriya) -> None:
+    """Handles Vowel Sandhi between an Upasarga and the Root/Augment."""
+    upasarga = next((t for t in prakriya.terms if t.term_type == 'upasarga'), None)
+    if not upasarga: return
+    
+    idx = prakriya.terms.index(upasarga)
+    if idx + 1 < len(prakriya.terms):
+        next_term = prakriya.terms[idx + 1]
+        
+        # Only apply sandhi if the next term starts with a vowel
+        if next_term.text and is_vowel(next_term.text[0]):
+            first_vowel = next_term.text[0]
+            
+            # Savarna Dirgha & Guna (a/A merges)
+            if upasarga.text.endswith('a'):
+                if first_vowel in['a', 'A']:
+                    upasarga.text = upasarga.text[:-1]
+                    next_term.text = 'A' + next_term.text[1:]
+                    prakriya.log("Rule 6.1.101: Upasarga Sandhi ('a' + 'a' -> 'A')")
+                elif first_vowel in['i', 'I']:
+                    upasarga.text = upasarga.text[:-1]
+                    next_term.text = 'e' + next_term.text[1:]
+                    prakriya.log("Rule 6.1.87: Upasarga Sandhi ('a' + 'i' -> 'e')")
+                elif first_vowel in ['u', 'U']:
+                    upasarga.text = upasarga.text[:-1]
+                    next_term.text = 'o' + next_term.text[1:]
+                    prakriya.log("Rule 6.1.87: Upasarga Sandhi ('a' + 'u' -> 'o')")
+                    
+            # YaN Sandhi (i/u becomes y/v) - Rule 6.1.77
+            elif upasarga.text.endswith('i') or upasarga.text.endswith('I'):
+                upasarga.text = upasarga.text[:-1] + 'y'
+                prakriya.log("Rule 6.1.77: Upasarga YaN Sandhi ('i' -> 'y')")
+            elif upasarga.text.endswith('u') or upasarga.text.endswith('U'):
+                upasarga.text = upasarga.text[:-1] + 'v'
+                prakriya.log("Rule 6.1.77: Upasarga YaN Sandhi ('u' -> 'v')")
+
+def pug_nau(prakriya: Prakriya) -> None:
+    """
+    Rule 7.3.36: ... pug RO
+    Adds the 'puk' ('p') augment to roots ending in 'A' before the Ric (Causative) affix.
+    e.g., sTA + Ric -> sTAp + i
+    """
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    if not dhatu: return
+    
+    # Check if 'Ric' is the suffix
+    ric_term = next((t for t in prakriya.terms if t.upadeza == 'Ric'), None)
+    if ric_term and dhatu.text.endswith('A'):
+        dhatu.text = dhatu.text + 'p'
+        prakriya.log("Rule 7.3.36: Added 'puk' augment to A-ending root before Ric")
+
+def upasarga_satva(prakriya: Prakriya) -> None:
+    """
+    Rule 8.3.65: upasargAt sunoti... sTA...
+    If an Upasarga ends in an 'iR' vowel, the 's' of specific roots like 'sTA' becomes 'z'.
+    Rule 8.4.41 (zwunA zwuH) then automatically turns 'T' into 'W'.
+    e.g., prati + sTApayati -> pratizWApayati.
+    """
+    upasarga = next((t for t in prakriya.terms if t.term_type == 'upasarga'), None)
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    
+    if upasarga and dhatu and upasarga.text:
+        # If Upasarga ends in an iN vowel (like i, u)
+        if upasarga.text[-1] in IN_VOWELS:
+            if dhatu.text.startswith('sT'):
+                # Apply Satva (s->z) and Stutva (T->W) simultaneously
+                dhatu.text = 'zW' + dhatu.text[2:]
+                prakriya.log("Rule 8.3.65 & 8.4.41: Upasarga Satva & Stutva (sT -> zW)")
