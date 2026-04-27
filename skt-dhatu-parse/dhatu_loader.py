@@ -3,7 +3,7 @@ dhatu_loader.py
 Queries the SQLite database and retrieves roots as Term objects.
 """
 import sqlite3
-from models import Term
+from .models import Term
 
 # Default to production DB
 DEFAULT_DB_PATH = 'data/dhatupatha.db'
