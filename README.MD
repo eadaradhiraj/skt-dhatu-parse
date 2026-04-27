@@ -1,19 +1,9 @@
-
-
-
-Here is the complete, fully updated **`README.md`** reflecting your new professional package architecture, your passing 28-test suite, and every grammatical feature you have implemented so far. 
-
-You can copy and paste this directly into your `README.md` file in the root of your project.
-
-***
-
-```markdown
 # 🕉️ skt-dhatu-parse (Paninian Sanskrit Engine)
 
 ## Overview
 `skt-dhatu-parse` is a computational linguistics engine that implements Pāṇini’s *Aṣṭādhyāyī*. Rather than relying on static lookup tables or pre-conjugated dictionaries, this package calculates Sanskrit morphophonemics dynamically in real-time. 
 
-It processes an abstract phonetic root (*Upadeśa*) and an abstract tense/mood marker (*Lakāra*) through a strict chronological state-machine of 2,500-year-old grammatical rules to generate mathematically perfect verbal paradigms.
+It processes an abstract phonetic root (*Upadeśa*) and runs it through a strict chronological state-machine of 2,500-year-old grammatical rules to generate Verbs (*Tiṅanta*), Participles/Primary Derivatives (*Kṛdanta*), and Secondary Roots/Causatives (*Sanādi*).
 
 It is designed to be fully `pip`-installable, highly usable as a standalone CLI tool, and importable as a Python library for advanced NLP applications.
 
@@ -31,18 +21,25 @@ pip install -e .
 ### Command Line Interface (CLI)
 Once installed, you can access the engine globally from your terminal using the Python module syntax. 
 
-**Generate a full 3x3 conjugation table:**
+**1. Generate a full 3x3 conjugation table (Tiṅanta):**
 ```bash
 python -m skt_dhatu_parse BU -l laW --table
 ```
 
-**Generate a specific word and view Pāṇini's step-by-step derivation history:**
+**2. Generate a Participle (Kṛdanta) with Derivation History:**
+*(Watch Consonant Sandhi dynamically merge `buD` + `kta` -> `budDa`)*
 ```bash
-python -m skt_dhatu_parse BU -l lfW -p prathama -v 0 --history
+python -m skt_dhatu_parse buD --krt kta --history
 ```
 
-**Handle Homonyms:**
-If a root exists in multiple classes (like `div`), the engine warns you and auto-defaults to the most common Gaṇa. You can explicitly override this with `-g`:
+**3. Generate a Secondary Causative Root (Sanādi):**
+*(Watch Vṛddhi dynamically lengthen `ram` + `Ric` -> `rAmi`)*
+```bash
+python -m skt_dhatu_parse ram --causative --history
+```
+
+**4. Handle Homonyms Automatically:**
+If a root exists in multiple classes (like `div`), the engine warns you and auto-defaults to Gaṇa 1. You can explicitly override this with `-g`:
 ```bash
 python -m skt_dhatu_parse div -l laW -g 4 --table
 ```
@@ -51,12 +48,15 @@ python -m skt_dhatu_parse div -l laW -g 4 --table
 You can easily import the engine into your own Python applications:
 ```python
 from skt_dhatu_parse.engine import derive
+from skt_dhatu_parse.krdanta import derive_krdanta
 
 # Derive the 3rd person singular future tense of 'bhū'
-prakriya = derive('BU', lakara_name='lfW', purusha='prathama', vacana=0, gana=1)
+verb = derive('BU', lakara_name='lfW', purusha='prathama', vacana=0, gana=1)
+print(verb.get_current_string())  # Outputs: Bavizyati
 
-print(prakriya.get_current_string())  # Outputs: Bavizyati
-prakriya.print_history()              # Prints the applied Sūtras
+# Derive the past participle of 'budh'
+participle = derive_krdanta('buD', 'kta', gana=1)
+print(participle.get_current_string()) # Outputs: budDa
 ```
 
 ---
@@ -67,7 +67,7 @@ prakriya.print_history()              # Prints the applied Sūtras
 2. **Database:** Powered by an indexed SQLite database (`dhatupatha.db`) for lightning-fast root lookups. 
 3. **Composite Primary Keys:** Safely handles Sanskrit homonyms (e.g., `vid` in Gaṇa 2, 4, 6, and 7) by identifying roots via a composite key of `dhatu_slp1` + `gana`.
 4. **State Machine (`Prakriya`):** Built on an Object-Oriented sequence of `Term` objects. Terms inherit tags and mutate in place via *Sthānivadbhāva* (State Inheritance).
-5. **TDD (Test-Driven Development):** Guarded by a comprehensive 28-test `unittest` suite simulating boundary cases, class variations, and exact Paninian rule execution.
+5. **TDD (Test-Driven Development):** Guarded by a comprehensive 33-test `unittest` suite simulating boundary cases, class variations, and exact Paninian rule execution.
 
 ---
 
@@ -75,41 +75,44 @@ prakriya.print_history()              # Prints the applied Sūtras
 
 ### 1. The Phonological Engine (`shivasutras.py`)
 Dynamically queries the Sanskrit alphabet using Pāṇini's 14 Śivasūtras.
-* **Pratyāhāras:** Generates arrays of phonemes dynamically (e.g., `ac` for vowels, `hal` for consonants, `ik`, `yaY`, `iR`).
+* **Pratyāhāras:** Generates arrays of phonemes dynamically (e.g., `ac`, `hal`, `ik`, `yaY`, `iR`, `jhal`, `jhaS`).
 * **The 'Ṇ' Edge-Case:** Handles Pāṇini’s duplicate `R` (ṇ) marker—`aR` stops at sutra 1; `iR`/`yaR` continue to sutra 6.
 
 ### 2. Meta-Marker Resolution / It-Lopa (`anubandha.py`)
 Strips instructional markers (*anubandhas*) from roots and affixes while saving their grammatical implications as tags.
-* **1.3.2 (upadeśe'janunāsika it):** Deletes nasalized vowels (`!` or `~`) and tags the term (e.g., `ahi!` -> `ah` + `idit`).
-* **1.3.3 (hal antyam):** Deletes terminal consonants (`tip` -> `ti` + `pit`).
-* **1.3.4 (na vibhaktau tusmāḥ):** Protects terminal `s`, `m`, and dentals in inflectional affixes (`tas`, `vas`, `mas`).
-* **1.3.8 (laśakvataddhite):** Deletes initial `l`, `S`, and velars (`Sap` -> `a` + `Sit` + `pit`).
+* **1.3.2 (upadeśe'janunāsika it):** Deletes nasalized vowels (`!` or `~`) and tags the term.
+* **1.3.3 & 1.3.8:** Deletes terminal and initial consonants (`tip` -> `ti` + `pit`).
+* **1.3.4 (na vibhaktau tusmāḥ):** Protects terminal `s`, `m`, and dentals in inflectional affixes.
+* **1.3.7 (cuṭū):** Deletes initial palatals and retroflexes (`Ric` -> `ic` + `Rit`).
 
-### 3. The Grammatical Rule Engine (`rules.py`)
-Applies context-sensitive, chronologically ordered Pāṇinian Sūtras:
-* **Lakāra Substitution:** (3.4.78) Replaces `laW` with 18 Tiṅ affixes. The new affix inherits properties from `laW` via rule 1.1.56.
-* **Class Infixes (Vikaraṇas):** Dynamically inserts `Sap` (Gaṇa 1), `Syan` (Gaṇa 4), `Sa` (Gaṇa 6), or `sya` (Future tense).
-* **Guṇa & Prevention:** (7.3.84) Strengthens `ik` vowels before *Sārvadhātuka* affixes (`BU` -> `Bo`). (1.1.5) Blocks Guṇa if the affix is `Nit` (which correctly handles Gaṇa 6 `tud`).
-* **Sandhi (Phonetics):** 
-    * 6.1.78: `eco'yavAyAvaH` (`Bo + a` -> `Bava`).
-    * 6.1.97: `ato guNe` merges consecutive `a`'s.
-    * 8.3.59: `AdeSapratyayayoH` dynamically changes `s` to `z` (ṣ) after `iR` vowels across both intra-term and cross-term boundaries (`jezyati`, `Bavizyati`).
-    * 8.2.23: `saMyogAntasya lopaH` drops terminal consonants in clusters (`aBavant` -> `aBavan`).
-    * 8.3.15: `rutva` converts terminal `s` to Visarga `H`.
-* **Voice Morphing (Ātmanepada):** (3.4.79) `ta` -> `te`. (3.4.80) `TAs` -> `se`. (7.2.81) `a + Ate` -> `ete`.
-* **Advanced Augments (Āgamas):** 
-    * 7.1.58: `idito num dhAtoH` inserts nasal `m` inside `idit` roots (`ah` -> `aMh`).
-    * 6.4.71: `aW` augment prefixes the root for Past Tense.
-    * 3.4.101: `tasthasthamipāṃ...` Replaces dual/plural affixes for `laN`.
-    * 7.2.35 & 7.2.10: Applies `iW` augment to `sya` for Future Tense, but actively **blocks** it for *Aniṭ* (anudātta) roots like `ji` (`jezyati`).
+### 3. Vowel Morphing & Sandhi
+* **Guṇa & Vṛddhi:** Strengthens vowels based on `Sārvadhātuka`, `Ardhadhātuka`, `Yit`, and `Rit` triggers (Rules 7.3.84, 7.2.115 *aco ñṇiti*, 7.2.116 *ata upadhāyāḥ*).
+* **Guṇa Prevention:** Recognizes `kit` and `Nit` tags to block vowel strengthening (Rule 1.1.5).
+* **Vowel Sandhi:** Merges `a+a` (*ato guṇe*) and triggers `ay/av/Ay/Av` replacements (*eco'yavAyAvaH*).
 
-### 4. Verified Conjugations
-The engine currently derives mathematically perfect 3x3 tables for:
-* **Gaṇa 1 Parasmaipada:** `BU` -> `Bavati` (Present), `aBavat` (Past), `Bavizyati` (Future).
+### 4. Consonant Sandhi
+* **Retroflexion (Ṣatva/Ṇatva):** Converts `s` to `z` (8.3.59) and `n` to `R` (8.4.1).
+* **Assimilation:** Merges `jhaS` and `jhal` consonant boundaries (e.g., `buD` + `ta` -> `budDa`) via Rules 8.2.40 and 8.4.53.
+* **Terminal Reductions:** Converts word-final `s` to `H` (8.3.15) and drops trailing consonants in clusters (8.2.23).
+
+### 5. Advanced Augments (Āgamas) & Morphing
+* **Kṛdanta Affixes:** 7.1.1 replaces `yu`/`vu` with `ana`/`aka` (`lyuW` -> `ana`).
+* **Sanādi Generation:** 3.1.32 merges secondary roots into a single base (`BAvi`).
+* **Tiṅanta Augments:** 7.1.58 inserts `m` inside `idit` roots. 6.4.71 prefixes `aW` for Past Tense.
+* **Seṭ/Aniṭ Logic:** 7.2.35 & 7.2.10 applies the `iW` augment to `sya` for Future Tense, but actively **blocks** it for *Aniṭ* (anudātta) roots like `ji` (`jezyati`).
+
+---
+
+## 🔬 Verified Derivations
+The engine is computationally verified (via unittests) to perfectly derive:
+* **Gaṇa 1 Parasmaipada:** `BU` -> `Bavati`, `aBavat`, `Bavizyati`.
 * **Gaṇa 1 Ātmanepada:** `aMh` -> `aMhate` (num augment + ṭi substitutions).
 * **Gaṇa 4:** `div` -> `dIvyati` (Syan infix + root lengthening).
 * **Gaṇa 6:** `tud` -> `tudati` (Sa infix + Nit Guṇa blocking).
 * **Aniṭ Roots:** `ji` -> `jezyati` (Augment blocking + ṣ sandhi).
+* **Participles:** `buD` + `kta` -> `budDa` (Consonant assimilation).
+* **Derivatives:** `ram` + `GaY` -> `rAma` (Vṛddhi). `ram` + `lyuW` -> `ramaRa` (Ṇatva Sandhi).
+* **Causatives:** `BU` + `Ric` -> `BAvi`. `ram` + `Ric` -> `rAmi`.
 
 ---
 
@@ -119,15 +122,18 @@ skt-dhatu-parse/
 ├── pyproject.toml           # Pip install configuration
 ├── README.md
 ├── LICENSE
-├── tests/                   # 28-test verification suite
+├── tests/                   # 33-test verification suite
 │   ├── test_cli.py
 │   ├── test_pipeline.py
-│   └── ...
+│   ├── test_krdanta.py
+│   └── test_sanadi.py
 └── skt_dhatu_parse/         # The Core Python Package
     ├── __init__.py
     ├── __main__.py          # Allows 'python -m skt_dhatu_parse'
     ├── cli.py               # Command Line Interface
-    ├── engine.py            # Derivation state machine orchestrator
+    ├── engine.py            # Tiṅanta state machine orchestrator
+    ├── krdanta.py           # Participle state machine
+    ├── sanadi.py            # Secondary Root state machine
     ├── conjugate.py         # 3x3 Table generator
     ├── rules.py             # Library of Paninian Sutras
     ├── models.py            # Term and Prakriya OOP Classes
@@ -143,16 +149,13 @@ skt-dhatu-parse/
 
 ## 🗺️ Roadmap & Next Steps
 
-### Phase 1: Subanta (Nominal Declensions)
+### Phase 1: Reduplication (Abhyāsa)
+* Implement root-duplication algorithms to unlock the Perfect Tense (*liW*) and Gaṇa 3 verbs (Juhotyādi).
+* Apply shortening/halving rules (`BUBU` -> `baBU`).
+
+### Phase 2: Noun Declensions (Subantas)
 * Build a parallel pipeline for Nominal Stems (*Prātipadika*).
-* Append the 21 nominal endings (`su, au, jas...`) to generate cases like *Rāmaḥ, Rāmam, Rāmeṇa*.
+* Append the 21 nominal case endings (`su, au, jas...`) to generate outputs like *Rāmaḥ, Rāmam, Rāmeṇa*.
 
-### Phase 2: Kṛdanta & Taddhita (Derivatives)
-* **Participles:** Apply Kṛt affixes to generate adjectives/participles (e.g., `kR` + `kta` -> *kṛta*, `kR` + `tavatu` -> *kṛtavān*).
-* **Nominal Derivatives:** Apply rules to generate patronymics or abstracts (e.g., `dazaratha` + `iY` -> *dāśarathi*).
-
-### Phase 3: Advanced Consonant Sandhi
-* Implement rules like *jhalām jaś jhaśi* and *ṣṭunā ṣṭuḥ* to handle complex root/suffix boundaries (e.g., `budh` + `ta` -> *buddha*).
-* Support remaining class infixes (e.g., Gaṇa 2 `luk`, Gaṇa 3 reduplication, Gaṇa 10 `Ric`).
-* Integrate a complete classical *Dhātupāṭha* dataset for total engine coverage.
-```
+### Phase 3: Recursive Piping
+* Pass newly generated Secondary Roots (like the Causative `BAvi`) directly back into the `engine.py` pipeline to seamlessly conjugate `BAvayati` (He causes to be).
