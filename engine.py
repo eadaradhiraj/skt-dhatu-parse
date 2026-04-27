@@ -10,7 +10,8 @@ from rules import (
     idito_num_dhatoh, sarvadhatuka_ardhadhatukayoh, eco_yayavayah,
     ato_dirgho_yayi, rutva_visarga, jhonta, ato_gune, 
     at_agama, itasca, it_agama, adesa_pratyayayoh, hali_ca,
-    tasthasthamipam, samyogantasya_lopah
+    tasthasthamipam, samyogantasya_lopah,
+    thasah_se, ato_nitah
 )
 
 def derive(dhatu_slp1: str, lakara_name: str = 'laW', 

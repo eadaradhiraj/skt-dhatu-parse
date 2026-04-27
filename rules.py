@@ -1,21 +1,28 @@
-from models import Term, Prakriya
 from shivasutras import get_pratyahara, is_vowel, SLP1_VOWELS
+from models import Term, Prakriya
 
+# --- Phonological Sets ---
+IK_VOWELS = set(get_pratyahara('i', 'k') + ['I', 'U', 'F', 'X'])
+EC_VOWELS = get_pratyahara('e', 'c')
+YAY_CONSONANTS = set(get_pratyahara('y', 'Y'))
+IN_VOWELS = set(get_pratyahara('i', 'R') + ['I', 'U', 'F', 'X'])
+# ADD THIS LINE: Ask the Shivasutras for all consonants ('hal')
+SLP1_CONSONANTS = set(get_pratyahara('h', 'l')) 
+
+# --- The 18 Tiṅ Affixes (Rule 3.4.78) ---
 TIN_PARASMAIPADA = {
-    'prathama': ['tip', 'tas', 'Ji'],
-    'madhyama':['sip', 'Tas', 'Ta'],
+    'prathama':['tip', 'tas', 'Ji'],
+    'madhyama': ['sip', 'Tas', 'Ta'],
     'uttama':   ['mip', 'vas', 'mas']
 }
 
 TIN_ATMANEPADA = {
     'prathama': ['ta', 'AtAm', 'Ja'],
-    'madhyama': ['TAs', 'ATAm', 'Dvam'],
-    'uttama':   ['iw', 'vahi', 'mahiN']
+    'madhyama':['TAs', 'ATAm', 'Dvam'],
+    'uttama':['iw', 'vahi', 'mahiN']
 }
-# Phonological sets for quick lookup
-IK_VOWELS = set(get_pratyahara('i', 'k') +['I', 'U', 'F', 'X'])
-EC_VOWELS = get_pratyahara('e', 'c')
-YAY_CONSONANTS = set(get_pratyahara('y', 'Y')) # 'yaY' pratyahara for 7.3.101
+
+# ... your substitute_lakara function and the rest of the code remains below ...
 
 def apply_guna(char: str) -> str:
     if char in ['i', 'I']: return 'e'
@@ -248,22 +255,6 @@ def itasca(prakriya: Prakriya):
         suffix.text = suffix.text[:-1]
         prakriya.log("Rule 3.4.100 (itaSca): Dropped terminal 'i'")
 
-# --- FUTURE TENSE AUGMENT ---
-def it_agama(prakriya: Prakriya):
-    """Rule 7.2.35: ArdhadhAtukasya iq valAdeH - Adds 'i' before 'sya'."""
-    for term in prakriya.terms:
-        if term.upadeza == 'sya':
-            term.text = 'i' + term.text
-            prakriya.log("Rule 7.2.35: Added 'iw' augment to 'sya'")
-
-# --- SANDHI FOR FUTURE TENSE ---
-def adesa_pratyayayoh(prakriya: Prakriya):
-    """Rule 8.3.59: AdeSapratyayayoH - 's' becomes 'z' after 'ik' vowels (e.g. isya -> izya)"""
-    for term in prakriya.terms:
-        if 'is' in term.text:
-            term.text = term.text.replace('is', 'iz')
-            prakriya.log("Rule 8.3.59 (Satva): Changed 's' to 'z'")
-
 def hali_ca(prakriya: Prakriya):
     """Rule 8.2.77: hali ca - Lengthens i/u of div before consonant (div + ya -> dIvya)"""
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
@@ -307,3 +298,53 @@ def samyogantasya_lopah(prakriya: Prakriya):
     if len(text) >= 2 and text[-1] in SLP1_CONSONANTS and text[-2] in SLP1_CONSONANTS:
         suffix.text = text[:-1]
         prakriya.log(f"Rule 8.2.23: Dropped final consonant of cluster '{text[-2:]}'")
+
+# --- FUTURE TENSE AUGMENT ---
+def it_agama(prakriya: Prakriya):
+    """
+    Rules 7.2.35 & 7.2.10: Applies 'iw' augment, blocked for anudatta (AniW) roots.
+    """
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    
+    # We emulate the anudatta accent data with a known AniW set
+    # (In a production app, you would add an 'anit' boolean column to your SQLite DB)
+    ANIT_ROOTS =['ji', 'dA', 'Sru', 'pA', 'han', 'dfS']
+    
+    is_anit = dhatu and (dhatu.text in ANIT_ROOTS)
+    
+    for term in prakriya.terms:
+        if term.upadeza == 'sya':
+            if not is_anit:
+                term.text = 'i' + term.text
+                prakriya.log("Rule 7.2.35: Added 'iw' augment to 'sya'")
+            else:
+                prakriya.log("Rule 7.2.10 (AniW): 'iw' augment blocked for anudatta root")
+
+# --- SANDHI FOR FUTURE TENSE ---
+def adesa_pratyayayoh(prakriya: Prakriya):
+    """
+    Rule 8.3.59: AdeSapratyayayoH 
+    An 's' belonging to an affix becomes 'z' if preceded by an iR vowel or a velar.
+    Handles both cross-term (je + sya) and intra-term (Bav + isya) boundaries.
+    """
+    for i, curr_term in enumerate(prakriya.terms):
+        text = curr_term.text
+        if 's' in text:
+            # Find the index of the 's'
+            idx = text.find('s')
+            
+            # Check what character comes immediately before the 's'
+            if idx > 0:
+                # The 's' is inside the term (e.g., 'isya'). Look at the letter before it.
+                prev_char = text[idx-1]
+            else:
+                # The 's' is at the very beginning (e.g., 'sya'). Look at the end of the previous term.
+                if i > 0 and prakriya.terms[i-1].text:
+                    prev_char = prakriya.terms[i-1].text[-1]
+                else:
+                    continue # Nothing precedes this 's'
+            
+            # If the preceding character is an iR vowel or a velar (ku)
+            if prev_char in IN_VOWELS or prev_char in['k', 'K', 'g', 'G', 'N']:
+                curr_term.text = text[:idx] + 'z' + text[idx+1:]
+                prakriya.log(f"Rule 8.3.59 (Satva): Changed 's' to 'z' after '{prev_char}'")
