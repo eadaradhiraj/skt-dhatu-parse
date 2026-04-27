@@ -21,7 +21,8 @@ class TestCLI(unittest.TestCase):
         self.assertEqual(gana, 4)
 
     @patch('cli.get_dhatu')
-    def test_resolve_gana_default_to_one(self, mock_get_dhatu):
+    @patch('sys.stdout', new_callable=io.StringIO)  # <--- Captures the print output!
+    def test_resolve_gana_default_to_one(self, mock_stdout, mock_get_dhatu):
         """Test that if a root has multiple Ganas including 1, it defaults to 1."""
         class MockDhatu1: tags = {'gana_10'}
         class MockDhatu2: tags = {'gana_1'}
@@ -30,6 +31,9 @@ class TestCLI(unittest.TestCase):
         
         gana = resolve_gana('BU')
         self.assertEqual(gana, 1)
+        
+        # Now we can safely assert the warning was generated properly!
+        self.assertIn("Warning: 'BU' belongs to multiple classes", mock_stdout.getvalue())
 
     @patch('cli.get_dhatu')
     def test_resolve_gana_user_specified(self, mock_get_dhatu):
@@ -43,7 +47,8 @@ class TestCLI(unittest.TestCase):
         self.assertEqual(gana, 10)
 
     @patch('cli.get_dhatu')
-    def test_resolve_gana_not_found(self, mock_get_dhatu):
+    @patch('sys.stdout', new_callable=io.StringIO)  # <--- Captures the print output!
+    def test_resolve_gana_not_found(self, mock_stdout, mock_get_dhatu):
         """Test that the app exits safely with code 1 if root doesn't exist."""
         mock_get_dhatu.return_value =[]
         
@@ -51,6 +56,9 @@ class TestCLI(unittest.TestCase):
         with self.assertRaises(SystemExit) as cm:
             resolve_gana('xyz')
         self.assertEqual(cm.exception.code, 1)
+        
+        # Assert the error message was correct
+        self.assertIn("Error: Root 'xyz' not found", mock_stdout.getvalue())
 
     @patch('sys.argv',['cli.py', 'BU', '-l', 'laW', '-p', 'prathama', '-v', '0'])
     @patch('sys.stdout', new_callable=io.StringIO)
@@ -63,7 +71,7 @@ class TestCLI(unittest.TestCase):
         self.assertIn('Bavati', output)
         self.assertNotIn('Derivation History', output) # History flag wasn't passed
 
-    @patch('sys.argv', ['cli.py', 'BU', '--history'])
+    @patch('sys.argv',['cli.py', 'BU', '--history'])
     @patch('sys.stdout', new_callable=io.StringIO)
     def test_main_with_history(self, mock_stdout):
         """Simulate running: python cli.py BU --history"""
