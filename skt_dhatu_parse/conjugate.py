@@ -1,5 +1,5 @@
-from engine import derive
-from dhatu_loader import DEFAULT_DB_PATH
+from .engine import derive
+from .dhatu_loader import DEFAULT_DB_PATH
 
 def print_conjugation(
     dhatu_slp1: str,

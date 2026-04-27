@@ -1,5 +1,5 @@
 import unittest
-from shivasutras import get_pratyahara
+from skt_dhatu_parse.shivasutras import get_pratyahara
 
 class TestPratyaharasSLP1(unittest.TestCase):
 

@@ -2,10 +2,10 @@
 engine.py
 The main orchestrator for the Paninian derivation pipeline (Prakriya).
 """
-from dhatu_loader import get_dhatu, DEFAULT_DB_PATH
-from models import Term, Prakriya
-from anubandha import resolve_it_markers
-from rules import (
+from .dhatu_loader import get_dhatu, DEFAULT_DB_PATH
+from .models import Term, Prakriya
+from .anubandha import resolve_it_markers
+from .rules import (
     substitute_lakara, insert_vikarana, atmanepada_tere, 
     idito_num_dhatoh, sarvadhatuka_ardhadhatukayoh, eco_yayavayah,
     ato_dirgho_yayi, rutva_visarga, jhonta, ato_gune, 

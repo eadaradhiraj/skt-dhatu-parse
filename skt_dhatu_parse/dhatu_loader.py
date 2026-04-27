@@ -2,11 +2,15 @@
 dhatu_loader.py
 Queries the SQLite database and retrieves roots as Term objects.
 """
+import os
 import sqlite3
 from .models import Term
 
+# 1. Get the absolute path of the directory containing THIS file (dhatu_loader.py)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # Default to production DB
-DEFAULT_DB_PATH = 'data/dhatupatha.db'
+DEFAULT_DB_PATH = os.path.join(BASE_DIR, 'data', 'dhatupatha.db')
 
 def get_dhatu(dhatu_slp1: str, gana: int = None, db_path: str = DEFAULT_DB_PATH) -> list[Term]:
     """

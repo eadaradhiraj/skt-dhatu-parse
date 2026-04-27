@@ -1,6 +1,6 @@
 import unittest
-from models import Term, Prakriya
-from rules import substitute_lakara, insert_vikarana
+from skt_dhatu_parse.models import Term, Prakriya
+from skt_dhatu_parse.rules import substitute_lakara, insert_vikarana
 
 class TestRules(unittest.TestCase):
 

@@ -1,6 +1,6 @@
 import unittest
-from models import Term
-from anubandha import resolve_it_markers
+from skt_dhatu_parse.models import Term
+from skt_dhatu_parse.anubandha import resolve_it_markers
 
 class TestAnubandha(unittest.TestCase):
 

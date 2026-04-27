@@ -1,5 +1,5 @@
-from shivasutras import get_pratyahara, is_vowel, SLP1_VOWELS
-from models import Term, Prakriya
+from .shivasutras import get_pratyahara, is_vowel, SLP1_VOWELS
+from .models import Term, Prakriya
 
 # --- Phonological Sets ---
 IK_VOWELS = set(get_pratyahara('i', 'k') + ['I', 'U', 'F', 'X'])

@@ -1,6 +1,6 @@
 import unittest
 import sqlite3
-from dhatu_loader import get_dhatu
+from skt_dhatu_parse.dhatu_loader import get_dhatu
 
 class TestDhatuLoader(unittest.TestCase):
     

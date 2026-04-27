@@ -2,7 +2,7 @@
 anubandha.py
 Rules for identifying and removing 'It' (meta-markers)
 """
-from models import Term
+from .models import Term
 
 SLP1_CONSONANTS = set("kKgGNcCjJYwWqQRtTdDnpPbBmyrlvSzsh")
 

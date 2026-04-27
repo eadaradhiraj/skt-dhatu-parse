@@ -1,7 +1,7 @@
 import unittest
 import sqlite3
 import os
-from engine import derive
+from skt_dhatu_parse.engine import derive
 
 class TestPipeline(unittest.TestCase):
     

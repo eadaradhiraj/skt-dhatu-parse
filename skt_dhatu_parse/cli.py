@@ -4,9 +4,9 @@ Command Line Interface for the Paninian Sanskrit Engine.
 """
 import argparse
 import sys
-from dhatu_loader import get_dhatu
-from engine import derive
-from conjugate import print_conjugation
+from .dhatu_loader import get_dhatu
+from .engine import derive
+from .conjugate import print_conjugation
 
 def resolve_gana(dhatu_slp1: str, user_gana: int = None):
     """Fetches the root and safely resolves homonyms (multiple ganas)."""
@@ -77,6 +77,3 @@ def main():
             
             if args.history:
                 prakriya.print_history()
-
-if __name__ == "__main__":
-    main()
