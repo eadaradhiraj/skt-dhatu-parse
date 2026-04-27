@@ -7,14 +7,15 @@ from models import Term
 SLP1_CONSONANTS = set("kKgGNcCjJYwWqQRtTdDnpPbBmyrlvSzsh")
 
 def resolve_it_markers(term: Term):
-    # Rule 1.3.2: Nasalized Vowels (!)
-    if '!' in term.text:
-        idx = term.text.find('!')
-        vowel = term.text[idx-1]
-        term.tags.add(f"{vowel}dit")
-        term.text = term.text[:idx-1] + term.text[idx+1:]
+    # Rule 1.3.2: Nasalized Vowels (! or ~)
+    for marker in ['!', '~']:
+        if marker in term.text:
+            idx = term.text.find(marker)
+            vowel = term.text[idx-1]
+            term.tags.add(f"{vowel}dit")
+            term.text = term.text[:idx-1] + term.text[idx+1:]
 
-    if term.term_type in ['pratyaya', 'vikaraRa', 'lakara']:
+    if term.term_type in ['pratyaya', 'vikaraRa', 'lakara', 'Agama']:
         
         # Rule 1.3.8: laśakvataddhite (INITIAL CONSONANT)
         if len(term.text) > 0:
