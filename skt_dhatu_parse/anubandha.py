@@ -6,7 +6,7 @@ from .models import Term
 
 SLP1_CONSONANTS = set("kKgGNcCjJYwWqQRtTdDnpPbBmyrlvSzsh")
 
-def resolve_it_markers(term: Term):
+def resolve_it_markers(term: Term) -> None:
     # Rule 1.3.2: Nasalized Vowels (! or ~)
     for marker in ['!', '~']:
         if marker in term.text:

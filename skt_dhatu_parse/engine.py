@@ -17,7 +17,8 @@ from .rules import (
 def derive(dhatu_slp1: str, lakara_name: str = 'laW', 
            purusha: str = 'prathama', vacana: int = 0,
            gana: int = None,
-           db_path: str = DEFAULT_DB_PATH):
+           db_path: str = DEFAULT_DB_PATH
+    ) -> Prakriya:
            
     prakriya = Prakriya()
     

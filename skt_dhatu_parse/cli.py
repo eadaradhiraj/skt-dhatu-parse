@@ -8,7 +8,7 @@ from .dhatu_loader import get_dhatu
 from .engine import derive
 from .conjugate import print_conjugation
 
-def resolve_gana(dhatu_slp1: str, user_gana: int = None):
+def resolve_gana(dhatu_slp1: str, user_gana: int = None) -> int:
     """Fetches the root and safely resolves homonyms (multiple ganas)."""
     dhatus = get_dhatu(dhatu_slp1)
     

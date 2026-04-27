@@ -6,7 +6,7 @@ def print_conjugation(
     lakara_name: str = 'laW',
     gana: int = None,
     db_path: str = DEFAULT_DB_PATH
-):
+) -> None:
     print(f"\n======================================")
     gana_text = f"Gaṇa {gana}" if gana else "Auto-Gaṇa"
     print(f" Conjugation: {dhatu_slp1} | {lakara_name} | {gana_text}")

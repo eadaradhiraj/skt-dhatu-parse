@@ -9,7 +9,7 @@ class Term:
     """
     Represents a single grammatical element (Root, Infix, Suffix, etc.).
     """
-    def __init__(self, upadeza: str, term_type: str):
+    def __init__(self, upadeza: str, term_type: str) -> None:
         # The original pedagogical instruction (e.g., 'tip', 'zap', 'akzU!')
         self.upadeza: str = upadeza 
         
@@ -22,7 +22,7 @@ class Term:
         # A set to store tags like 'pit', 'Rit', 'sarvadhatuka', 'gana_1', etc.
         self.tags: Set[str] = set()
         
-    def __repr__(self):
+    def __repr__(self) -> None:
         return f"Term(text='{self.text}', tags={self.tags})"
 
 
@@ -35,18 +35,18 @@ class Prakriya:
         self.terms: List[Term] =[]
         self.history: List[str] =[]
 
-    def add_term(self, term: Term):
+    def add_term(self, term: Term) -> None:
         self.terms.append(term)
         self.log(f"Added {term.term_type}: {term.upadeza}")
 
-    def log(self, message: str):
+    def log(self, message: str) -> None:
         self.history.append(message)
         
     def get_current_string(self) -> str:
         """Returns the concatenated word as it currently stands."""
         return "".join([t.text for t in self.terms])
 
-    def print_history(self):
+    def print_history(self) -> None:
         print("--- Derivation History ---")
         for step in self.history:
             print(step)
