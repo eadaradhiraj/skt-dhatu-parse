@@ -9,9 +9,10 @@ from .rules import (
     idito_num_dhatoh,
     jhasas_tathor_dho_dhah,
     jhalam_jas_jhasi,
-    yuvor_anakau,        # <--- NEW
-    ata_upadhayah,       # <--- NEW
-    rashabhyam_no_nah    # <--- NEW
+    yuvor_anakau,
+    ata_upadhayah,
+    rashabhyam_no_nah,
+    anunasikalopo_jhali_kniti
 )
 
 def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_path: str = DEFAULT_DB_PATH):
@@ -42,6 +43,7 @@ def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_
     ata_upadhayah(prakriya)   # Yit/Rit causes penultimate 'a' -> 'A'
     
     # 7. Consonant Sandhi
+    anunasikalopo_jhali_kniti(prakriya)
     jhasas_tathor_dho_dhah(prakriya)  
     jhalam_jas_jhasi(prakriya)        
     rashabhyam_no_nah(prakriya)       # n -> R

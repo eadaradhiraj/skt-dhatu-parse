@@ -464,3 +464,30 @@ def sna_sandhi(prakriya: Prakriya) -> None:
                 vikarana.text = 'n'
             else:
                 vikarana.text = 'nI'
+
+def anunasikalopo_jhali_kniti(prakriya: Prakriya) -> None:
+    """
+    Rule 6.4.37: anunAsikalopo jhali kNiti
+    Deletes the final nasal (m, n) of specific roots before a jhal-initial kit/Nit affix.
+    e.g., ram + ktvA -> ra + tvA -> ratvA
+    """
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    if not dhatu: return
+    idx = prakriya.terms.index(dhatu)
+    if idx + 1 >= len(prakriya.terms): return
+    suffix = prakriya.terms[idx + 1]
+
+    # Check if the affix is kit or Nit
+    is_kit_or_nit = 'kit' in suffix.tags or 'Nit' in suffix.tags
+    # Check if the affix starts with a jhal consonant (like 't' in tvA)
+    starts_with_jhal = suffix.text and suffix.text[0] in JHAL_CONSONANTS
+    # Check if the root ends in a nasal
+    ends_with_nasal = dhatu.text and dhatu.text[-1] in ['m', 'n']
+
+    if is_kit_or_nit and starts_with_jhal and ends_with_nasal:
+        # Pāṇini specifies anudātta roots and a few others (van, tan, etc.)
+        # We handle the most common ones here for safety.
+        ANUDATTA_NASAL_ROOTS =['ram', 'gam', 'han', 'man', 'yam', 'van', 'tan', 'nam']
+        if dhatu.text in ANUDATTA_NASAL_ROOTS:
+            dhatu.text = dhatu.text[:-1]
+            prakriya.log(f"Rule 6.4.37: Dropped final nasal before jhal+kit/Nit -> '{dhatu.text}'")

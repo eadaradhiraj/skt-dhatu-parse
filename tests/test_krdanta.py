@@ -77,5 +77,17 @@ class TestKrdanta(unittest.TestCase):
         self.assertIsNotNone(prakriya)
         self.assertEqual(prakriya.get_current_string(), 'ramaRa')
 
+    def test_ram_ktva_nasal_drop(self) -> None:
+        """
+        Tests ram + ktvA -> ratvA.
+        Verifies Rule 6.4.37 (anunAsikalopo jhali kNiti).
+        1. 'ktvA' loses 'k' -> 'tvA' (tagged 'kit').
+        2. 'tvA' is jhal-initial and kit, so 'ram' loses 'm' -> 'ra'.
+        """
+        prakriya = derive_krdanta('ram', 'ktvA', gana=1, db_path=self.test_db_path)
+        
+        self.assertIsNotNone(prakriya)
+        self.assertEqual(prakriya.get_current_string(), 'ratvA')
+
 if __name__ == '__main__':
     unittest.main()
