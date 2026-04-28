@@ -102,7 +102,7 @@ class TestPipeline(unittest.TestCase):
     # ==========================================
     def test_gana_9_vikri_singular(self) -> None:
         """Test Gana 9 (SnA -> nI), Natva Sandhi, and Upasarga Atmanepada override: vi-krI + laW -> vikrIRIte"""
-        prakriya = derive('krI', 'laW', purusha='prathama', vacana=0, gana=9, upasargas='vi', db_path=self.test_db_path)
+        prakriya = derive('krI', 'laW', purusha='prathama', vacana=0, gana=9, upasargas=['vi'], db_path=self.test_db_path)
         self.assertEqual(prakriya.get_current_string(), 'vikrIRIte')
 
     def test_gana_9_vikri_plural(self) -> None:
@@ -124,6 +124,24 @@ class TestPipeline(unittest.TestCase):
 
     def test_multiple_upasargas(self) -> None:
         """Test vi + A + BU + laN -> vyABavat"""
+        prakriya = derive('BU', 'laN', purusha='prathama', vacana=0, gana=1, upasargas=['vi', 'A'], db_path=self.test_db_path)
+        self.assertEqual(prakriya.get_current_string(), 'vyABavat')
+
+    def test_gana_9_vikri_singular(self) -> None:
+        prakriya = derive('krI', 'laW', purusha='prathama', vacana=0, gana=9, upasargas=['vi'], db_path=self.test_db_path)
+        self.assertEqual(prakriya.get_current_string(), 'vikrIRIte')
+
+    def test_gana_9_vikri_plural(self) -> None:
+        prakriya = derive('krI', 'laW', purusha='prathama', vacana=2, gana=9, upasargas=['vi'], db_path=self.test_db_path)
+        self.assertEqual(prakriya.get_current_string(), 'vikrIRate')
+
+    def test_causative_puk_and_upasarga_satva(self) -> None:
+        from skt_dhatu_parse.sanadi import derive_secondary_root
+        sanadi_prakriya = derive_secondary_root('sTA', 'Ric', gana=1, db_path=self.test_db_path)
+        final_prakriya = derive('sTA', 'lfW', purusha='prathama', vacana=0, gana=1, upasargas=['prati'], custom_dhatu=sanadi_prakriya.terms[0], db_path=self.test_db_path)
+        self.assertEqual(final_prakriya.get_current_string(), 'pratizWApayizyati')
+
+    def test_multiple_upasargas(self) -> None:
         prakriya = derive('BU', 'laN', purusha='prathama', vacana=0, gana=1, upasargas=['vi', 'A'], db_path=self.test_db_path)
         self.assertEqual(prakriya.get_current_string(), 'vyABavat')
 

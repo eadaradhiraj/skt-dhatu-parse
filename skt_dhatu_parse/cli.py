@@ -95,10 +95,10 @@ def main() -> None:
             print(f"\n✨ Kṛdanta Result: {prakriya.get_current_string()}\n")
             
     elif args.table:
-        print_conjugation(raw_dhatu, lakara_name=args.lakara, gana=gana, upasargas=upasarga, custom_dhatu=custom_root, voice=args.voice) 
+        print_conjugation(raw_dhatu, lakara_name=args.lakara, gana=gana, upasargas=upasargas, custom_dhatu=custom_root, voice=args.voice) 
         
     else:
-        prakriya = derive(raw_dhatu, lakara_name=args.lakara, purusha=args.purusha, vacana=args.vacana, gana=gana, upasargas=upasarga, custom_dhatu=custom_root, voice=args.voice)
+        prakriya = derive(raw_dhatu, lakara_name=args.lakara, purusha=args.purusha, vacana=args.vacana, gana=gana, upasargas=upasargas, custom_dhatu=custom_root, voice=args.voice)
         if prakriya:
             print(f"\n✨ Tiṅanta Result: {prakriya.get_current_string()}\n")
             

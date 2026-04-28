@@ -55,6 +55,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW',
             dhatu.tags.discard('parasmaipada')
             dhatu.tags.discard('ubhayapada')
             dhatu.tags.add('atmanepada')
+            prakriya.log(f"Rule 1.3.44: 'krI' becomes Atmanepada after '{upasargas[-1]}'")
 
     prakriya.add_term(dhatu)
     

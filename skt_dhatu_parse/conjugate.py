@@ -7,17 +7,27 @@ from .engine import derive
 from .dhatu_loader import DEFAULT_DB_PATH
 from .models import Term
 
+"""
+conjugate.py
+Generates a full 3x3 verbal paradigm table.
+"""
+import copy
+from .engine import derive
+from .dhatu_loader import DEFAULT_DB_PATH
+from .models import Term
+
 def print_conjugation(
-    dhatu_slp1: str, lakara_name: str = 'laW', gana: int = None,
-    db_path: str = DEFAULT_DB_PATH, 
-    upasargas: list[str] = None, # <--- CHANGED TO LIST
-    custom_dhatu: Term = None, voice: str = None
+    dhatu_slp1: str,
+    lakara_name: str = 'laW',
+    gana: int = None,
+    db_path: str = DEFAULT_DB_PATH,
+    upasargas: list[str] = None,
+    custom_dhatu: Term = None,
+    voice: str = None
 ) -> None:
     
     print(f"\n======================================")
     gana_text = f"Gaṇa {gana}" if gana else "Auto-Gaṇa"
-    
-    # Formats 'vi-A-BU'
     prefix_text = "-".join(upasargas) + "-" if upasargas else ""
     root_text = custom_dhatu.text if custom_dhatu else dhatu_slp1
     
@@ -29,12 +39,11 @@ def print_conjugation(
     print("-" * 50)
     
     for p in purushas:
-        # We MUST deepcopy the custom root so the state machine 
-        # doesn't destroy it for the next loop iteration!
         d_eka = copy.deepcopy(custom_dhatu) if custom_dhatu else None
         d_dvi = copy.deepcopy(custom_dhatu) if custom_dhatu else None
         d_bahu = copy.deepcopy(custom_dhatu) if custom_dhatu else None
         
+        # FIXED: upasargas=upasargas (removed the extra 's')
         eka = derive(dhatu_slp1, lakara_name, purusha=p, vacana=0, gana=gana, db_path=db_path, upasargas=upasargas, custom_dhatu=d_eka, voice=voice)
         dvi = derive(dhatu_slp1, lakara_name, purusha=p, vacana=1, gana=gana, db_path=db_path, upasargas=upasargas, custom_dhatu=d_dvi, voice=voice)
         bahu = derive(dhatu_slp1, lakara_name, purusha=p, vacana=2, gana=gana, db_path=db_path, upasargas=upasargas, custom_dhatu=d_bahu, voice=voice)

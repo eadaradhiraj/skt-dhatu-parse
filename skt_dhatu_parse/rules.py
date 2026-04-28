@@ -349,30 +349,35 @@ def upasarga_sandhi(prakriya: Prakriya) -> None:
     """Handles Vowel Sandhi folding multiple Upasargas from right to left."""
     upasarga_indices =[i for i, t in enumerate(prakriya.terms) if t.term_type == 'upasarga']
     
-    # Process from right to left (e.g., vi + A + aBavat -> vi + ABavat -> vyABavat)
     for idx in reversed(upasarga_indices):
         upasarga = prakriya.terms[idx]
-        if idx + 1 < len(prakriya.terms):
-            next_term = prakriya.terms[idx + 1]
-            if next_term.text and is_vowel(next_term.text[0]):
-                first_vowel = next_term.text[0]
-                if upasarga.text.endswith('a'):
-                    if first_vowel in['a', 'A']:
-                        upasarga.text = upasarga.text[:-1]
-                        next_term.text = 'A' + next_term.text[1:]
-                    elif first_vowel in ['i', 'I']:
-                        upasarga.text = upasarga.text[:-1]
-                        next_term.text = 'e' + next_term.text[1:]
-                    elif first_vowel in ['u', 'U']:
-                        upasarga.text = upasarga.text[:-1]
-                        next_term.text = 'o' + next_term.text[1:]
-                    elif first_vowel in ['f', 'F']: # Rule 6.1.91 (upasargAd fti...)
-                        upasarga.text = upasarga.text[:-1]
-                        next_term.text = 'Ar' + next_term.text[1:]
-                elif upasarga.text.endswith('i') or upasarga.text.endswith('I'):
-                    upasarga.text = upasarga.text[:-1] + 'y'
-                elif upasarga.text.endswith('u') or upasarga.text.endswith('U'):
-                    upasarga.text = upasarga.text[:-1] + 'v'
+        
+        # Find the next NON-EMPTY term (skips terms that were emptied by previous sandhis!)
+        next_term = None
+        for j in range(idx + 1, len(prakriya.terms)):
+            if prakriya.terms[j].text:
+                next_term = prakriya.terms[j]
+                break
+                
+        if next_term and is_vowel(next_term.text[0]):
+            first_vowel = next_term.text[0]
+            if upasarga.text.endswith('a') or upasarga.text.endswith('A'):
+                if first_vowel in['a', 'A']:
+                    upasarga.text = upasarga.text[:-1]
+                    next_term.text = 'A' + next_term.text[1:]
+                elif first_vowel in['i', 'I']:
+                    upasarga.text = upasarga.text[:-1]
+                    next_term.text = 'e' + next_term.text[1:]
+                elif first_vowel in['u', 'U']:
+                    upasarga.text = upasarga.text[:-1]
+                    next_term.text = 'o' + next_term.text[1:]
+                elif first_vowel in['f', 'F']:
+                    upasarga.text = upasarga.text[:-1]
+                    next_term.text = 'Ar' + next_term.text[1:]
+            elif upasarga.text.endswith('i') or upasarga.text.endswith('I'):
+                upasarga.text = upasarga.text[:-1] + 'y'
+            elif upasarga.text.endswith('u') or upasarga.text.endswith('U'):
+                upasarga.text = upasarga.text[:-1] + 'v'
 
 def aco_nniti(prakriya: Prakriya) -> None:
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
