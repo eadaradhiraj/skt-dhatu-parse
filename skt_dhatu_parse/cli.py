@@ -10,6 +10,13 @@ from .conjugate import print_conjugation
 from .krdanta import derive_krdanta
 from .sanadi import derive_secondary_root
 
+# Pāṇini Rule 1.4.58: prādayaḥ (The 22 Upasargas)
+UPASARGAS =[
+    'pra', 'parA', 'apa', 'sam', 'anu', 'ava', 'nis', 'nir', 
+    'dus', 'dur', 'vi', 'A', 'ni', 'aDi', 'api', 'ati', 
+    'su', 'ud', 'aBi', 'prati', 'pari', 'upa'
+]
+
 def resolve_gana(dhatu_slp1: str, user_gana: int = None) -> int:
     """Fetches the root and safely resolves homonyms (multiple ganas)."""
     dhatus = get_dhatu(dhatu_slp1)
@@ -62,8 +69,13 @@ def main() -> None:
     upasarga = None
     if '-' in raw_dhatu:
         parts = raw_dhatu.split('-', 1)
-        upasarga = parts[0]
-        raw_dhatu = parts[1]
+        if parts[0] in UPASARGAS:
+            upasarga = parts[0]
+            raw_dhatu = parts[1]
+        else:
+            print(f"⚠️ Warning: '{parts[0]}' is not a recognized Pāṇinian Upasarga.")
+            upasarga = parts[0]
+            raw_dhatu = parts[1]
 
     gana = resolve_gana(raw_dhatu, args.gana)
     

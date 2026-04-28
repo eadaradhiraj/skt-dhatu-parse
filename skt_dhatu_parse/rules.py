@@ -124,6 +124,8 @@ def insert_vikarana(prakriya: Prakriya) -> None:
         vik = Term('Syan', 'vikaraRa')
     elif 'gana_6' in dhatu.tags:
         vik = Term('Sa', 'vikaraRa')
+    elif 'gana_9' in dhatu.tags:            # <--- NEW
+        vik = Term('SnA', 'vikaraRa')       # <--- NEW
     else:
         return
 
@@ -270,34 +272,25 @@ def rutva_visarga(prakriya: Prakriya) -> None:
         suffix.text = suffix.text[:-1] + 'H'
         prakriya.log("Rule 8.3.15: Terminal 's' converted to Visarga 'H'")
 
-
 def jhonta(prakriya: Prakriya) -> None:
-    """Rule 7.1.3: jho'ntaH - Replaces 'Jh' in a suffix with 'ant'"""
+    """
+    Rule 7.1.3: jho'ntaH (Jh -> ant)
+    Rule 7.1.5: Atmanepadezv anataH (Jh -> at after non-'a' stems in Atmanepada)
+    """
     suffix = prakriya.terms[-1]
     if suffix.text.startswith('J'):
-        suffix.text = 'ant' + suffix.text[1:]
-        prakriya.log("Rule 7.1.3: Replaced 'Jh' with 'ant'")
-
-    """Rule 6.1.97: ato guNe - a + a = a (Pararupa Sandhi)"""
-    if len(prakriya.terms) >= 3:
-        vikarana = prakriya.terms[1]
-        suffix = prakriya.terms[2]
-        if vikarana.text.endswith('a') and suffix.text.startswith('a'):
-            # Delete the second 'a' to merge them
-            suffix.text = suffix.text[1:]
-            prakriya.log(
-                "Rule 6.1.97: Pararupa Sandhi applied ('a' + 'a' -> 'a')")
-
-
-def jhonta(prakriya: Prakriya) -> None:
-    """Rule 7.1.3: jho'ntaH - Replaces 'Jh' in a suffix with 'ant'"""
-    suffix = prakriya.terms[-1]
-    if suffix.text.startswith('J'):
-        # E.g., Ji -> anti, Jha -> antha (which becomes anta via another rule, but we simplify here)
-        # Note: If it's Atmanepada 'Ja' that became 'Je', 'J' becomes 'ant' so 'Je' -> 'ante'
-        suffix.text = 'ant' + suffix.text[1:]
-        prakriya.log(f"Rule 7.1.3: Replaced 'Jh' with 'ant' -> {suffix.text}")
-
+        dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+        is_atmanepada = dhatu and 'atmanepada' in dhatu.tags
+        
+        # Gaṇa 9 (SnA) drops 'A' before vowels, leaving a stem ending in consonant 'n'
+        is_anat = dhatu and 'gana_9' in dhatu.tags
+        
+        if is_atmanepada and is_anat:
+            suffix.text = 'at' + suffix.text[1:]
+            prakriya.log(f"Rule 7.1.5 (Atmanepadezv anataH): 'Jh' -> 'at' -> {suffix.text}")
+        else:
+            suffix.text = 'ant' + suffix.text[1:]
+            prakriya.log(f"Rule 7.1.3 (jho'ntaH): 'Jh' -> 'ant' -> {suffix.text}")
 
 def thasah_se(prakriya: Prakriya) -> None:
     """Rule 3.4.80: thAsaH se - Replaces Atmanepada 'TAs' with 'se' in a Wit lakara."""
@@ -545,18 +538,15 @@ def ata_upadhayah(prakriya: Prakriya) -> None:
             prakriya.log(f"Rule 7.2.116: Vrddhi of penultimate 'a' -> 'A' (Yit/Rit affix). Result: {dhatu.text}")
 
 def rashabhyam_no_nah(prakriya: Prakriya) -> None:
-    """
-    Rule 8.4.1 & 8.4.2: raSAbhyAM no NaH samAnapade (Natva Sandhi)
-    An 'n' becomes 'R' (ṇ) if it follows 'r' or 'S' (ṣ), even if separated by vowels/velars/labials.
-    (This turns ram + ana into ramaRa).
-    """
-    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
-    suffix = prakriya.terms[-1]
-    
-    # If the root contains 'r' or 'z' (ṣ) and the suffix has 'n'
-    if dhatu and ('r' in dhatu.text or 'z' in dhatu.text) and 'n' in suffix.text:
-        suffix.text = suffix.text.replace('n', 'R')
-        prakriya.log("Rule 8.4.1 (Natva Sandhi): Changed 'n' to 'R'")
+    """Rule 8.4.1: raSAbhyAM no NaH samAnapade (n -> R after r/z)"""
+    has_rz = False
+    for term in prakriya.terms:
+        # If we've passed an 'r' or 'z', subsequent 'n's become 'R'
+        if any(c in term.text for c in['r', 'z', 'f', 'F']):
+            has_rz = True
+        if has_rz and 'n' in term.text:
+            term.text = term.text.replace('n', 'R')
+            prakriya.log("Rule 8.4.1 (Natva Sandhi): Changed 'n' to 'R'")
 
 def apply_vrddhi(char: str) -> str:
     """Returns the Vrddhi equivalent of a vowel."""
@@ -735,3 +725,22 @@ def upasarga_satva(prakriya: Prakriya) -> None:
                 # Apply Satva (s->z) and Stutva (T->W) simultaneously
                 dhatu.text = 'zW' + dhatu.text[2:]
                 prakriya.log("Rule 8.3.65 & 8.4.41: Upasarga Satva & Stutva (sT -> zW)")
+
+def sna_sandhi(prakriya: Prakriya) -> None:
+    """
+    Handles Gana 9 'SnA' vikarana.
+    6.4.112: 'SnA' drops 'A' before vowel-initial weak Sarvadhatuka.
+    6.4.113: 'SnA' -> 'SnI' before consonant-initial weak Sarvadhatuka.
+    """
+    vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa'), None)
+    suffix = prakriya.terms[-1]
+    
+    if vikarana and vikarana.text == 'nA': 
+        is_weak = 'pit' not in suffix.tags # Apit affixes are weak (Nit)
+        if is_weak:
+            if suffix.text and is_vowel(suffix.text[0]):
+                vikarana.text = 'n'
+                prakriya.log("Rule 6.4.112: 'nA' drops 'A' before vowel")
+            else:
+                vikarana.text = 'nI'
+                prakriya.log("Rule 6.4.113: 'nA' becomes 'nI' before consonant")

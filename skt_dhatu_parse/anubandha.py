@@ -7,6 +7,21 @@ from .models import Term
 SLP1_CONSONANTS = set("kKgGNcCjJYwWqQRtTdDnpPbBmyrlvSzsh")
 
 def resolve_it_markers(term: Term) -> None:
+
+    # Initial and Final Dhatu Markers ---
+    if term.term_type == 'dhatu':
+        # Rule 1.3.5: Adir YiWuqavaH (Initial Yi, wu, qu are 'it')
+        for prefix in ['Yi', 'wu', 'qu']:
+            if term.text.startswith(prefix):
+                term.tags.add(f"{prefix}it")
+                term.text = term.text[len(prefix):]
+                
+        # Rule 1.3.3: hal antyam (Only if original upadesha ends in consonant)
+        if term.upadeza[-1] in SLP1_CONSONANTS:
+            final_char = term.text[-1]
+            term.tags.add(f"{final_char}it")
+            term.text = term.text[:-1]
+
     # Rule 1.3.2: Nasalized Vowels (! or ~)
     for marker in ['!', '~']:
         if marker in term.text:

@@ -10,7 +10,7 @@ from .rules import (
     idito_num_dhatoh, sarvadhatuka_ardhadhatukayoh, eco_yayavayah,
     ato_dirgho_yayi, rutva_visarga, jhonta, ato_gune, 
     at_agama, itasca, it_agama, adesa_pratyayayoh, hali_ca,
-    tasthasthamipam, samyogantasya_lopah,
+    tasthasthamipam, samyogantasya_lopah, rashabhyam_no_nah,
     thasah_se, ato_nitah, upasarga_satva,
     liti_dhator_anabhyasasya, hrasvah, bhavater_ah, abhyase_car_ca, bhuvo_vug_lunlitoh,
     upasarga_sandhi, dhatvadeh_sah_sah_no_nah, paghra_sthadi_adesha
@@ -39,10 +39,8 @@ def derive(
     # 1. Fetch or Receive Dhatu
     if custom_dhatu:
         dhatu = custom_dhatu
-        # Secondary roots act like Gana 1 (taking 'Sap' infix)
         if not any(tag.startswith('gana_') for tag in dhatu.tags):
             dhatu.tags.add('gana_1')
-        # Default to Parasmaipada for standard causative active voice
         if 'parasmaipada' not in dhatu.tags and 'atmanepada' not in dhatu.tags:
             dhatu.tags.add('parasmaipada')
     else:
@@ -51,22 +49,30 @@ def derive(
             return None
         dhatu = dhatus[0] 
         
+        # --- FIXED: Check dhatu_slp1, not dhatu.text! ---
+        if dhatu_slp1 == 'krI' and upasarga in['vi', 'parA']:
+            dhatu.tags.discard('parasmaipada')
+            dhatu.tags.add('atmanepada')
+            prakriya.log(f"Rule 1.3.44: 'krI' becomes Atmanepada after '{upasarga}'")
+            
     prakriya.add_term(dhatu)
     
     # 2. Resolve Dhatu Anubandhas and Apply Root Augments
     resolve_it_markers(dhatu)
-    dhatvadeh_sah_sah_no_nah(prakriya)
-    idito_num_dhatoh(prakriya)  # idit -> num augment (e.g., ah -> aMh)
+    dhatvadeh_sah_sah_no_nah(prakriya)  
+    idito_num_dhatoh(prakriya)  
     
     # 3. Add Lakara (Tense/Mood) and Past Tense Prefix (aW)
     lakara = Term(lakara_name, 'lakara')
-    lakara.tags.add(lakara_name) # Ensure tags like 'laN' or 'lfW' are passed down
+    lakara.tags.add(lakara_name) 
     prakriya.add_term(lakara)
-    at_agama(prakriya)           # 6.4.71: Adds 'aW' prefix for laN
+    at_agama(prakriya)           
     
     # 4. Resolve Initial Meta-Markers for Prefix/Lakara
     for term in prakriya.terms:
-        resolve_it_markers(term)
+        # --- FIXED: Do NOT resolve the Dhatu twice! ---
+        if term.term_type != 'dhatu':
+            resolve_it_markers(term)
     
     # ==========================================
     # PHASE 2: SUFFIX SUBSTITUTIONS
@@ -124,6 +130,7 @@ def derive(
     ato_nitah(prakriya)                     # 7.2.81: a + Ate -> ete
     ato_gune(prakriya)                      # 6.1.97: a + anti -> anti
     adesa_pratyayayoh(prakriya)             # 8.3.59: isya -> izya
+    rashabhyam_no_nah(prakriya)             # krI + nI -> krIRI
     
     # ==========================================
     # PHASE 6: WORD-FINAL OPERATIONS
