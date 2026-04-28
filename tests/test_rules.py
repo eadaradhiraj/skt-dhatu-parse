@@ -40,11 +40,11 @@ class TestRules(unittest.TestCase):
     def test_upasarga_sandhi_branches(self) -> None:
         """Covers a+A, a+i, a+u, i+a, u+a sandhis"""
         tests =[
-            ('upa', 'A', 'up', 'AA'), # a + A -> A
-            ('upa', 'i', 'up', 'ei'), # a + i -> e
-            ('upa', 'u', 'up', 'ou'), # a + u -> o
-            ('vi', 'a', 'vy', 'a'),   # i -> y
-            ('su', 'a', 'sv', 'a')    # u -> v
+            ('upa', 'A', 'up', 'A'), # a + A -> A (Fixed!)
+            ('upa', 'i', 'up', 'e'), # a + i -> e (Fixed!)
+            ('upa', 'u', 'up', 'o'), # a + u -> o (Fixed!)
+            ('vi', 'a', 'vy', 'a'),  # i -> y
+            ('su', 'a', 'sv', 'a')   # u -> v
         ]
         for upa, aug, exp_upa, exp_aug in tests:
             p = Prakriya()
@@ -58,9 +58,9 @@ class TestRules(unittest.TestCase):
         """Covers all Jas sandhi mappings and T -> D"""
         p = Prakriya()
         p.add_term(Term('buD', 'dhatu'))
-        p.add_term(Term('Tha', 'pratyaya'))
+        p.add_term(Term('Ta', 'pratyaya')) # Fixed: 'Ta' is SLP1 for 'tha'
         jhasas_tathor_dho_dhah(p)
-        self.assertEqual(p.terms[1].text, 'Da') # Th -> D
+        self.assertEqual(p.terms[1].text, 'Da') # Ta -> Da
 
         mappings =[('vak', 'g'), ('vac', 'j'), ('vaw', 'q'), ('vap', 'b')]
         for orig_jhal, expected_jas in mappings:
@@ -72,7 +72,8 @@ class TestRules(unittest.TestCase):
 
     def test_tasthasthamipam_branches(self) -> None:
         """Covers the remaining past tense suffix replacements"""
-        for orig, expected in[('tas', 'tAm'), ('Tha', 'ta'), ('mip', 'am')]:
+        # Fixed: 'Ta' is SLP1 for 'tha'
+        for orig, expected in[('tas', 'tAm'), ('Ta', 'ta'), ('mip', 'am')]:
             p = Prakriya()
             lak = Term('laN', 'lakara')
             lak.tags.add('laN')
