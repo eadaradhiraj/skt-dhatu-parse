@@ -23,7 +23,7 @@ def resolve_it_markers(term: Term) -> None:
             term.text = term.text[:-1]
 
     # 2. NASALIZED VOWELS (All terms)
-    for marker in ['!', '~']:
+    for marker in['!', '~']:
         if marker in term.text:
             idx = term.text.find(marker)
             if idx > 0:

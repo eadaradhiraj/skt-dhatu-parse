@@ -1,47 +1,45 @@
 from .shivasutras import get_pratyahara, is_vowel, SLP1_VOWELS
 from .models import Term, Prakriya
 
-# --- Phonological Sets ---
-IK_VOWELS = set(get_pratyahara('i', 'k') +['I', 'U', 'F', 'X'])
+IK_VOWELS = set(get_pratyahara('i', 'k') + ['I', 'U', 'F', 'X'])
 EC_VOWELS = get_pratyahara('e', 'c')
 YAY_CONSONANTS = set(get_pratyahara('y', 'Y'))
-IN_VOWELS = set(get_pratyahara('i', 'R') +['I', 'U', 'F', 'X'])
+IN_VOWELS = set(get_pratyahara('i', 'R') + ['I', 'U', 'F', 'X'])
 SLP1_CONSONANTS = set(get_pratyahara('h', 'l')) 
 VAL_CONSONANTS = set(get_pratyahara('v', 'l')) 
 JHAS_CONSONANTS = set(get_pratyahara('J', 'z'))      
 JHAL_CONSONANTS = set(get_pratyahara('J', 'l'))      
 JHAS_SOFT_CONSONANTS = set(get_pratyahara('J', 'S')) 
 
-# --- Suffixes ---
 TIN_PARASMAIPADA = {
-    'prathama':['tip', 'tas', 'Ji'],
-    'madhyama': ['sip', 'Tas', 'Ta'],
+    'prathama': ['tip', 'tas', 'Ji'],
+    'madhyama':['sip', 'Tas', 'Ta'],
     'uttama':   ['mip', 'vas', 'mas']
 }
 TIN_ATMANEPADA = {
-    'prathama': ['ta', 'AtAm', 'Ja'],
-    'madhyama':['TAs', 'ATAm', 'Dvam'],
-    'uttama':['iw', 'vahi', 'mahiN']
+    'prathama':['ta', 'AtAm', 'Ja'],
+    'madhyama': ['TAs', 'ATAm', 'Dvam'],
+    'uttama':   ['iw', 'vahi', 'mahiN']
 }
 TIN_PARASMAIPADA_LIT = {
-    'prathama':['Ral', 'atus', 'us'],
-    'madhyama':['Tal', 'aTus', 'a'],
-    'uttama':   ['Ral', 'va', 'ma']
+    'prathama': ['Ral', 'atus', 'us'],
+    'madhyama': ['Tal', 'aTus', 'a'],
+    'uttama':['Ral', 'va', 'ma']
 }
 
 def apply_guna(char: str) -> str:
-    if char in['i', 'I']: return 'e'
-    if char in ['u', 'U']: return 'o'
+    if char in ['i', 'I']: return 'e'
+    if char in['u', 'U']: return 'o'
     if char in ['f', 'F']: return 'ar'
-    if char in['x']: return 'al'
+    if char in ['x']: return 'al'
     return char
 
 def apply_vrddhi(char: str) -> str:
     if char in ['a']: return 'A'
-    if char in ['i', 'I', 'e']: return 'E'
-    if char in['u', 'U', 'o']: return 'O'
-    if char in['f', 'F']: return 'Ar'
-    if char in ['x']: return 'Al'
+    if char in['i', 'I', 'e']: return 'E'
+    if char in ['u', 'U', 'o']: return 'O'
+    if char in ['f', 'F']: return 'Ar'
+    if char in['x']: return 'Al'
     return char
 
 def substitute_lakara(prakriya: Prakriya, purusha: str = 'prathama', vacana: int = 0) -> None:
@@ -63,7 +61,6 @@ def substitute_lakara(prakriya: Prakriya, purusha: str = 'prathama', vacana: int
     
     if is_lit: lakara.tags.add('ardhadhatuka')
     else: lakara.tags.add('sarvadhatuka')
-    prakriya.log(f"Rule 3.4.78: Substituted lakara with '{new_suffix}'")
 
 def insert_vikarana(prakriya: Prakriya) -> None:
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
@@ -77,19 +74,13 @@ def insert_vikarana(prakriya: Prakriya) -> None:
         prakriya.terms.insert(idx, vik)
         return
         
-    if 'ardhadhatuka' in suffix.tags:
-        return
+    if 'ardhadhatuka' in suffix.tags: return
         
-    if 'gana_1' in dhatu.tags:
-        vik = Term('Sap', 'vikaraRa')
-    elif 'gana_4' in dhatu.tags:
-        vik = Term('Syan', 'vikaraRa')
-    elif 'gana_6' in dhatu.tags:
-        vik = Term('Sa', 'vikaraRa')
-    elif 'gana_9' in dhatu.tags:
-        vik = Term('SnA', 'vikaraRa')
-    else:
-        return
+    if 'gana_1' in dhatu.tags: vik = Term('Sap', 'vikaraRa')
+    elif 'gana_4' in dhatu.tags: vik = Term('Syan', 'vikaraRa')
+    elif 'gana_6' in dhatu.tags: vik = Term('Sa', 'vikaraRa')
+    elif 'gana_9' in dhatu.tags: vik = Term('SnA', 'vikaraRa')
+    else: return
         
     prakriya.terms.insert(idx, vik)
 
@@ -167,6 +158,7 @@ def jhonta(prakriya: Prakriya) -> None:
         dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
         is_atmanepada = dhatu and 'atmanepada' in dhatu.tags
         is_anat = dhatu and 'gana_9' in dhatu.tags
+        
         if is_atmanepada and is_anat:
             suffix.text = 'at' + suffix.text[1:]
         else:
@@ -230,7 +222,7 @@ def samyogantasya_lopah(prakriya: Prakriya) -> None:
 
 def it_agama(prakriya: Prakriya) -> None:
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
-    ANIT_ROOTS =['ji', 'dA', 'Sru', 'pA', 'han', 'dfS', 'buD']
+    ANIT_ROOTS = ['ji', 'dA', 'Sru', 'pA', 'han', 'dfS', 'buD']
     is_anit = dhatu and (dhatu.text in ANIT_ROOTS)
     
     for term in prakriya.terms[1:]:
@@ -275,11 +267,10 @@ def jhalam_jas_jhasi(prakriya: Prakriya) -> None:
             last_char = dhatu.text[-1]
             jas_char = last_char
             if last_char in['k', 'K', 'g', 'G', 'h']: jas_char = 'g'
-            elif last_char in['c', 'C', 'j', 'J', 'S']: jas_char = 'j'
-            elif last_char in['w', 'W', 'q', 'Q', 'z']: jas_char = 'q'
-            elif last_char in ['t', 'T', 'd', 'D', 's']: jas_char = 'd'
-            elif last_char in ['p', 'P', 'b', 'B']: jas_char = 'b'
-            
+            elif last_char in ['c', 'C', 'j', 'J', 'S']: jas_char = 'j'
+            elif last_char in ['w', 'W', 'q', 'Q', 'z']: jas_char = 'q'
+            elif last_char in['t', 'T', 'd', 'D', 's']: jas_char = 'd'
+            elif last_char in['p', 'P', 'b', 'B']: jas_char = 'b'
             if jas_char != last_char:
                 dhatu.text = dhatu.text[:-1] + jas_char
 
@@ -361,7 +352,7 @@ def upasarga_sandhi(prakriya: Prakriya) -> None:
                 elif first_vowel in['i', 'I']:
                     upasarga.text = upasarga.text[:-1]
                     next_term.text = 'e' + next_term.text[1:]
-                elif first_vowel in ['u', 'U']:
+                elif first_vowel in['u', 'U']:
                     upasarga.text = upasarga.text[:-1]
                     next_term.text = 'o' + next_term.text[1:]
             elif upasarga.text.endswith('i') or upasarga.text.endswith('I'):
