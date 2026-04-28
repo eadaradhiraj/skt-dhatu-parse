@@ -27,6 +27,14 @@ TIN_PARASMAIPADA_LIT = {
     'uttama':['Ral', 'va', 'ma']
 }
 
+
+# Pāṇini Rule 1.4.58: prādayaḥ
+UPASARGAS =[
+    'pra', 'parA', 'apa', 'sam', 'anu', 'ava', 'nis', 'nir', 
+    'dus', 'dur', 'vi', 'A', 'ni', 'aDi', 'api', 'ati', 
+    'su', 'ud', 'aBi', 'prati', 'pari', 'upa'
+]
+
 def apply_guna(char: str) -> str:
     if char in ['i', 'I']: return 'e'
     if char in['u', 'U']: return 'o'
@@ -338,27 +346,33 @@ def paghra_sthadi_adesha(prakriya: Prakriya) -> None:
             dhatu.text = adesha_map[dhatu.text]
 
 def upasarga_sandhi(prakriya: Prakriya) -> None:
-    upasarga = next((t for t in prakriya.terms if t.term_type == 'upasarga'), None)
-    if not upasarga: return
-    idx = prakriya.terms.index(upasarga)
-    if idx + 1 < len(prakriya.terms):
-        next_term = prakriya.terms[idx + 1]
-        if next_term.text and is_vowel(next_term.text[0]):
-            first_vowel = next_term.text[0]
-            if upasarga.text.endswith('a'):
-                if first_vowel in['a', 'A']:
-                    upasarga.text = upasarga.text[:-1]
-                    next_term.text = 'A' + next_term.text[1:]
-                elif first_vowel in['i', 'I']:
-                    upasarga.text = upasarga.text[:-1]
-                    next_term.text = 'e' + next_term.text[1:]
-                elif first_vowel in['u', 'U']:
-                    upasarga.text = upasarga.text[:-1]
-                    next_term.text = 'o' + next_term.text[1:]
-            elif upasarga.text.endswith('i') or upasarga.text.endswith('I'):
-                upasarga.text = upasarga.text[:-1] + 'y'
-            elif upasarga.text.endswith('u') or upasarga.text.endswith('U'):
-                upasarga.text = upasarga.text[:-1] + 'v'
+    """Handles Vowel Sandhi folding multiple Upasargas from right to left."""
+    upasarga_indices =[i for i, t in enumerate(prakriya.terms) if t.term_type == 'upasarga']
+    
+    # Process from right to left (e.g., vi + A + aBavat -> vi + ABavat -> vyABavat)
+    for idx in reversed(upasarga_indices):
+        upasarga = prakriya.terms[idx]
+        if idx + 1 < len(prakriya.terms):
+            next_term = prakriya.terms[idx + 1]
+            if next_term.text and is_vowel(next_term.text[0]):
+                first_vowel = next_term.text[0]
+                if upasarga.text.endswith('a'):
+                    if first_vowel in['a', 'A']:
+                        upasarga.text = upasarga.text[:-1]
+                        next_term.text = 'A' + next_term.text[1:]
+                    elif first_vowel in ['i', 'I']:
+                        upasarga.text = upasarga.text[:-1]
+                        next_term.text = 'e' + next_term.text[1:]
+                    elif first_vowel in ['u', 'U']:
+                        upasarga.text = upasarga.text[:-1]
+                        next_term.text = 'o' + next_term.text[1:]
+                    elif first_vowel in ['f', 'F']: # Rule 6.1.91 (upasargAd fti...)
+                        upasarga.text = upasarga.text[:-1]
+                        next_term.text = 'Ar' + next_term.text[1:]
+                elif upasarga.text.endswith('i') or upasarga.text.endswith('I'):
+                    upasarga.text = upasarga.text[:-1] + 'y'
+                elif upasarga.text.endswith('u') or upasarga.text.endswith('U'):
+                    upasarga.text = upasarga.text[:-1] + 'v'
 
 def aco_nniti(prakriya: Prakriya) -> None:
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
@@ -424,12 +438,16 @@ def pug_nau(prakriya: Prakriya) -> None:
         dhatu.text = dhatu.text + 'p'
 
 def upasarga_satva(prakriya: Prakriya) -> None:
-    upasarga = next((t for t in prakriya.terms if t.term_type == 'upasarga'), None)
+    """Rule 8.3.65: Upasarga Satva (e.g., prati + sTA -> pratizWA)"""
+    upasargas =[t for t in prakriya.terms if t.term_type == 'upasarga']
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
-    if upasarga and dhatu and upasarga.text:
-        if upasarga.text[-1] in IN_VOWELS:
+    
+    # We only look at the LAST upasarga (the one closest to the root)
+    if upasargas and dhatu and upasargas[-1].text:
+        if upasargas[-1].text[-1] in IN_VOWELS:
             if dhatu.text.startswith('sT'):
                 dhatu.text = 'zW' + dhatu.text[2:]
+
 
 def sna_sandhi(prakriya: Prakriya) -> None:
     vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa'), None)

@@ -9,13 +9,7 @@ from .engine import derive
 from .conjugate import print_conjugation
 from .krdanta import derive_krdanta
 from .sanadi import derive_secondary_root
-
-# Pāṇini Rule 1.4.58: prādayaḥ
-UPASARGAS =[
-    'pra', 'parA', 'apa', 'sam', 'anu', 'ava', 'nis', 'nir', 
-    'dus', 'dur', 'vi', 'A', 'ni', 'aDi', 'api', 'ati', 
-    'su', 'ud', 'aBi', 'prati', 'pari', 'upa'
-]
+from .rules import UPASARGAS
 
 def resolve_gana(dhatu_slp1: str, user_gana: int = None) -> int:
     dhatus = get_dhatu(dhatu_slp1)
@@ -63,16 +57,17 @@ def main() -> None:
     args = parser.parse_args()
 
     raw_dhatu = args.dhatu
-    upasarga = None
+    upasargas = None
     if '-' in raw_dhatu:
-        parts = raw_dhatu.split('-', 1)
-        if parts[0] in UPASARGAS:
-            upasarga = parts[0]
-            raw_dhatu = parts[1]
-        else:
-            print(f"⚠️ Warning: '{parts[0]}' is not a recognized Pāṇinian Upasarga.")
-            upasarga = parts[0]
-            raw_dhatu = parts[1]
+        parts = raw_dhatu.split('-')
+        raw_dhatu = parts[-1]  # The last element is the dhatu
+        upasargas = []
+        for p in parts[:-1]:   # Everything before is an upasarga
+            if p in UPASARGAS:
+                upasargas.append(p)
+            else:
+                print(f"⚠️ Warning: '{p}' is not a recognized Pāṇinian Upasarga. Attempting to process anyway.")
+                upasargas.append(p)
 
     gana = resolve_gana(raw_dhatu, args.gana)
     
@@ -100,10 +95,10 @@ def main() -> None:
             print(f"\n✨ Kṛdanta Result: {prakriya.get_current_string()}\n")
             
     elif args.table:
-        print_conjugation(raw_dhatu, lakara_name=args.lakara, gana=gana, upasarga=upasarga, custom_dhatu=custom_root, voice=args.voice) 
+        print_conjugation(raw_dhatu, lakara_name=args.lakara, gana=gana, upasargas=upasarga, custom_dhatu=custom_root, voice=args.voice) 
         
     else:
-        prakriya = derive(raw_dhatu, lakara_name=args.lakara, purusha=args.purusha, vacana=args.vacana, gana=gana, upasarga=upasarga, custom_dhatu=custom_root, voice=args.voice)
+        prakriya = derive(raw_dhatu, lakara_name=args.lakara, purusha=args.purusha, vacana=args.vacana, gana=gana, upasargas=upasarga, custom_dhatu=custom_root, voice=args.voice)
         if prakriya:
             print(f"\n✨ Tiṅanta Result: {prakriya.get_current_string()}\n")
             

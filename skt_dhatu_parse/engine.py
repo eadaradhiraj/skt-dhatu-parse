@@ -22,13 +22,14 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW',
            gana: int = None,
            db_path: str = DEFAULT_DB_PATH,
            custom_dhatu: Term = None,
-           upasarga: str = None,
+           upasargas: list[str] = None,
            voice: str = None) -> Prakriya:
            
     prakriya = Prakriya()
     
-    if upasarga:
-        prakriya.add_term(Term(upasarga, 'upasarga'))
+    if upasargas:
+        for u in upasargas:
+            prakriya.add_term(Term(u, 'upasarga'))
         
     if custom_dhatu:
         dhatu = custom_dhatu
@@ -49,11 +50,12 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW',
             dhatu.tags.add(voice)
             
         # Upasarga Override: vi/parA + krI -> atmanepada ONLY
-        if dhatu_slp1 == 'krI' and upasarga in['vi', 'parA']:
+        # check the last upasarga in the list
+        if dhatu_slp1 == 'krI' and upasargas and upasargas[-1] in ['vi', 'parA']:
             dhatu.tags.discard('parasmaipada')
             dhatu.tags.discard('ubhayapada')
             dhatu.tags.add('atmanepada')
-            
+
     prakriya.add_term(dhatu)
     
     # 2. Resolve Dhatu Anubandhas and Preprocessing
