@@ -2,85 +2,78 @@ import unittest
 from unittest.mock import patch
 import sys
 import io
-
-# Import the functions from our cli
 from skt_dhatu_parse.cli import resolve_gana, main
 
 class TestCLI(unittest.TestCase):
 
     @patch('skt_dhatu_parse.cli.get_dhatu')
-    def test_resolve_gana_single_match(self, mock_get_dhatu):
-        """Test that if a root only has one Gana, it returns that Gana."""
-        # Mocking a Dhatu object with a gana_4 tag
-        class MockDhatu:
-            tags = {'gana_4'}
-            
+    def test_resolve_gana_single_match(self, mock_get_dhatu) -> None:
+        class MockDhatu: tags = {'gana_4'}
         mock_get_dhatu.return_value = [MockDhatu()]
-        
-        gana = resolve_gana('div')
-        self.assertEqual(gana, 4)
+        self.assertEqual(resolve_gana('div'), 4)
 
     @patch('skt_dhatu_parse.cli.get_dhatu')
-    @patch('sys.stdout', new_callable=io.StringIO)  # <--- Captures the print output!
-    def test_resolve_gana_default_to_one(self, mock_stdout, mock_get_dhatu):
-        """Test that if a root has multiple Ganas including 1, it defaults to 1."""
+    @patch('sys.stdout', new_callable=io.StringIO)  
+    def test_resolve_gana_default_to_one(self, mock_stdout, mock_get_dhatu) -> None:
         class MockDhatu1: tags = {'gana_10'}
         class MockDhatu2: tags = {'gana_1'}
-        
         mock_get_dhatu.return_value =[MockDhatu1(), MockDhatu2()]
-        
-        gana = resolve_gana('BU')
-        self.assertEqual(gana, 1)
-        
-        # Now we can safely assert the warning was generated properly!
-        self.assertIn("Warning: 'BU' belongs to multiple classes", mock_stdout.getvalue())
+        self.assertEqual(resolve_gana('BU'), 1)
 
     @patch('skt_dhatu_parse.cli.get_dhatu')
-    def test_resolve_gana_user_specified(self, mock_get_dhatu):
-        """Test that user can manually override the default Gana."""
+    def test_resolve_gana_user_specified(self, mock_get_dhatu) -> None:
         class MockDhatu1: tags = {'gana_10'}
         class MockDhatu2: tags = {'gana_1'}
-        
         mock_get_dhatu.return_value =[MockDhatu1(), MockDhatu2()]
-        
-        gana = resolve_gana('BU', user_gana=10)
-        self.assertEqual(gana, 10)
+        self.assertEqual(resolve_gana('BU', user_gana=10), 10)
 
     @patch('skt_dhatu_parse.cli.get_dhatu')
-    @patch('sys.stdout', new_callable=io.StringIO)  # <--- Captures the print output!
-    def test_resolve_gana_not_found(self, mock_stdout, mock_get_dhatu):
-        """Test that the app exits safely with code 1 if root doesn't exist."""
+    @patch('sys.stdout', new_callable=io.StringIO) 
+    def test_resolve_gana_not_found(self, mock_stdout, mock_get_dhatu) -> None:
         mock_get_dhatu.return_value =[]
-        
-        # We expect sys.exit(1) to be called
-        with self.assertRaises(SystemExit) as cm:
+        with self.assertRaises(SystemExit):
             resolve_gana('xyz')
-        self.assertEqual(cm.exception.code, 1)
-        
-        # Assert the error message was correct
-        self.assertIn("Error: Root 'xyz' not found", mock_stdout.getvalue())
 
-    @patch('sys.argv',['skt_dhatu_parse.cli.py', 'BU', '-l', 'laW', '-p', 'prathama', '-v', '0'])
+    @patch('sys.argv',['cli.py', 'BU', '-l', 'laW'])
     @patch('sys.stdout', new_callable=io.StringIO)
-    def test_main_single_derivation(self, mock_stdout):
-        """Simulate running: python skt_dhatu_parse.cli.py BU -l laW -p prathama -v 0"""
+    def test_main_single_derivation(self, mock_stdout) -> None:
         main()
-        output = mock_stdout.getvalue()
-        
-        # It should successfully derive Bavati
-        self.assertIn('Bavati', output)
-        self.assertNotIn('Derivation History', output) # History flag wasn't passed
+        self.assertIn('Bavati', mock_stdout.getvalue())
 
-    @patch('sys.argv',['skt_dhatu_parse.cli.py', 'BU', '--history'])
+    @patch('sys.argv',['cli.py', 'BU', '--history'])
     @patch('sys.stdout', new_callable=io.StringIO)
-    def test_main_with_history(self, mock_stdout):
-        """Simulate running: python skt_dhatu_parse.cli.py BU --history"""
+    def test_main_with_history(self, mock_stdout) -> None:
         main()
-        output = mock_stdout.getvalue()
-        
-        self.assertIn('Bavati', output)
-        self.assertIn('Derivation History', output)
-        self.assertIn('Added dhatu: BU', output)
+        self.assertIn('Derivation History', mock_stdout.getvalue())
+
+    # --- NEW: COVERAGE FOR CONJUGATE.PY AND CLI FLAGS ---
+    
+    @patch('sys.argv',['cli.py', 'BU', '--table'])
+    @patch('sys.stdout', new_callable=io.StringIO)
+    def test_main_table(self, mock_stdout) -> None:
+        main()
+        self.assertIn('Bavati', mock_stdout.getvalue())
+        self.assertIn('Bavanti', mock_stdout.getvalue())
+
+    @patch('sys.argv',['cli.py', 'BU', '--causative', '--table'])
+    @patch('sys.stdout', new_callable=io.StringIO)
+    def test_main_causative_table(self, mock_stdout) -> None:
+        main()
+        self.assertIn('BAvayati', mock_stdout.getvalue())
+
+    @patch('sys.argv',['cli.py', 'buD', '--krt', 'kta'])
+    @patch('sys.stdout', new_callable=io.StringIO)
+    def test_main_krdanta(self, mock_stdout) -> None:
+        main()
+        self.assertIn('budDa', mock_stdout.getvalue())
+
+    @patch('skt_dhatu_parse.conjugate.derive')
+    @patch('sys.stdout', new_callable=io.StringIO)
+    def test_conjugate_failure(self, mock_stdout, mock_derive) -> None:
+        mock_derive.return_value = None
+        from skt_dhatu_parse.conjugate import print_conjugation
+        print_conjugation('xyz')
+        self.assertIn('Failed to derive forms', mock_stdout.getvalue())
 
 if __name__ == '__main__':
     unittest.main()

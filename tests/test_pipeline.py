@@ -152,5 +152,14 @@ class TestPipeline(unittest.TestCase):
         prakriya = derive('BU', 'liW', purusha='prathama', vacana=2, gana=1, db_path=self.test_db_path)
         self.assertEqual(prakriya.get_current_string(), 'baBUvuH')
 
+    def test_invalid_roots_return_none(self) -> None:
+        """Covers the return None paths in engine, sanadi, and krdanta."""
+        from skt_dhatu_parse.krdanta import derive_krdanta
+        from skt_dhatu_parse.sanadi import derive_secondary_root
+        
+        self.assertIsNone(derive('xyz', db_path=self.test_db_path))
+        self.assertIsNone(derive_krdanta('xyz', 'kta', db_path=self.test_db_path))
+        self.assertIsNone(derive_secondary_root('xyz', 'Ric', db_path=self.test_db_path))
+
 if __name__ == '__main__':
     unittest.main()

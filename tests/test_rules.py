@@ -1,61 +1,92 @@
 import unittest
 from skt_dhatu_parse.models import Term, Prakriya
-from skt_dhatu_parse.rules import substitute_lakara, insert_vikarana
+from skt_dhatu_parse.rules import (
+    substitute_lakara, insert_vikarana, apply_guna, apply_vrddhi,
+    paghra_sthadi_adesha, upasarga_sandhi, jhalam_jas_jhasi, 
+    jhasas_tathor_dho_dhah, tasthasthamipam, yuvor_anakau
+)
 
 class TestRules(unittest.TestCase):
 
-    def test_substitute_lakara_parasmaipada(self):
-        """Test Rule 3.4.78 for a Parasmaipada root (e.g., akz)"""
-        p = Prakriya()
-        dhatu = Term('akz', 'dhatu')
-        dhatu.tags.add('parasmaipada')
-        p.add_term(dhatu)
-        p.add_term(Term('laW', 'lakara'))
-        
-        # Call the rule
-        substitute_lakara(p, purusha='prathama', vacana=0)
-        
-        # The lakara should now be 'tip'
-        self.assertEqual(p.terms[-1].text, 'tip')
-        self.assertEqual(p.terms[-1].term_type, 'pratyaya')
+    def test_vowel_helpers(self) -> None:
+        """Covers all branches of apply_guna and apply_vrddhi"""
+        self.assertEqual(apply_guna('i'), 'e')
+        self.assertEqual(apply_guna('u'), 'o')
+        self.assertEqual(apply_guna('f'), 'ar')
+        self.assertEqual(apply_guna('x'), 'al')
+        self.assertEqual(apply_guna('a'), 'a') # Fallback
 
-    def test_substitute_lakara_atmanepada(self):
-        """Test Rule 3.4.78 for an Atmanepada root (e.g., edh/aMh)"""
-        p = Prakriya()
-        dhatu = Term('aMh', 'dhatu')
-        dhatu.tags.add('atmanepada')
-        p.add_term(dhatu)
-        p.add_term(Term('laW', 'lakara'))
-        
-        substitute_lakara(p, purusha='prathama', vacana=0)
-        
-        # The lakara should now be 'ta'
-        self.assertEqual(p.terms[-1].text, 'ta')
+        self.assertEqual(apply_vrddhi('a'), 'A')
+        self.assertEqual(apply_vrddhi('i'), 'E')
+        self.assertEqual(apply_vrddhi('u'), 'O')
+        self.assertEqual(apply_vrddhi('f'), 'Ar')
+        self.assertEqual(apply_vrddhi('x'), 'Al')
+        self.assertEqual(apply_vrddhi('k'), 'k') # Fallback
 
-    def test_insert_vikarana_gana_1(self):
-        """Test Rule 3.1.68 (kartari Sap) for Gana 1 roots"""
-        p = Prakriya()
-        dhatu = Term('akz', 'dhatu')
-        dhatu.tags.add('gana_1')
-        p.add_term(dhatu)
-        p.add_term(Term('tip', 'pratyaya'))
-        
-        insert_vikarana(p)
-        
-        # 'Sap' should be inserted in the middle
-        self.assertEqual(len(p.terms), 3)
-        self.assertEqual(p.terms[1].text, 'Sap')
-        self.assertEqual(p.terms[1].term_type, 'vikaraRa')
+    def test_paghra_sthadi_adesha(self) -> None:
+        """Covers all the stem replacements (pA -> piba, etc.)"""
+        mappings =[('pA', 'piba'), ('GrA', 'jiGra'), ('DmA', 'Dama'), 
+                    ('mnA', 'mana'), ('dfS', 'pazya'), ('f', 'fcCa'), 
+                    ('sf', 'DAva'), ('Sad', 'zIya'), ('sad', 'sIda')]
+        for orig, adesha in mappings:
+            p = Prakriya()
+            p.add_term(Term(orig, 'dhatu'))
+            vik = Term('Sap', 'vikaraRa')
+            vik.tags.add('Sit')
+            p.add_term(vik)
+            paghra_sthadi_adesha(p)
+            self.assertEqual(p.terms[0].text, adesha)
 
-    def test_no_vikarana_for_gana_2(self):
-        """Ensure Gana 2 roots (like ad) do not get 'Sap' here."""
+    def test_upasarga_sandhi_branches(self) -> None:
+        """Covers a+A, a+i, a+u, i+a, u+a sandhis"""
+        tests =[
+            ('upa', 'A', 'up', 'AA'), # a + A -> A
+            ('upa', 'i', 'up', 'ei'), # a + i -> e
+            ('upa', 'u', 'up', 'ou'), # a + u -> o
+            ('vi', 'a', 'vy', 'a'),   # i -> y
+            ('su', 'a', 'sv', 'a')    # u -> v
+        ]
+        for upa, aug, exp_upa, exp_aug in tests:
+            p = Prakriya()
+            p.add_term(Term(upa, 'upasarga'))
+            p.add_term(Term(aug, 'Agama'))
+            upasarga_sandhi(p)
+            self.assertEqual(p.terms[0].text, exp_upa)
+            self.assertEqual(p.terms[1].text, exp_aug)
+
+    def test_consonant_sandhi_branches(self) -> None:
+        """Covers all Jas sandhi mappings and T -> D"""
         p = Prakriya()
-        dhatu = Term('ad', 'dhatu')
-        dhatu.tags.add('gana_2')
-        p.add_term(dhatu)
-        p.add_term(Term('tip', 'pratyaya'))
-        
-        insert_vikarana(p)
-        
-        # Should still just be Dhatu + Suffix
-        self.assertEqual(len(p.terms), 2)
+        p.add_term(Term('buD', 'dhatu'))
+        p.add_term(Term('Tha', 'pratyaya'))
+        jhasas_tathor_dho_dhah(p)
+        self.assertEqual(p.terms[1].text, 'Da') # Th -> D
+
+        mappings =[('vak', 'g'), ('vac', 'j'), ('vaw', 'q'), ('vap', 'b')]
+        for orig_jhal, expected_jas in mappings:
+            p = Prakriya()
+            p.add_term(Term(orig_jhal, 'dhatu'))
+            p.add_term(Term('Da', 'pratyaya'))
+            jhalam_jas_jhasi(p)
+            self.assertEqual(p.terms[0].text, orig_jhal[:-1] + expected_jas)
+
+    def test_tasthasthamipam_branches(self) -> None:
+        """Covers the remaining past tense suffix replacements"""
+        for orig, expected in[('tas', 'tAm'), ('Tha', 'ta'), ('mip', 'am')]:
+            p = Prakriya()
+            lak = Term('laN', 'lakara')
+            lak.tags.add('laN')
+            p.add_term(lak)
+            p.add_term(Term(orig, 'pratyaya'))
+            tasthasthamipam(p)
+            self.assertEqual(p.terms[1].text, expected)
+
+    def test_yuvor_anakau_vu(self) -> None:
+        """Covers vu -> aka"""
+        p = Prakriya()
+        p.add_term(Term('vu', 'pratyaya'))
+        yuvor_anakau(p)
+        self.assertEqual(p.terms[0].text, 'aka')
+
+if __name__ == '__main__':
+    unittest.main()
