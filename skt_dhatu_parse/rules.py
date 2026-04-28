@@ -230,7 +230,10 @@ def samyogantasya_lopah(prakriya: Prakriya) -> None:
 
 def it_agama(prakriya: Prakriya) -> None:
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
-    ANIT_ROOTS = ['ji', 'dA', 'Sru', 'pA', 'han', 'dfS', 'buD']
+    ANIT_ROOTS =[
+        'ji', 'dA', 'Sru', 'pA', 'han', 'dfS', 'buD', 
+        'ram', 'gam', 'nam', 'vac', 'Cid', 'muc', 'duh', 'svap', 'yaj', 'Bid'
+    ]
     is_anit = dhatu and (dhatu.text in ANIT_ROOTS)
     
     for term in prakriya.terms[1:]:
@@ -491,3 +494,75 @@ def anunasikalopo_jhali_kniti(prakriya: Prakriya) -> None:
         if dhatu.text in ANUDATTA_NASAL_ROOTS:
             dhatu.text = dhatu.text[:-1]
             prakriya.log(f"Rule 6.4.37: Dropped final nasal before jhal+kit/Nit -> '{dhatu.text}'")
+
+def vacisvapiyajadinam_kiti(prakriya: Prakriya) -> None:
+    """
+    Rule 6.1.15 & 6.1.108: Samprasarana
+    v/y -> u/i for specific roots (vac, svap, yaj) before 'kit' affixes.
+    """
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    suffix = prakriya.terms[-1]
+    if dhatu and 'kit' in suffix.tags:
+        if dhatu.text == 'vac':
+            dhatu.text = 'uc'
+            prakriya.log("Rule 6.1.15: Samprasarana (vac -> uc)")
+        elif dhatu.text == 'svap':
+            dhatu.text = 'sup'
+            prakriya.log("Rule 6.1.15: Samprasarana (svap -> sup)")
+        elif dhatu.text == 'yaj':
+            dhatu.text = 'ij'
+            prakriya.log("Rule 6.1.15: Samprasarana (yaj -> ij)")
+
+def choh_kuh(prakriya: Prakriya) -> None:
+    """
+    Rule 8.2.30: coH kuH 
+    Palatals (c, j) become Velars (k, g) before a jhal consonant.
+    """
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    suffix = prakriya.terms[-1]
+    
+    if dhatu and suffix and suffix.text and suffix.text[0] in JHAL_CONSONANTS:
+        last_char = dhatu.text[-1]
+        if last_char in ['c', 'C', 'j', 'J']:
+            map_ku = {'c':'k', 'C':'K', 'j':'g', 'J':'G'}
+            dhatu.text = dhatu.text[:-1] + map_ku[last_char]
+            prakriya.log(f"Rule 8.2.30: coH kuH ({last_char} -> {map_ku[last_char]})")
+
+def radabhyam_nishthato_nah(prakriya: Prakriya) -> None:
+    """
+    Rule 8.2.42: radAbhyAM nizThAto naH pUrvasya ca daH
+    For nizThA affixes (kta/ktavatu), 't' -> 'n' after 'r' or 'd'.
+    AND the preceding 'd' also becomes 'n'.
+    """
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    suffix = prakriya.terms[-1]
+    
+    # 'kta' and 'ktavatu' are called nizThA
+    if dhatu and suffix and suffix.upadeza in ['kta', 'ktavatu']:
+        text = dhatu.text
+        if text.endswith('d') or text.endswith('r'):
+            if suffix.text.startswith('t'):
+                suffix.text = 'n' + suffix.text[1:]
+                if text.endswith('d'):
+                    dhatu.text = text[:-1] + 'n'
+                prakriya.log("Rule 8.2.42: nizThA 't' -> 'n' (and d->n)")
+
+def ho_dhah_dader_ghah(prakriya: Prakriya) -> None:
+    """
+    Rule 8.2.31: ho DhaH (h -> Qh before jhal)
+    Rule 8.2.32: dAder dhAtor ghaH (h -> Gh for roots starting with 'd' before jhal)
+    """
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    if not dhatu: return
+    idx = prakriya.terms.index(dhatu)
+    if idx + 1 >= len(prakriya.terms): return
+    suffix = prakriya.terms[idx + 1]
+
+    # Before a jhal consonant (like 't' in 'ta')
+    if dhatu.text.endswith('h') and suffix.text and suffix.text[0] in JHAL_CONSONANTS:
+        if dhatu.text.startswith('d'):
+            dhatu.text = dhatu.text[:-1] + 'G'
+            prakriya.log("Rule 8.2.32: 'h' -> 'G' (dAder dhAtor ghaH)")
+        else:
+            dhatu.text = dhatu.text[:-1] + 'Q'
+            prakriya.log("Rule 8.2.31: 'h' -> 'Q' (ho DhaH)")

@@ -10,6 +10,11 @@ def resolve_it_markers(term: Term) -> None:
     
     # 1. INITIAL & FINAL MARKERS FOR DHATUS
     if term.term_type == 'dhatu':
+
+        if 'i!r' in term.text:
+            term.tags.add('irit')
+            term.text = term.text.replace('i!r', '')
+
         # Rule 1.3.5: Adir YiWuqavaH
         for prefix in['Yi', 'wu', 'qu']:
             if term.text.startswith(prefix):
@@ -18,9 +23,11 @@ def resolve_it_markers(term: Term) -> None:
                 
         # Rule 1.3.3: hal antyam (Strips final consonant of the upadesa)
         if len(term.text) > 0 and term.upadeza[-1] in SLP1_CONSONANTS:
-            final_char = term.text[-1]
-            term.tags.add(f"{final_char}it")
-            term.text = term.text[:-1]
+            # We don't want to strip the final consonant if it was already stripped by 'i!r'
+            if 'irit' not in term.tags: 
+                final_char = term.text[-1]
+                term.tags.add(f"{final_char}it")
+                term.text = term.text[:-1]
 
     # 2. NASALIZED VOWELS (All terms)
     for marker in['!', '~']:

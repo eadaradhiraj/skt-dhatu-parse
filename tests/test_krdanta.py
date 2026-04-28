@@ -18,7 +18,9 @@ class TestKrdanta(unittest.TestCase):
         # Insert buD and ram
         mock_data =[
             ('buD', 1, 'parasmaipada', 'avagamane', '0994', 'buDa~'),
-            ('ram', 1, 'atmanepada', 'krIDAyAm', '0989', 'ramu~')  # <--- NEW
+            ('ram', 1, 'atmanepada', 'krIDAyAm', '0989', 'ramu~'),
+            ('paW', 1, 'parasmaipada', 'vyaktAyAM vAci', '0381', 'paWa~'),
+            ('duh', 2, 'ubhayapada', 'prapUraNe', '0004', 'duha~')
         ]
         c.executemany("INSERT INTO dhatu VALUES (?, ?, ?, ?, ?, ?)", mock_data)
         conn.commit()
@@ -88,6 +90,18 @@ class TestKrdanta(unittest.TestCase):
         
         self.assertIsNotNone(prakriya)
         self.assertEqual(prakriya.get_current_string(), 'ratvA')
+
+    def test_path_kta_set(self) -> None:
+        """Tests paW + kta -> paWita (SeW root gets 'i' augment)."""
+        prakriya = derive_krdanta('paW', 'kta', gana=1, db_path=self.test_db_path)
+        self.assertIsNotNone(prakriya)
+        self.assertEqual(prakriya.get_current_string(), 'paWita')
+
+    def test_duh_kta_ho_dhah(self) -> None:
+        """Tests duh + kta -> dugDa (h -> G -> g)."""
+        prakriya = derive_krdanta('duh', 'kta', gana=2, db_path=self.test_db_path)
+        self.assertIsNotNone(prakriya)
+        self.assertEqual(prakriya.get_current_string(), 'dugDa')
 
 if __name__ == '__main__':
     unittest.main()
