@@ -61,6 +61,7 @@ def main() -> None:
     parser.add_argument("--krt", type=str, help="Generate a Primary Derivative (Kṛdanta) with given suffix (e.g., kta, GaY, lyuW)")
     parser.add_argument("--causative", action="store_true", help="Generate the Causative (Ṇic) secondary root")
     parser.add_argument("--history", action="store_true", help="Show the step-by-step Pāṇinian derivation history")
+    parser.add_argument("--voice", choices=["parasmaipada", "atmanepada"], help="Force a specific voice (useful for Ubhayapada roots)")
     
     args = parser.parse_args()
 
@@ -101,16 +102,14 @@ def main() -> None:
         prakriya = derive_krdanta(raw_dhatu, args.krt, gana=gana) 
         if prakriya:
             print(f"\n✨ Kṛdanta Result: {prakriya.get_current_string()}\n")
-            
+
     elif args.table:
         # Pass custom_root (which will be None unless --causative was used)
-        print_conjugation(raw_dhatu, lakara_name=args.lakara, gana=gana, upasarga=upasarga, custom_dhatu=custom_root) 
-        
+        print_conjugation(raw_dhatu, lakara_name=args.lakara, gana=gana, upasarga=upasarga, custom_dhatu=custom_root, voice=args.voice) 
+
     else:
         # Single derivation (Pass custom_root if available)
-        prakriya = derive(raw_dhatu, lakara_name=args.lakara, purusha=args.purusha, vacana=args.vacana, gana=gana, upasarga=upasarga, custom_dhatu=custom_root)
-        if prakriya:
-            print(f"\n✨ Tiṅanta Result: {prakriya.get_current_string()}\n")
+        prakriya = derive(raw_dhatu, lakara_name=args.lakara, purusha=args.purusha, vacana=args.vacana, gana=gana, upasarga=upasarga, custom_dhatu=custom_root, voice=args.voice)
             
     # Print Tiṅanta History if requested
     if prakriya and args.history:

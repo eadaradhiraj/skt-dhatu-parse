@@ -13,7 +13,8 @@ def print_conjugation(
     gana: int = None,
     db_path: str = DEFAULT_DB_PATH,
     upasarga: str = None,
-    custom_dhatu: Term = None  # <--- NEW PARAMETER
+    custom_dhatu: Term = None,
+    voice: str = None
 ) -> None:
     
     print(f"\n======================================")
@@ -37,9 +38,9 @@ def print_conjugation(
         d_dvi = copy.deepcopy(custom_dhatu) if custom_dhatu else None
         d_bahu = copy.deepcopy(custom_dhatu) if custom_dhatu else None
         
-        eka = derive(dhatu_slp1, lakara_name, purusha=p, vacana=0, gana=gana, db_path=db_path, upasarga=upasarga, custom_dhatu=d_eka)
-        dvi = derive(dhatu_slp1, lakara_name, purusha=p, vacana=1, gana=gana, db_path=db_path, upasarga=upasarga, custom_dhatu=d_dvi)
-        bahu = derive(dhatu_slp1, lakara_name, purusha=p, vacana=2, gana=gana, db_path=db_path, upasarga=upasarga, custom_dhatu=d_bahu)
+        eka = derive(dhatu_slp1, lakara_name, purusha=p, vacana=0, gana=gana, db_path=db_path, upasarga=upasarga, custom_dhatu=d_eka, voice=voice)
+        dvi = derive(dhatu_slp1, lakara_name, purusha=p, vacana=1, gana=gana, db_path=db_path, upasarga=upasarga, custom_dhatu=d_dvi, voice=voice)
+        bahu = derive(dhatu_slp1, lakara_name, purusha=p, vacana=2, gana=gana, db_path=db_path, upasarga=upasarga, custom_dhatu=d_bahu, voice=voice)
         
         if eka and dvi and bahu:
             print(f"{p.capitalize():<12} | {eka.get_current_string():<10} | {dvi.get_current_string():<10} | {bahu.get_current_string():<10}")

@@ -11,7 +11,7 @@ from .rules import (
     ato_dirgho_yayi, rutva_visarga, jhonta, ato_gune, 
     at_agama, itasca, it_agama, adesa_pratyayayoh, hali_ca,
     tasthasthamipam, samyogantasya_lopah, rashabhyam_no_nah,
-    thasah_se, ato_nitah, upasarga_satva,
+    thasah_se, ato_nitah, upasarga_satva, sna_sandhi,
     liti_dhator_anabhyasasya, hrasvah, bhavater_ah, abhyase_car_ca, bhuvo_vug_lunlitoh,
     upasarga_sandhi, dhatvadeh_sah_sah_no_nah, paghra_sthadi_adesha
 )
@@ -22,7 +22,8 @@ def derive(
     gana: int = None,
     db_path: str = DEFAULT_DB_PATH,
     custom_dhatu: Term = None,
-    upasarga: str = None
+    upasarga: str = None,
+    voice: str = None
 ) -> Prakriya:
            
     prakriya = Prakriya()
@@ -35,8 +36,6 @@ def derive(
     # ==========================================
     # PHASE 1: INITIALIZATION & DATA FETCHING
     # ==========================================
-    
-    # 1. Fetch or Receive Dhatu
     if custom_dhatu:
         dhatu = custom_dhatu
         if not any(tag.startswith('gana_') for tag in dhatu.tags):
@@ -45,64 +44,35 @@ def derive(
             dhatu.tags.add('parasmaipada')
     else:
         dhatus = get_dhatu(dhatu_slp1, gana=gana, db_path=db_path)
-        if not dhatus: 
-            return None
+        if not dhatus: return None
         dhatu = dhatus[0] 
         
-        # --- FIXED: Check dhatu_slp1, not dhatu.text! ---
-        if dhatu_slp1 == 'krI' and upasarga in['vi', 'parA']:
+        # --- NEW: Manual Voice Override from CLI ---
+        if voice:
+            dhatu.tags.discard('parasmaipada')
+            dhatu.tags.discard('atmanepada')
+            dhatu.tags.discard('ubhayapada')
+            dhatu.tags.add(voice)
+            
+        # Upasarga Voice Overrides (Runs after manual voice!)
+        if dhatu_slp1 == 'krI' and upasarga in ['vi', 'parA']:
             dhatu.tags.discard('parasmaipada')
             dhatu.tags.add('atmanepada')
             prakriya.log(f"Rule 1.3.44: 'krI' becomes Atmanepada after '{upasarga}'")
             
     prakriya.add_term(dhatu)
-    
-    # 2. Resolve Dhatu Anubandhas and Apply Root Augments
-    resolve_it_markers(dhatu)
-    dhatvadeh_sah_sah_no_nah(prakriya)  
-    idito_num_dhatoh(prakriya)  
-    
-    # 3. Add Lakara (Tense/Mood) and Past Tense Prefix (aW)
-    lakara = Term(lakara_name, 'lakara')
-    lakara.tags.add(lakara_name) 
-    prakriya.add_term(lakara)
-    at_agama(prakriya)           
-    
-    # 4. Resolve Initial Meta-Markers for Prefix/Lakara
-    for term in prakriya.terms:
-        # --- FIXED: Do NOT resolve the Dhatu twice! ---
-        if term.term_type != 'dhatu':
-            resolve_it_markers(term)
-    
-    # ==========================================
-    # PHASE 2: SUFFIX SUBSTITUTIONS
-    # ==========================================
-    
-    # 5. Substitute Lakara with 18 Tiṅ Suffixes (ti/tas/Ji etc.)
-    substitute_lakara(prakriya, purusha=purusha, vacana=vacana)
-    
-    # 6. Early Suffix Replacements
-    jhonta(prakriya)            # 7.1.3: Jh -> ant
-    thasah_se(prakriya)         # 3.4.80: ThAs -> se
-    tasthasthamipam(prakriya)   # 3.4.101: tas/Thas/Tha/mip -> tAm/tam/ta/am (Past Tense)
-    
-    # 7. Resolve Suffix Markers and apply Voice Morphing
-    suffix = prakriya.terms[-1]
-    resolve_it_markers(suffix)
-    atmanepada_tere(prakriya)   # 3.4.79: ta -> te
-    itasca(prakriya)            # 3.4.100: Drops terminal 'i' for Past Tense
-    
+    # ...[Keep Phase 1 and 2 the same] ...
+
     # ==========================================
     # PHASE 3: VIKARANA (CLASS INFIXES) & AUGMENTS
     # ==========================================
-    
-    # 8. Insert Vikarana (Sap, Syan, Sa, or sya)
     insert_vikarana(prakriya)
     
-    # 9. Resolve Vikarana Markers and add Future Tense Augment
     vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa'), None)
     if vikarana:
         resolve_it_markers(vikarana)
+        
+    sna_sandhi(prakriya)            # <--- DROP THIS IN HERE!
     paghra_sthadi_adesha(prakriya)
     it_agama(prakriya)          # 7.2.35: Adds 'i' to 'sya'
     
