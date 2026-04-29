@@ -11,7 +11,7 @@ from .rules import (
     choh_kuh, radabhyam_nishthato_nah, it_agama, ho_dhah_dader_ghah, dhatvadeh_sah_sah_no_nah, 
     sarvadhatuka_ardhadhatukayoh, eco_yayavayah, vrasca_bhrasja_sruja_mruja, stuna_stuh,
     khari_ca, insert_vikarana, sna_sandhi, se_mucadinam, anusvarasya_yayi_parasavarnah, ato_gune,
-    srujidrusor_jhaly_amakiti
+    srujidrusor_jhaly_amakiti, nascapadantasya_jhali
 )
 
 def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_path: str = DEFAULT_DB_PATH) -> Prakriya:
@@ -56,7 +56,9 @@ def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_
     jhasas_tathor_dho_dhah(prakriya)  
     jhalam_jas_jhasi(prakriya)
     khari_ca(prakriya)  
-    stuna_stuh(prakriya)    # draz + tavya -> drazwavya               
+    stuna_stuh(prakriya)    # draz + tavya -> drazwavya
+    nascapadantasya_jhali(prakriya)          # m -> M
+    anusvarasya_yayi_parasavarnah(prakriya)  # M + t -> nt           
     anusvarasya_yayi_parasavarnah(prakriya)
     rashabhyam_no_nah(prakriya)       
     

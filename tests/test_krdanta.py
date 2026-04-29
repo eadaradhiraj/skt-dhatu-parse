@@ -69,5 +69,10 @@ class TestKrdanta(unittest.TestCase):
         prakriya = derive_krdanta('dfS', 'kta', gana=1)
         self.assertEqual(prakriya.get_current_string(), 'dfzwa')
 
+    def test_gam_tavya_anusvara_parasavarna(self) -> None:
+        """Tests gam + tavya -> gantavya (m -> M -> n)."""
+        prakriya = derive_krdanta('gam', 'tavya', gana=1)
+        self.assertEqual(prakriya.get_current_string(), 'gantavya')
+
 if __name__ == '__main__':
     unittest.main()

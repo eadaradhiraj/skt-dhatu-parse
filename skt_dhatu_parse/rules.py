@@ -661,21 +661,37 @@ def se_mucadinam(prakriya: Prakriya) -> None:
                     break
 
 def anusvarasya_yayi_parasavarnah(prakriya: Prakriya) -> None:
-    for term in prakriya.terms:
+    """
+    Rule 8.4.58: anusvArasya yayi parasavarNaH
+    Anusvara (M) becomes the nasal of the following yay-consonant's class.
+    Handles both intra-term (muMc -> muYc) and cross-term (gaM + tavya -> gantavya) boundaries.
+    """
+    for i, term in enumerate(prakriya.terms):
         if 'M' in term.text:
             text = term.text
             new_text = ""
-            for i in range(len(text)):
-                if text[i] == 'M' and i + 1 < len(text) and text[i+1] in YAY_PRATYAHARA:
-                    next_char = text[i+1]
-                    if next_char in['k', 'K', 'g', 'G', 'N']: new_text += 'N'
-                    elif next_char in['c', 'C', 'j', 'J', 'Y']: new_text += 'Y'
-                    elif next_char in['w', 'W', 'q', 'Q', 'R']: new_text += 'R'
-                    elif next_char in['t', 'T', 'd', 'D', 'n']: new_text += 'n'
-                    elif next_char in['p', 'P', 'b', 'B', 'm']: new_text += 'm'
-                    else: new_text += 'M'
+            for j in range(len(text)):
+                if text[j] == 'M':
+                    next_char = ''
+                    # 1. Check intra-term (inside the same term)
+                    if j + 1 < len(text):
+                        next_char = text[j+1]
+                    # 2. Check cross-term (the first letter of the next term)
+                    elif i + 1 < len(prakriya.terms) and prakriya.terms[i+1].text:
+                        next_char = prakriya.terms[i+1].text[0]
+                    
+                    if next_char in YAY_PRATYAHARA:
+                        if next_char in ['k', 'K', 'g', 'G', 'N']: new_text += 'N'
+                        elif next_char in['c', 'C', 'j', 'J', 'Y']: new_text += 'Y'
+                        elif next_char in['w', 'W', 'q', 'Q', 'R']: new_text += 'R'
+                        elif next_char in['t', 'T', 'd', 'D', 'n']: new_text += 'n'
+                        elif next_char in ['p', 'P', 'b', 'B', 'm']: new_text += 'm'
+                        else: new_text += 'M'
+                    else:
+                        new_text += 'M'
                 else:
-                    new_text += text[i]
+                    new_text += text[j]
+                    
             if term.text != new_text:
                 term.text = new_text
                 prakriya.log(f"Rule 8.4.58: Parasavarna Sandhi -> '{term.text}'")
@@ -794,3 +810,28 @@ def srujidrusor_jhaly_amakiti(prakriya: Prakriya) -> None:
         elif dhatu.text == 'sfj':
             dhatu.text = 'sraj'
             prakriya.log("Rule 6.1.58: 'sfj' -> 'sraj' (am augment)")
+
+def nascapadantasya_jhali(prakriya: Prakriya) -> None:
+    """
+    Rule 8.3.24: naScApadAntasya jhali
+    A non-word-final 'm' or 'n' becomes anusvara ('M') before a jhal consonant.
+    """
+    for i in range(len(prakriya.terms)):
+        term = prakriya.terms[i]
+        text = term.text
+        new_text = ""
+        for j, char in enumerate(text):
+            if char in['m', 'n']:
+                # Check intra-term boundary
+                if j + 1 < len(text) and text[j+1] in JHAL_CONSONANTS:
+                    new_text += 'M'
+                    prakriya.log(f"Rule 8.3.24: '{char}' -> 'M' before jhal '{text[j+1]}'")
+                # Check cross-term boundary
+                elif j == len(text) - 1 and i + 1 < len(prakriya.terms) and prakriya.terms[i+1].text and prakriya.terms[i+1].text[0] in JHAL_CONSONANTS:
+                    new_text += 'M'
+                    prakriya.log(f"Rule 8.3.24: '{char}' -> 'M' before jhal '{prakriya.terms[i+1].text[0]}'")
+                else:
+                    new_text += char
+            else:
+                new_text += char
+        term.text = new_text

@@ -5,7 +5,9 @@ from skt_dhatu_parse.rules import (
     jhalam_jas_jhasi, jhasas_tathor_dho_dhah, tasthasthamipam, yuvor_anakau,
     dhatvadeh_sah_sah_no_nah, rashabhyam_no_nah, sna_sandhi, upasarga_satva,
     anunasikalopo_jhali_kniti, vacisvapiyajadinam_kiti, choh_kuh, radabhyam_nishthato_nah,
-    vrasca_bhrasja_sruja_mruja, stuna_stuh
+    vrasca_bhrasja_sruja_mruja, stuna_stuh, nascapadantasya_jhali, dhatvadeh_sah_sah_no_nah,
+    ho_dhah_dader_ghah, ur_at, srujidrusor_jhaly_amakiti, kr_u_morphing, vikarana_guna,
+    sarvadhatuka_ardhadhatukayoh, kuhos_cuh
 )
 
 class TestRules(unittest.TestCase):
@@ -92,7 +94,6 @@ class TestRules(unittest.TestCase):
         for orig, expected in mappings:
             p = Prakriya()
             p.add_term(Term(orig, 'dhatu'))
-            from skt_dhatu_parse.rules import dhatvadeh_sah_sah_no_nah
             dhatvadeh_sah_sah_no_nah(p)
             self.assertEqual(p.terms[0].text, expected)
 
@@ -188,7 +189,6 @@ class TestRules(unittest.TestCase):
 
     # In tests/test_rules.py:
     def test_ho_dhah_dader_ghah(self) -> None:
-        from skt_dhatu_parse.rules import ho_dhah_dader_ghah
         # Test 1: d-initial (duh -> duG)
         p1 = Prakriya()
         p1.add_term(Term('duh', 'dhatu'))
@@ -229,7 +229,6 @@ class TestRules(unittest.TestCase):
     def test_ur_at(self) -> None:
         p = Prakriya()
         p.add_term(Term('kf', 'abhyasa'))
-        from skt_dhatu_parse.rules import ur_at
         ur_at(p)
         self.assertEqual(p.terms[0].text, 'ka')
 
@@ -238,7 +237,6 @@ class TestRules(unittest.TestCase):
         for orig, expected in mappings:
             p = Prakriya()
             p.add_term(Term(orig, 'abhyasa'))
-            from skt_dhatu_parse.rules import kuhos_cuh
             kuhos_cuh(p)
             self.assertEqual(p.terms[0].text, expected)
 
@@ -248,7 +246,6 @@ class TestRules(unittest.TestCase):
         suf = Term('Ric', 'pratyaya')
         suf.tags.add('ardhadhatuka')
         p.add_term(suf)
-        from skt_dhatu_parse.rules import sarvadhatuka_ardhadhatukayoh
         sarvadhatuka_ardhadhatukayoh(p)
         self.assertEqual(p.terms[0].text, 'boD')
 
@@ -259,13 +256,10 @@ class TestRules(unittest.TestCase):
         suf = Term('ti', 'pratyaya')
         suf.tags.add('pit')
         p.add_term(suf)
-        from skt_dhatu_parse.rules import vikarana_guna
         vikarana_guna(p)
         self.assertEqual(vik.text, 'o')
 
     def test_kr_u_morphing(self) -> None:
-        from skt_dhatu_parse.rules import kr_u_morphing
-        
         p = Prakriya()
         t1 = Term('qukfY', 'dhatu')
         t1.text = 'kf'
@@ -285,7 +279,6 @@ class TestRules(unittest.TestCase):
         self.assertEqual(p2.terms[1].text, '') # u is dropped before v
 
     def test_srujidrusor_jhaly_amakiti(self) -> None:
-        from skt_dhatu_parse.rules import srujidrusor_jhaly_amakiti
         p = Prakriya()
         p.add_term(Term('dfS', 'dhatu'))
         p.add_term(Term('tavya', 'pratyaya')) # non-kit jhal affix
@@ -300,6 +293,13 @@ class TestRules(unittest.TestCase):
         p2.add_term(suf)
         srujidrusor_jhaly_amakiti(p2)
         self.assertEqual(p2.terms[0].text, 'dfS')
+
+    def test_nascapadantasya_jhali(self) -> None:
+        p = Prakriya()
+        p.add_term(Term('gam', 'dhatu'))
+        p.add_term(Term('tavya', 'pratyaya')) # 't' is jhal
+        nascapadantasya_jhali(p)
+        self.assertEqual(p.terms[0].text, 'gaM')
 
 if __name__ == '__main__':
     unittest.main()
