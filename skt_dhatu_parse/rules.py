@@ -144,16 +144,6 @@ def thasah_se(prakriya: Prakriya) -> None:
         suffix.text = 'se'
         prakriya.log("Rule 3.4.80: Replaced 'TAs' with 'se'")
 
-def tasthasthamipam(prakriya: Prakriya) -> None:
-    lakara = next((t for t in prakriya.terms if t.term_type == 'lakara' or set(['laN', 'liN', 'luN']).intersection(t.tags)), None)
-    suffix = prakriya.terms[-1]
-    if lakara and set(['laN', 'liN', 'luN']).intersection(lakara.tags):
-        if suffix.text == 'tas': suffix.text = 'tAm'
-        elif suffix.text == 'Tas': suffix.text = 'tam'
-        elif suffix.text == 'Ta': suffix.text = 'ta'
-        elif suffix.text == 'mip': suffix.text = 'am'
-        prakriya.log(f"Rule 3.4.101: Past/Opt/Aorist replacement -> '{suffix.text}'")
-
 def jhonta(prakriya: Prakriya) -> None:
     suffix = prakriya.terms[-1]
     if suffix.text.startswith('J'):
@@ -175,18 +165,17 @@ def jhonta(prakriya: Prakriya) -> None:
                 prakriya.log("Rule 7.1.3: 'Jh' -> 'ant'")
 
 def at_agama(prakriya: Prakriya) -> None:
-    lakara = prakriya.terms[-1]
+    suffix = prakriya.terms[-1]
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
-    if dhatu and set(['laN', 'luN']).intersection(lakara.tags):
+    if dhatu and set(['laN', 'luN']).intersection(suffix.tags):
         agama = Term('aw', 'Agama')
         idx = prakriya.terms.index(dhatu)
         prakriya.terms.insert(idx, agama)
         prakriya.log("Rule 6.4.71: Inserted 'aw' past tense augment")
 
 def itasca(prakriya: Prakriya) -> None:
-    lakara = next((t for t in prakriya.terms if t.term_type == 'lakara' or set(['laN', 'liN', 'luN']).intersection(t.tags)), None)
     suffix = prakriya.terms[-1]
-    if lakara and set(['laN', 'liN', 'luN']).intersection(lakara.tags):
+    if set(['laN', 'liN', 'luN']).intersection(suffix.tags):
         if suffix.text.endswith('i') and suffix.upadeza in['tip', 'sip', 'mip', 'Ji']:
             suffix.text = suffix.text[:-1]
             prakriya.log("Rule 3.4.100: itaśca (Dropped terminal 'i')")
@@ -1013,56 +1002,11 @@ def tasyasti_lopa(prakriya: Prakriya) -> None:
         dhatu.text = 'a'
         prakriya.log("Rule 7.4.50: tāsyastilopaḥ -> 'as' becomes 'a' before 's'")
 
-def jher_jus(prakriya: Prakriya) -> None:
-    lakara = next((t for t in prakriya.terms if 'liN' in t.tags), None)
-    suffix = prakriya.terms[-1]
-    if lakara and suffix.upadeza == 'Ji':
-        suffix.text = 'us'
-        prakriya.log("Rule 3.4.108: jher jus (Ji -> us for liN)")
-
-def mer_nih(prakriya: Prakriya) -> None:
-    lakara = next((t for t in prakriya.terms if 'loW' in t.tags), None)
-    suffix = prakriya.terms[-1]
-    if lakara and suffix.text == 'mi':
-        suffix.text = 'ni'
-        prakriya.log("Rule 3.4.89: mer niH (mi -> ni)")
-
-def ser_hi(prakriya: Prakriya) -> None:
-    lakara = next((t for t in prakriya.terms if 'loW' in t.tags), None)
-    suffix = prakriya.terms[-1]
-    if lakara and suffix.text == 'si':
-        suffix.text = 'hi'
-        if 'pit' in suffix.tags: suffix.tags.remove('pit')
-        prakriya.log("Rule 3.4.87: ser hy apic ca (si -> hi, apit)")
-
-def at_uttasya(prakriya: Prakriya) -> None:
-    lakara = next((t for t in prakriya.terms if 'loW' in t.tags), None)
-    suffix = prakriya.terms[-1]
-    if lakara and suffix.upadeza in['mip', 'vas', 'mas']:
-        suffix.text = 'A' + suffix.text
-        suffix.tags.add('pit')
-        if 'Nit' in suffix.tags: suffix.tags.remove('Nit')
-        prakriya.log("Rule 3.4.92: Aw uttasya picca (Aw augment)")
-
-def nityam_nitah(prakriya: Prakriya) -> None:
-    lakara = next((t for t in prakriya.terms if set(['laN', 'liN', 'luN', 'loW']).intersection(t.tags)), None)
-    suffix = prakriya.terms[-1]
-    if lakara and suffix.text.endswith('s') and suffix.upadeza in ['vas', 'mas']:
-        suffix.text = suffix.text[:-1]
-        prakriya.log("Rule 3.4.99: nityaM NitaH (dropped final 's')")
-
-def er_uh(prakriya: Prakriya) -> None:
-    lakara = next((t for t in prakriya.terms if 'loW' in t.tags), None)
-    suffix = prakriya.terms[-1]
-    if lakara and suffix.text.endswith('i') and not suffix.text.startswith('A'):
-        suffix.text = suffix.text[:-1] + 'u'
-        prakriya.log("Rule 3.4.86: er uH (i -> u for loW)")
-
 def lin_agamas(prakriya: Prakriya) -> None:
-    lakara = next((t for t in prakriya.terms if t.term_type == 'lakara' or 'liN' in t.tags), None)
+    suffix = prakriya.terms[-1]
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
-    if lakara and 'liN' in lakara.tags:
-        if 'atmanepada' in dhatu.tags:
+    if 'liN' in suffix.tags:
+        if dhatu and 'atmanepada' in dhatu.tags:
             agama = Term('sIy', 'Agama')
             prakriya.terms.insert(-1, agama)
             prakriya.log("Rule 3.4.102: sIyuW augment for Atmanepada liN")
@@ -1073,9 +1017,9 @@ def lin_agamas(prakriya: Prakriya) -> None:
             prakriya.log("Rule 3.4.103: yAsuW augment for Parasmaipada liN")
 
 def cli_agama(prakriya: Prakriya) -> None:
-    lakara = next((t for t in prakriya.terms if 'luN' in t.tags), None)
+    suffix = prakriya.terms[-1]
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
-    if lakara and dhatu:
+    if 'luN' in suffix.tags and dhatu:
         cli = Term('cli', 'vikaraRa')
         clean_dhatu = ''
         for tag in dhatu.tags:
@@ -1128,7 +1072,7 @@ def ad_gunah(prakriya: Prakriya) -> None:
         t1 = prakriya.terms[i]
         t2 = prakriya.terms[i+1]
         if t1.text and t2.text:
-            if t1.text[-1] in ['a', 'A'] and t2.text[0] in ['i', 'I', 'u', 'U', 'f', 'F']:
+            if t1.text[-1] in ['a', 'A'] and t2.text[0] in['i', 'I', 'u', 'U', 'f', 'F']:
                 rep = apply_guna(t2.text[0])
                 t1.text = t1.text[:-1] + rep
                 t2.text = t2.text[1:]
@@ -1139,8 +1083,9 @@ def lopo_vyorvali(prakriya: Prakriya) -> None:
         t1 = prakriya.terms[i]
         t2 = prakriya.terms[i+1]
         if t1.text and t1.text[-1] in ['v', 'y'] and t2.text and t2.text[0] in VAL_CONSONANTS:
+            dropped = t1.text[-1]
             t1.text = t1.text[:-1]
-            prakriya.log(f"Rule 6.1.66: lopo vyorvali (dropped {t1.text[-1]} before val)")
+            prakriya.log(f"Rule 6.1.66: lopo vyorvali (dropped {dropped} before val)")
 
 def usy_apadantat(prakriya: Prakriya) -> None:
     for i in range(len(prakriya.terms)-1):
@@ -1149,3 +1094,59 @@ def usy_apadantat(prakriya: Prakriya) -> None:
         if t1.text.endswith('A') and t2.text.startswith('us'):
             t1.text = t1.text[:-1]
             prakriya.log("Rule 6.1.96: usy apadAntAt (A + us -> us)")
+
+# ==========================================
+# LOṬ (IMPERATIVE) & LIṄ (OPTATIVE) & LUṄ (AORIST)
+# ==========================================
+
+def jher_jus(prakriya: Prakriya) -> None:
+    suffix = prakriya.terms[-1]
+    if 'liN' in suffix.tags and suffix.upadeza == 'Ji':
+        suffix.text = 'us'
+        suffix.upadeza = 'us' 
+        prakriya.log("Rule 3.4.108: jher jus (Ji -> us for liN)")
+
+def mer_nih(prakriya: Prakriya) -> None:
+    suffix = prakriya.terms[-1]
+    if 'loW' in suffix.tags and suffix.upadeza == 'mip':
+        suffix.text = 'ni'
+        suffix.upadeza = 'ni' 
+        prakriya.log("Rule 3.4.89: mer niH (mip -> ni)")
+
+def ser_hi(prakriya: Prakriya) -> None:
+    suffix = prakriya.terms[-1]
+    if 'loW' in suffix.tags and suffix.upadeza == 'sip':
+        suffix.text = 'hi'
+        suffix.upadeza = 'hi' 
+        if 'pit' in suffix.tags: suffix.tags.remove('pit')
+        prakriya.log("Rule 3.4.87: ser hy apic ca (sip -> hi, apit)")
+
+def at_uttasya(prakriya: Prakriya) -> None:
+    suffix = prakriya.terms[-1]
+    if 'loW' in suffix.tags and suffix.upadeza in['mip', 'ni', 'vas', 'mas']:
+        suffix.text = 'A' + suffix.text
+        suffix.tags.add('pit')
+        if 'Nit' in suffix.tags: suffix.tags.remove('Nit')
+        prakriya.log("Rule 3.4.92: Aw uttasya picca (Aw augment)")
+
+def nityam_nitah(prakriya: Prakriya) -> None:
+    suffix = prakriya.terms[-1]
+    if set(['laN', 'liN', 'luN', 'loW']).intersection(suffix.tags) and suffix.text.endswith('s') and suffix.upadeza in ['vas', 'mas']:
+        suffix.text = suffix.text[:-1]
+        prakriya.log("Rule 3.4.99: nityaM NitaH (dropped final 's')")
+
+def tasthasthamipam(prakriya: Prakriya) -> None:
+    suffix = prakriya.terms[-1]
+    if set(['laN', 'liN', 'luN', 'loW']).intersection(suffix.tags):
+        if suffix.text == 'tas': suffix.text = 'tAm'
+        elif suffix.text == 'Tas': suffix.text = 'tam'
+        elif suffix.text == 'Ta': suffix.text = 'ta'
+        elif suffix.text == 'mip' and 'loW' not in suffix.tags: 
+            suffix.text = 'am'
+        prakriya.log(f"Rule 3.4.101: Past/Opt/Aorist replacement -> '{suffix.text}'")
+
+def er_uh(prakriya: Prakriya) -> None:
+    suffix = prakriya.terms[-1]
+    if 'loW' in suffix.tags and suffix.text.endswith('i') and suffix.upadeza in ['tip', 'Ji']:
+        suffix.text = suffix.text[:-1] + 'u'
+        prakriya.log("Rule 3.4.86: er uH (i -> u for loW)")
