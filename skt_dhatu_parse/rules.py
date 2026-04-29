@@ -73,7 +73,7 @@ def substitute_lakara(prakriya: Prakriya, purusha: str = 'prathama', vacana: int
         new_suffix = TIN_PARASMAIPADA_LIT[purusha][vacana] if is_lit else TIN_PARASMAIPADA[purusha][vacana]
         
     lakara.text = new_suffix
-    lakara.upadeza = new_suffix
+    lakara.upadeza = new_suffix  # This syncs the memory so specific tense replacements trigger!
     lakara.term_type = 'pratyaya'
     lakara.tags.add('tin') 
     

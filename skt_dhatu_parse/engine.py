@@ -68,19 +68,23 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     # 5. Substitute Lakara
     substitute_lakara(prakriya, purusha=purusha, vacana=vacana)
     
-    # 6. Early Suffix Replacements
+    # 6. Early Suffix Replacements (NOW PLUGGED IN!)
+    mer_nih(prakriya)
+    jher_jus(prakriya)
     jhonta(prakriya)            
     thasah_se(prakriya)         
-    tasthasthamipam(prakriya)   
+    tasthasthamipam(prakriya)
+    ser_hi(prakriya)
+    at_uttasya(prakriya)
     
     # 7. Resolve Suffix Markers and Morphing
     suffix = prakriya.terms[-1]
     resolve_it_markers(suffix)
     atmanepada_tere(prakriya)   
-    itasca(prakriya)
+    itasca(prakriya)            
     nityam_nitah(prakriya)
-    er_uh(prakriya)            
-    
+    er_uh(prakriya)
+
     # 8. Insert Vikarana & Special Lakara Agamas
     insert_vikarana(prakriya)
     cli_agama(prakriya)
@@ -88,11 +92,10 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     
     vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa' and t.upadeza != 'cli'), None)
     if vikarana: resolve_it_markers(vikarana)
-    
-    # 8.5. Early Elisions
+
+    # 8.5 Early Elisions
     gatistha_sic_lopa(prakriya)
 
-        
     # 9. Gana 9 and Root Substitutions
     sarvadhatukam_apit(prakriya)
     sna_sandhi(prakriya)
@@ -106,23 +109,23 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     # 10. Abhyasa (Reduplication)
     liti_dhator_anabhyasasya(prakriya)
     slau_reduplication(prakriya)
-    haladi_seshah(prakriya)            # Drops all but first consonant
+    haladi_seshah(prakriya)            
     hrasvah(prakriya)
     ur_at(prakriya)                    
     bhavater_ah(prakriya)              
     abhyase_car_ca(prakriya)
     kuhos_cuh(prakriya)                
-    bhuvo_vug_lunlitoh(prakriya)
-
-    # 10.5 Remove empty terms (luk, Slu, lopa) to allow proper adjacent Sandhi
-    prakriya.terms =[t for t in prakriya.terms if t.text]   
+    bhuvo_vug_lunlitoh(prakriya)       
     
+    # 10.5 Remove empty terms
+    prakriya.terms =[t for t in prakriya.terms if t.text]
+
     # 11. Core Phonetics
     ato_yeyah(prakriya)
     lin_salopo_anantyasya(prakriya)
     ato_heh(prakriya)
     tasyasti_lopa(prakriya)
-    
+
     hali_ca(prakriya)
     aco_nniti(prakriya)
     ata_upadhayah(prakriya)           
@@ -132,17 +135,17 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     
     # 12. Sandhi and Final Consonants
     ato_dirgho_yayi(prakriya)               
-    ato_nitah(prakriya) 
-    ad_gunah(prakriya)                    
-    ato_gune(prakriya) 
+    ato_nitah(prakriya)                     
+    ad_gunah(prakriya)
+    ato_gune(prakriya)
     usy_apadantat(prakriya)
     akah_savarne_dirghah(prakriya)
-    lopo_vyorvali(prakriya)                     
+    lopo_vyorvali(prakriya)
     adesa_pratyayayoh(prakriya)             
     rashabhyam_no_nah(prakriya)
 
-    jhasas_tathor_dho_dhah(prakriya)        # buD + Ta -> buD + Da
-    jhalam_jas_jhasi(prakriya)              # buD + Da -> bud + Da
+    jhasas_tathor_dho_dhah(prakriya)        
+    jhalam_jas_jhasi(prakriya)              
     
     khari_ca(prakriya)                      
     samyogantasya_lopah(prakriya)

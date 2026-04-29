@@ -74,14 +74,14 @@ class TestRules(unittest.TestCase):
             self.assertEqual(p.terms[0].text, orig_jhal[:-1] + expected_jas)
 
     def test_tasthasthamipam_branches(self) -> None:
-        for orig, expected in[('tas', 'tAm'), ('Ta', 'ta'), ('mip', 'am')]:
+        for orig, expected in [('tas', 'tAm'), ('Ta', 'ta'), ('mip', 'am')]:
             p = Prakriya()
-            lak = Term('laN', 'lakara')
-            lak.tags.add('laN')
-            p.add_term(lak)
-            p.add_term(Term(orig, 'pratyaya'))
+            # The engine fuses the lakara and suffix into one term
+            suf = Term(orig, 'pratyaya')
+            suf.tags.add('laN') 
+            p.add_term(suf)
             tasthasthamipam(p)
-            self.assertEqual(p.terms[1].text, expected)
+            self.assertEqual(p.terms[0].text, expected)
 
     def test_yuvor_anakau_vu(self) -> None:
         p = Prakriya()
