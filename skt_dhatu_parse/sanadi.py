@@ -23,9 +23,13 @@ def derive_secondary_root(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = No
     dhatvadeh_sah_sah_no_nah(prakriya)  
     idito_num_dhatoh(prakriya)
     
+    # 3. Add Secondary Affix (e.g., 'Ric')
     pratyaya = Term(pratyaya_upadeza, 'pratyaya')
+    pratyaya.tags.add('ardhadhatuka') # Crucial tag so Guna can fire!
     prakriya.add_term(pratyaya)
-    resolve_it_markers(pratyaya)
+
+    # 4. Resolve Affix Markers
+    resolve_it_markers(pratyaya)       # Strips 'Ric' to 'i' + Rit
 
     # 5. Apply Vrddhi & Augment Rules
     pug_nau(prakriya)        

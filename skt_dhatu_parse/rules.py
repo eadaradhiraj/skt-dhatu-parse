@@ -285,14 +285,12 @@ def sarvadhatuka_ardhadhatukayoh(prakriya: Prakriya) -> None:
         
     if is_sarva or is_ardha:
         text = dhatu.text
-        # Rule 7.3.84: Terminal ik vowels
+        # Terminal Vowels (BU -> Bo)
         if text and text[-1] in IK_VOWELS:
             dhatu.text = text[:-1] + apply_guna(text[-1])
-            prakriya.log(f"Rule 7.3.84: Guna applied -> '{dhatu.text}'")
-        # --- NEW: Rule 7.3.86: Penultimate short ik vowels (pugantalaghUpadhasya) ---
-        elif len(text) >= 2 and text[-2] in['i', 'u', 'f', 'x'] and text[-1] not in SLP1_VOWELS:
+        # Penultimate Short Vowels (buD -> boD)
+        elif len(text) >= 2 and text[-2] in ['i', 'u', 'f', 'x'] and text[-1] not in SLP1_VOWELS:
             dhatu.text = text[:-2] + apply_guna(text[-2]) + text[-1]
-            prakriya.log(f"Rule 7.3.86 (pugantalaghUpadhasya): Penultimate Guna -> '{dhatu.text}'")
 
 def aco_nniti(prakriya: Prakriya) -> None:
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
