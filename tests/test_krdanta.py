@@ -28,7 +28,8 @@ class TestKrdanta(unittest.TestCase):
             ('svap', 2, 'parasmaipada', 'zaye', '0063', 'Yizvapa!'),
             ('sfj', 6, 'parasmaipada', 'visarge', '0150', 'sfja!'),
             ('BU', 1, 'parasmaipada', 'sattAyAm', '0001', 'BU'),
-            ('muc', 6, 'ubhayapada', 'mokSaNe', '0166', 'mucx!')  # Added for muYcati test
+            ('muc', 6, 'ubhayapada', 'mokSaNe', '0166', 'mucx!'),  # Added for muYcati test
+            ('dfS',	1, 'parasmaipada', 'prekSaNe', '1143', 'dfSi!r')
         ]
         c.executemany("INSERT INTO dhatu VALUES (?, ?, ?, ?, ?, ?)", mock_data)
         conn.commit()
@@ -129,6 +130,11 @@ class TestKrdanta(unittest.TestCase):
         prakriya = derive_krdanta('BU', 'Satf', gana=1, db_path=self.test_db_path)
         self.assertIsNotNone(prakriya)
         self.assertEqual(prakriya.get_current_string(), 'Bavat')
+
+    def test_drs_kta_retroflexion(self) -> None:
+        """Tests dfS + kta -> dfzwa."""
+        prakriya = derive_krdanta('dfS', 'kta', gana=1, db_path=self.test_db_path)
+        self.assertEqual(prakriya.get_current_string(), 'dfzwa')
 
 if __name__ == '__main__':
     unittest.main()

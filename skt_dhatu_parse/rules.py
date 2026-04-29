@@ -478,6 +478,7 @@ def stuna_stuh(prakriya: Prakriya) -> None:
                 prakriya.log("Rule 8.4.41: 'T' -> 'W' (zwunA zwuH)")
 
 def vrasca_bhrasja_sruja_mruja(prakriya: Prakriya) -> None:
+    """Rule 8.2.36: ...cCaSAM zaH. Final palatals/C/S become 'z' before jhal."""
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     if not dhatu: return
     idx = prakriya.terms.index(dhatu)
@@ -486,9 +487,10 @@ def vrasca_bhrasja_sruja_mruja(prakriya: Prakriya) -> None:
 
     if suffix.text and suffix.text[0] in JHAL_CONSONANTS:
         targets =['vrazc', 'Brajj', 'Brasj', 'sfj', 'mfj', 'yaj', 'rAj', 'BrAj']
-        if dhatu.text in targets:
+        # includes roots ending in 'C' or 'S' ---
+        if dhatu.text in targets or dhatu.text.endswith('C') or dhatu.text.endswith('S'):
             dhatu.text = dhatu.text[:-1] + 'z'
-            prakriya.log(f"Rule 8.2.36: Final palatal became 'z' -> '{dhatu.text}'")
+            prakriya.log(f"Rule 8.2.36: Final palatal/C/S became 'z' -> '{dhatu.text}'")
 
 def ho_dhah_dader_ghah(prakriya: Prakriya) -> None:
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
@@ -568,7 +570,8 @@ def paghra_sthadi_adesha(prakriya: Prakriya) -> None:
         adesha_map = {
             'pA': 'piba', 'GrA': 'jiGra', 'DmA': 'Dama', 
             'sTA': 'tizWa', 'mnA': 'mana', 'dfS': 'pazya', 
-            'f': 'fcCa', 'sf': 'DAva', 'Sad': 'zIya', 'sad': 'sIda'
+            'f': 'fcCa', 'sf': 'DAva', 'Sad': 'zIya', 'sad': 'sIda',
+            'gam': 'gacCa', 'yam': 'yacCa', 'iz': 'icCa'
         }
         if dhatu.text in adesha_map:
             dhatu.text = adesha_map[dhatu.text]
@@ -751,3 +754,20 @@ def kr_u_morphing(prakriya: Prakriya) -> None:
         else:
             dhatu.text = 'kar'
             prakriya.log("Rule 7.3.84: 'kf' -> 'kar' before strong 'u'")
+
+def haladi_seshah(prakriya: Prakriya) -> None:
+    """Rule 7.4.60: halAdi zezaH. Only the first consonant remains in the abhyasa."""
+    abhyasa = next((t for t in prakriya.terms if t.term_type == 'abhyasa'), None)
+    if abhyasa:
+        text = abhyasa.text
+        new_text = ""
+        cons_seen = False
+        for char in text:
+            if is_vowel(char):
+                new_text += char
+            elif not cons_seen:
+                new_text += char
+                cons_seen = True
+        if new_text != text:
+            abhyasa.text = new_text
+            prakriya.log(f"Rule 7.4.60 (halAdi zezaH): -> '{abhyasa.text}'")

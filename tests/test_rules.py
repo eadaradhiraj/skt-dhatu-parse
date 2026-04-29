@@ -25,9 +25,12 @@ class TestRules(unittest.TestCase):
         self.assertEqual(apply_vrddhi('k'), 'k') 
 
     def test_paghra_sthadi_adesha(self) -> None:
-        mappings =[('pA', 'piba'), ('GrA', 'jiGra'), ('DmA', 'Dama'), 
-                    ('mnA', 'mana'), ('dfS', 'pazya'), ('f', 'fcCa'), 
-                    ('sf', 'DAva'), ('Sad', 'zIya'), ('sad', 'sIda')]
+        mappings = [
+            ('pA', 'piba'), ('GrA', 'jiGra'), ('DmA', 'Dama'), 
+            ('mnA', 'mana'), ('dfS', 'pazya'), ('f', 'fcCa'), 
+            ('sf', 'DAva'), ('Sad', 'zIya'), ('sad', 'sIda'),
+            ('gam', 'gacCa'), ('yam', 'yacCa'), ('iz', 'icCa')
+        ]
         for orig, adesha in mappings:
             p = Prakriya()
             p.add_term(Term(orig, 'dhatu'))
@@ -202,11 +205,12 @@ class TestRules(unittest.TestCase):
 
     def test_vrasca_bhrasja_sruja_mruja(self) -> None:
         """Covers palatal to retroflex (j -> z) before jhal."""
-        p = Prakriya()
-        p.add_term(Term('sfj', 'dhatu'))
-        p.add_term(Term('ta', 'pratyaya'))
-        vrasca_bhrasja_sruja_mruja(p)
-        self.assertEqual(p.terms[0].text, 'sfz')
+        for root in['sfj', 'dfS', 'praC']:
+            p = Prakriya()
+            p.add_term(Term('sfj', 'dhatu'))
+            p.add_term(Term('ta', 'pratyaya'))
+            vrasca_bhrasja_sruja_mruja(p)
+            self.assertEqual(p.terms[0].text, 'sfz')
 
     def test_stuna_stuh(self) -> None:
         """Covers dental to retroflex (t/th -> w/W) after retroflex."""

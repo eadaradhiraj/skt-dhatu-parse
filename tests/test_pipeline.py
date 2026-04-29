@@ -25,7 +25,8 @@ class TestPipeline(unittest.TestCase):
             ('ji', 1, 'parasmaipada', 'jaye', '0593', 'ji'),
             ('krI', 9, 'ubhayapada', 'dravyavinimaye', '0001', 'qukrIY'),
             ('sTA', 1, 'parasmaipada', 'gatinivRttau', '1077', 'zWA'),
-            ('kf', 8, 'ubhayapada', 'karaNe', '0010', 'qukfY')
+            ('kf', 8, 'ubhayapada', 'karaNe', '0010', 'qukfY'),
+            ('paW', 1, 'parasmaipada', 'vyaktAyAM vAci', '0381', 'paWa~'),
         ]
         c.executemany("INSERT INTO dhatu VALUES (?, ?, ?, ?, ?, ?)", mock_data)
         conn.commit()
@@ -168,6 +169,15 @@ class TestPipeline(unittest.TestCase):
     def test_gana_8_kr_uttama_dual(self) -> None:
         prakriya = derive('kf', 'laW', purusha='uttama', vacana=1, gana=8, db_path=self.test_db_path)
         self.assertEqual(prakriya.get_current_string(), 'kurvaH')
+
+    def test_gam_lath(self) -> None:
+        prakriya = derive('gam', 'laW', purusha='prathama', vacana=0, gana=1, db_path=self.test_db_path)
+        self.assertEqual(prakriya.get_current_string(), 'gacCati')
+
+    def test_perfect_tense_path(self) -> None:
+        """Test liW for paW: pa + pAW + a -> papATa"""
+        prakriya = derive('paW', 'liW', purusha='prathama', vacana=0, gana=1, db_path=self.test_db_path)
+        self.assertEqual(prakriya.get_current_string(), 'papATa')
 
 if __name__ == '__main__':
     unittest.main()

@@ -12,7 +12,7 @@ from .rules import (
     khari_ca, kuhos_cuh, aco_nniti, liti_dhator_anabhyasasya, hrasvah, bhavater_ah, abhyase_car_ca, 
     bhuvo_vug_lunlitoh, upasarga_sandhi, upasarga_satva, dhatvadeh_sah_sah_no_nah, paghra_sthadi_adesha,
     sna_sandhi, rashabhyam_no_nah, iko_yanaci, se_mucadinam, anusvarasya_yayi_parasavarnah,
-    vikarana_guna, kr_u_morphing
+    vikarana_guna, kr_u_morphing, haladi_seshah, ata_upadhayah
 )
 
 def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'prathama', vacana: int = 0,
@@ -89,7 +89,8 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     it_agama(prakriya)          
     
     # 10. Abhyasa (Reduplication)
-    liti_dhator_anabhyasasya(prakriya) 
+    liti_dhator_anabhyasasya(prakriya)
+    haladi_seshah(prakriya)            # Drops all but first consonant
     hrasvah(prakriya)
     ur_at(prakriya)                    
     bhavater_ah(prakriya)              
@@ -99,7 +100,8 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     
     # 11. Core Phonetics
     hali_ca(prakriya)
-    aco_nniti(prakriya)                              
+    aco_nniti(prakriya)
+    ata_upadhayah(prakriya)           # Applies Vṛddhi to penultimate 'a' in verbs (paW -> pAW)
     sarvadhatuka_ardhadhatukayoh(prakriya)  
     eco_yayavayah(prakriya)                 
     iko_yanaci(prakriya)
