@@ -114,9 +114,78 @@ class TestPipeline(unittest.TestCase):
         prakriya = derive('kf', 'liW', purusha='prathama', vacana=1, gana=8)
         self.assertEqual(prakriya.get_current_string(), 'cakratuH')
 
-    def test_perfect_tense_kr_dual(self) -> None:
-        prakriya = derive('kf', 'liW', purusha='prathama', vacana=1, gana=8)
-        self.assertEqual(prakriya.get_current_string(), 'cakratuH')
+    def test_gana_2_ad(self) -> None:
+        """Gaṇa 2: Suffix attaches directly. ad + ti -> atti (khari ca)."""
+        prakriya = derive('ad', 'laW', purusha='prathama', vacana=0, gana=2)
+        self.assertEqual(prakriya.get_current_string(), 'atti')
+
+    def test_gana_2_as(self) -> None:
+        """Gaṇa 2: 'as' drops 'a' before weak affixes (śnasor allopaḥ)."""
+        p1 = derive('as', 'laW', purusha='prathama', vacana=0, gana=2) # Strong
+        self.assertEqual(p1.get_current_string(), 'asti')
+        
+        p2 = derive('as', 'laW', purusha='prathama', vacana=2, gana=2) # Weak
+        self.assertEqual(p2.get_current_string(), 'santi')
+        
+        p3 = derive('as', 'laW', purusha='uttama', vacana=0, gana=2)   # Strong
+        self.assertEqual(p3.get_current_string(), 'asmi')
+
+    def test_gana_3_hu(self) -> None:
+        """Gaṇa 3: ślu elision triggers reduplication and vowel morphing."""
+        p1 = derive('hu', 'laW', purusha='prathama', vacana=0, gana=3) # Strong -> Guna
+        self.assertEqual(p1.get_current_string(), 'juhoti')
+        
+        p2 = derive('hu', 'laW', purusha='prathama', vacana=2, gana=3) # Weak -> Jh -> at + Yan
+        self.assertEqual(p2.get_current_string(), 'juhvati')
+
+    def test_gana_5_su(self) -> None:
+        """Gaṇa 5: śnu augment and u-lopa morphing."""
+        p1 = derive('su', 'laW', purusha='prathama', vacana=0, gana=5) # Strong -> Guna
+        self.assertEqual(p1.get_current_string(), 'sunoti')
+        
+        p2 = derive('su', 'laW', purusha='prathama', vacana=2, gana=5) # Weak -> Yan sandhi
+        self.assertEqual(p2.get_current_string(), 'sunvanti')
+        
+        p3 = derive('su', 'laW', purusha='uttama', vacana=1, gana=5)   # Weak -> 'u' drops before 'v'
+        self.assertEqual(p3.get_current_string(), 'sunvaH')
+    
+    def test_imperative_lot(self) -> None:
+        """Tests the generation of loW (Imperative)."""
+        # Prathama: BU + tu -> Bavatu
+        p1 = derive('BU', 'loW', purusha='prathama', vacana=0, gana=1)
+        self.assertEqual(p1.get_current_string(), 'Bavatu')
+        
+        # Madhyama: BU + hi -> Bava ('hi' drops after 'a')
+        p2 = derive('BU', 'loW', purusha='madhyama', vacana=0, gana=1)
+        self.assertEqual(p2.get_current_string(), 'Bava')
+        
+        # Uttama: BU + Ani -> BavAni
+        p3 = derive('BU', 'loW', purusha='uttama', vacana=0, gana=1)
+        self.assertEqual(p3.get_current_string(), 'BavAni')
+
+    def test_optative_lin(self) -> None:
+        """Tests the generation of liN (Optative) using yAsuW augments."""
+        # Prathama Eka: Bava + iy + t -> Bavet
+        p1 = derive('BU', 'liN', purusha='prathama', vacana=0, gana=1)
+        self.assertEqual(p1.get_current_string(), 'Bavet')
+        
+        # Prathama Bahu: Bava + iy + us -> BaveyuH
+        p2 = derive('BU', 'liN', purusha='prathama', vacana=2, gana=1)
+        self.assertEqual(p2.get_current_string(), 'BaveyuH')
+        
+        # Madhyama Eka: Bava + iy + s -> BaveH
+        p3 = derive('BU', 'liN', purusha='madhyama', vacana=0, gana=1)
+        self.assertEqual(p3.get_current_string(), 'BaveH')
+
+    def test_aorist_lun(self) -> None:
+        """Tests the luN (Aorist) past tense."""
+        # sic-lopa: a + BU + s(drops) + t -> aBUt
+        p1 = derive('BU', 'luN', purusha='prathama', vacana=0, gana=1)
+        self.assertEqual(p1.get_current_string(), 'aBUt')
+        
+        # puSAdi aN augment: a + gam + a(N) + t -> agamat
+        p2 = derive('gam', 'luN', purusha='prathama', vacana=0, gana=1)
+        self.assertEqual(p2.get_current_string(), 'agamat')
 
     def test_models_repr_and_history(self) -> None:
         """Covers the __repr__ and stdout logging in models.py"""

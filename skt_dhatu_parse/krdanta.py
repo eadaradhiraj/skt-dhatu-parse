@@ -12,7 +12,8 @@ from .rules import (
     sarvadhatuka_ardhadhatukayoh, eco_yayavayah, vrasca_bhrasja_sruja_mruja, stuna_stuh,
     khari_ca, insert_vikarana, sna_sandhi, se_mucadinam, anusvarasya_yayi_parasavarnah, ato_gune,
     srujidrusor_jhaly_amakiti, nascapadantasya_jhali, aco_nniti, paghra_sthadi_adesha,
-    upasarga_sandhi, upasarga_satva, akah_savarne_dirghah, stha_adi_ita, ato_yuk, id_yati
+    upasarga_sandhi, upasarga_satva, akah_savarne_dirghah, stha_adi_ita, ato_yuk, id_yati,
+    sarvadhatukam_apit
 )
 
 def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_path: str = DEFAULT_DB_PATH, upasargas: list[str] = None) -> Prakriya:
@@ -43,6 +44,7 @@ def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_
         insert_vikarana(prakriya)
         vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa'), None)
         if vikarana: resolve_it_markers(vikarana)
+        sarvadhatukam_apit(prakriya=prakriya)
         sna_sandhi(prakriya)
         se_mucadinam(prakriya)
         paghra_sthadi_adesha(prakriya) # Essential for gacCha / tiṣṭha etc.
@@ -56,7 +58,10 @@ def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_
     aco_nniti(prakriya)
     ata_upadhayah(prakriya)
     vacisvapiyajadinam_kiti(prakriya)
-    srujidrusor_jhaly_amakiti(prakriya)  
+    srujidrusor_jhaly_amakiti(prakriya)
+
+    # 3.5 Remove empty terms (luk, Slu, lopa) to allow proper adjacent Sandhi
+    prakriya.terms = [t for t in prakriya.terms if t.text]
     
     # 4. Phonetic Vowel Rules
     sarvadhatuka_ardhadhatukayoh(prakriya)  
