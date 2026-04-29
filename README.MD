@@ -169,3 +169,6 @@ skt-dhatu-parse/
 
 ### Phase 3: Recursive Piping
 * Build internal engine recursion to automatically pass newly generated Kṛdantas back into the Subanta engine, generating full nominal tables for participles (e.g., *gataḥ, gatau, gatāḥ*).
+
+### Phase 4: Analysis
+* Build an engine that analyses a term and tries to identify what kridanta or what conjugation it is
