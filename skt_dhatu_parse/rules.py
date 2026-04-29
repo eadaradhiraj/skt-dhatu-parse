@@ -175,10 +175,21 @@ def hali_ca(prakriya: Prakriya) -> None:
 def it_agama(prakriya: Prakriya) -> None:
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     is_anit = False
+    clean_dhatu = dhatu.text if dhatu else ''
+    
     if dhatu:
-        ANIT_ROOTS =['ji', 'dA', 'Sru', 'pA', 'han', 'dfS', 'buD', 'ram', 'gam', 'nam', 'vac', 'Cid', 'muc', 'svap', 'yaj', 'Bid', 'sfj']
-        if dhatu.text in ANIT_ROOTS: is_anit = True
-        elif dhatu.text == 'duh' and 'gana_2' in dhatu.tags: is_anit = True
+        # Check original clean root tag (to survive text mutations like sTA -> sTi)
+        for tag in dhatu.tags:
+            if tag.startswith('clean_'):
+                clean_dhatu = tag.split('_')[1]
+                
+        # Expanded Core AniW roots
+        ANIT_ROOTS =[
+            'ji', 'dA', 'Sru', 'pA', 'han', 'dfS', 'buD', 'ram', 'gam', 'nam', 'vac', 
+            'Cid', 'muc', 'svap', 'yaj', 'Bid', 'sfj', 'sTA', 'jJA', 'snA', 'kf', 'kF'
+        ]
+        if clean_dhatu in ANIT_ROOTS: is_anit = True
+        elif clean_dhatu == 'duh' and 'gana_2' in dhatu.tags: is_anit = True
             
     for term in prakriya.terms[1:]:
         if 'ardhadhatuka' in term.tags and term.text and term.text[0] in VAL_CONSONANTS:
@@ -854,3 +865,69 @@ def nascapadantasya_jhali(prakriya: Prakriya) -> None:
             else:
                 new_text += char
         term.text = new_text
+
+# --- New Krdanta & Sandhi Rules ---
+
+def stha_adi_ita(prakriya: Prakriya) -> None:
+    """Rule 7.4.40 & 7.4.46: A -> i/a before 'kit' affixes starting with 't'"""
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    suffix = prakriya.terms[-1]
+    if dhatu and suffix and 'kit' in suffix.tags:
+        if suffix.text.startswith('t'):
+            if dhatu.text == 'sTA':
+                dhatu.text = 'sTi'
+                prakriya.log("Rule 7.4.40: sTA -> sTi before kit starting with t")
+            elif dhatu.text == 'pA':
+                dhatu.text = 'pI'
+                prakriya.log("Rule 6.4.66: pA -> pI before kit")
+            elif dhatu.text == 'dA':
+                dhatu.text = 'dat'
+                prakriya.log("Rule 7.4.46: dA -> dat before kit")
+            elif dhatu.text == 'mA':
+                dhatu.text = 'mi'
+                prakriya.log("Rule 7.4.40: mA -> mi before kit")
+
+def ato_yuk(prakriya: Prakriya) -> None:
+    """Rule 7.3.33: āto yuk ciṇkṛtoḥ (adds 'yuk' augment to A-ending roots before ṇit/ñit)"""
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    if not dhatu: return
+    idx = prakriya.terms.index(dhatu)
+    if idx + 1 >= len(prakriya.terms): return
+    next_term = prakriya.terms[idx + 1]
+    
+    if dhatu.text.endswith('A') and ('Rit' in next_term.tags or 'Yit' in next_term.tags):
+        dhatu.text = dhatu.text + 'y'
+        prakriya.log("Rule 7.3.33: Added 'yuk' augment to root ending in 'A'")
+
+def id_yati(prakriya: Prakriya) -> None:
+    """Rule 6.4.65: id yati (A -> I/e before 'yat' affix)"""
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    if not dhatu: return
+    idx = prakriya.terms.index(dhatu)
+    if idx + 1 >= len(prakriya.terms): return
+    next_term = prakriya.terms[idx + 1]
+    
+    if dhatu.text.endswith('A') and next_term.upadeza == 'yat':
+        dhatu.text = dhatu.text[:-1] + 'e'
+        prakriya.log("Rule 6.4.65: A -> e before 'yat'")
+
+def akah_savarne_dirghah(prakriya: Prakriya) -> None:
+    """Rule 6.1.101: akaḥ savarṇe dīrghaḥ (Universal Savarṇa Dīrgha Sandhi)"""
+    for i in range(len(prakriya.terms) - 1):
+        t1 = prakriya.terms[i]
+        t2 = prakriya.terms[i+1]
+        if t1.text and t2.text:
+            v1 = t1.text[-1]
+            v2 = t2.text[0]
+            if v1 in ['a', 'A'] and v2 in['a', 'A']:
+                t1.text = t1.text[:-1] + 'A'
+                t2.text = t2.text[1:]
+                prakriya.log("Rule 6.1.101: Savarna Dirgha (A)")
+            elif v1 in ['i', 'I'] and v2 in ['i', 'I']:
+                t1.text = t1.text[:-1] + 'I'
+                t2.text = t2.text[1:]
+                prakriya.log("Rule 6.1.101: Savarna Dirgha (I)")
+            elif v1 in['u', 'U'] and v2 in ['u', 'U']:
+                t1.text = t1.text[:-1] + 'U'
+                t2.text = t2.text[1:]
+                prakriya.log("Rule 6.1.101: Savarna Dirgha (U)")

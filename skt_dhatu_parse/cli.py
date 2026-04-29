@@ -101,7 +101,7 @@ def main() -> None:
         print("-" * 40)
         
         for p in pratyayas:
-            p_prakriya = derive_krdanta(raw_dhatu, p, gana=gana)
+            p_prakriya = derive_krdanta(raw_dhatu, p, gana=gana, upasargas=upasargas)
             if p_prakriya:
                 print(f"{p:<20} | {p_prakriya.get_current_string()}")
             else:
@@ -109,7 +109,7 @@ def main() -> None:
         print()
         
     elif args.krt:
-        prakriya = derive_krdanta(raw_dhatu, args.krt, gana=gana) 
+        prakriya = derive_krdanta(raw_dhatu, args.krt, gana=gana, upasargas=upasargas) 
         if prakriya:
             print(f"\n✨ Kṛdanta Result: {prakriya.get_current_string()}\n")
             
