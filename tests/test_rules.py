@@ -222,5 +222,21 @@ class TestRules(unittest.TestCase):
         stuna_stuh(p2)
         self.assertEqual(p2.terms[1].text, 'Wa')
 
+    def test_ur_at(self) -> None:
+        p = Prakriya()
+        p.add_term(Term('kf', 'abhyasa'))
+        from skt_dhatu_parse.rules import ur_at
+        ur_at(p)
+        self.assertEqual(p.terms[0].text, 'ka')
+
+    def test_kuhos_cuh(self) -> None:
+        mappings =[('ka', 'ca'), ('Ga', 'Ja'), ('ha', 'ja')]
+        for orig, expected in mappings:
+            p = Prakriya()
+            p.add_term(Term(orig, 'abhyasa'))
+            from skt_dhatu_parse.rules import kuhos_cuh
+            kuhos_cuh(p)
+            self.assertEqual(p.terms[0].text, expected)
+
 if __name__ == '__main__':
     unittest.main()

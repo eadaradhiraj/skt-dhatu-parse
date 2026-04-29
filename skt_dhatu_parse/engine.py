@@ -10,11 +10,11 @@ from .rules import (
     idito_num_dhatoh, sarvadhatuka_ardhadhatukayoh, eco_yayavayah,
     ato_dirgho_yayi, rutva_visarga, jhonta, ato_gune, 
     at_agama, itasca, it_agama, adesa_pratyayayoh, hali_ca,
-    tasthasthamipam, samyogantasya_lopah,
-    thasah_se, ato_nitah,
+    tasthasthamipam, samyogantasya_lopah, ur_at,
+    thasah_se, ato_nitah, khari_ca, kuhos_cuh, aco_nniti,
     liti_dhator_anabhyasasya, hrasvah, bhavater_ah, abhyase_car_ca, bhuvo_vug_lunlitoh,
     upasarga_sandhi, upasarga_satva, dhatvadeh_sah_sah_no_nah, paghra_sthadi_adesha,
-    sna_sandhi, rashabhyam_no_nah
+    sna_sandhi, rashabhyam_no_nah, iko_yanaci
 )
 
 def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', 
@@ -102,13 +102,16 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW',
     
     # 10. Abhyasa (Reduplication)
     liti_dhator_anabhyasasya(prakriya) 
-    hrasvah(prakriya)                  
+    hrasvah(prakriya)
+    ur_at(prakriya)                    # kf -> ka            
     bhavater_ah(prakriya)              
-    abhyase_car_ca(prakriya)           
+    abhyase_car_ca(prakriya)
+    kuhos_cuh(prakriya)                # ka -> ca      
     bhuvo_vug_lunlitoh(prakriya)       
     
     # 11. Core Phonetics
-    hali_ca(prakriya)                       
+    hali_ca(prakriya)
+    aco_nniti(prakriya)                # kf + Ral -> kAr              
     sarvadhatuka_ardhadhatukayoh(prakriya)  
     eco_yayavayah(prakriya)                 
     
@@ -118,7 +121,8 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW',
     ato_gune(prakriya)                      
     adesa_pratyayayoh(prakriya)             
     rashabhyam_no_nah(prakriya)
-    samyogantasya_lopah(prakriya)           
+    khari_ca(prakriya)                      # ad + ti -> atti
+    samyogantasya_lopah(prakriya)           # 8.2.23: Drops 't' from 'nt'   
     upasarga_satva(prakriya)                
     upasarga_sandhi(prakriya)               
     rutva_visarga(prakriya)                 

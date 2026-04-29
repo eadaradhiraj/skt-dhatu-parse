@@ -24,7 +24,8 @@ class TestPipeline(unittest.TestCase):
             ('tud', 6, 'parasmaipada', 'vyathane', '0001', 'tuda~'),
             ('ji', 1, 'parasmaipada', 'jaye', '0593', 'ji'),
             ('krI', 9, 'ubhayapada', 'dravyavinimaye', '0001', 'qukrIY'),
-            ('sTA', 1, 'parasmaipada', 'gatinivRttau', '1077', 'zWA')
+            ('sTA', 1, 'parasmaipada', 'gatinivRttau', '1077', 'zWA'),
+            ('kf', 8, 'ubhayapada', 'karaNe', '0010', 'qukfY')
         ]
         c.executemany("INSERT INTO dhatu VALUES (?, ?, ?, ?, ?, ?)", mock_data)
         conn.commit()
@@ -145,6 +146,15 @@ class TestPipeline(unittest.TestCase):
         prakriya = derive('BU', 'laN', purusha='prathama', vacana=0, gana=1, upasargas=['vi', 'A'], db_path=self.test_db_path)
         self.assertEqual(prakriya.get_current_string(), 'vyABavat')
 
+    def test_perfect_tense_kr(self) -> None:
+        """Test liW for kf: kf + liW -> cakAra"""
+        prakriya = derive('kf', 'liW', purusha='prathama', vacana=0, gana=8, db_path=self.test_db_path)
+        self.assertEqual(prakriya.get_current_string(), 'cakAra')
+
+    def test_perfect_tense_kr_dual(self) -> None:
+        """Test liW Dual: kf + liW -> cakratuH (iko yaNaci)"""
+        prakriya = derive('kf', 'liW', purusha='prathama', vacana=1, gana=8, db_path=self.test_db_path)
+        self.assertEqual(prakriya.get_current_string(), 'cakratuH')
 
 if __name__ == '__main__':
     unittest.main()

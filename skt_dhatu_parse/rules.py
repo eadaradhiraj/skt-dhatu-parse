@@ -10,6 +10,8 @@ VAL_CONSONANTS = set(get_pratyahara('v', 'l'))
 JHAS_CONSONANTS = set(get_pratyahara('J', 'z'))      
 JHAL_CONSONANTS = set(get_pratyahara('J', 'l'))      
 JHAS_SOFT_CONSONANTS = set(get_pratyahara('J', 'S')) 
+KHAR_CONSONANTS = set(get_pratyahara('K', 'r'))      # khar: Hard consonants
+CHAR_CONSONANTS = set(get_pratyahara('c', 'r'))      # car: Unvoiced unaspirated stops
 
 TIN_PARASMAIPADA = {
     'prathama': ['tip', 'tas', 'Ji'],
@@ -615,3 +617,71 @@ def stuna_stuh(prakriya: Prakriya) -> None:
             elif suffix.text.startswith('T'):
                 suffix.text = 'W' + suffix.text[1:]
                 prakriya.log("Rule 8.4.41: 'T' -> 'W' after 'z' (zwunA zwuH)")
+
+def khari_ca(prakriya: Prakriya) -> None:
+    """
+    Rule 8.4.55: khari ca
+    A 'jhal' consonant becomes a 'car' (hard, unaspirated) when followed by a 'khar' (hard) consonant.
+    e.g., ad + ti -> atti
+    """
+    if len(prakriya.terms) >= 2:
+        dhatu = prakriya.terms[-2]
+        suffix = prakriya.terms[-1]
+        
+        if dhatu.text and dhatu.text[-1] in JHAL_CONSONANTS and suffix.text and suffix.text[0] in KHAR_CONSONANTS:
+            last_char = dhatu.text[-1]
+            
+            # Map the character to its hard, unaspirated equivalent (car)
+            char_map = {
+                'g': 'k', 'G': 'k', 'k': 'k', 'K': 'k',
+                'j': 'c', 'J': 'c', 'c': 'c', 'C': 'c',
+                'q': 'w', 'Q': 'w', 'w': 'w', 'W': 'w',
+                'd': 't', 'D': 't', 't': 't', 'T': 't',
+                'b': 'p', 'B': 'p', 'p': 'p', 'P': 'p'
+            }
+            if last_char in char_map and char_map[last_char] != last_char:
+                dhatu.text = dhatu.text[:-1] + char_map[last_char]
+                prakriya.log(f"Rule 8.4.55 (khari ca): Changed '{last_char}' to '{char_map[last_char]}'")
+
+def ur_at(prakriya: Prakriya) -> None:
+    """Rule 7.4.66: ur at - The 'f' or 'F' of an abhyasa becomes 'a'."""
+    abhyasa = next((t for t in prakriya.terms if t.term_type == 'abhyasa'), None)
+    if abhyasa and ('f' in abhyasa.text or 'F' in abhyasa.text):
+        abhyasa.text = abhyasa.text.replace('f', 'a').replace('F', 'a')
+        prakriya.log("Rule 7.4.66 (ur at): 'f' -> 'a' in abhyasa")
+
+def kuhos_cuh(prakriya: Prakriya) -> None:
+    """Rule 7.4.62: kuhoS cuH - Velars and 'h' in an abhyasa become palatals."""
+    abhyasa = next((t for t in prakriya.terms if t.term_type == 'abhyasa'), None)
+    if abhyasa:
+        text = abhyasa.text
+        char_map = {'k':'c', 'K':'C', 'g':'j', 'G':'J', 'N':'Y', 'h':'j'}
+        new_text = "".join([char_map.get(c, c) for c in text])
+        if new_text != text:
+            abhyasa.text = new_text
+            prakriya.log(f"Rule 7.4.62 (kuhoS cuH): Velar/h -> Palatal -> '{abhyasa.text}'")
+
+def iko_yanaci(prakriya: Prakriya) -> None:
+    """
+    Rule 6.1.77: iko yaRaci
+    An 'ik' vowel (i, u, f, x) becomes a 'yaR' consonant (y, v, r, l) before any vowel.
+    (e.g., cakf + atus -> cakr + atus).
+    """
+    for i in range(len(prakriya.terms) - 1):
+        term1 = prakriya.terms[i]
+        term2 = prakriya.terms[i+1]
+        
+        # If term1 ends in an 'ik' vowel and term2 starts with a vowel
+        if term1.text and term2.text and term1.text[-1] in IK_VOWELS and is_vowel(term2.text[0]):
+            last_char = term1.text[-1]
+            rep = ''
+            
+            # Map 'ik' to 'yaR'
+            if last_char in ['i', 'I']: rep = 'y'
+            elif last_char in['u', 'U']: rep = 'v'
+            elif last_char in ['f', 'F']: rep = 'r'
+            elif last_char == 'x': rep = 'l'
+            
+            if rep:
+                term1.text = term1.text[:-1] + rep
+                prakriya.log(f"Rule 6.1.77 (iko yaRaci): '{last_char}' -> '{rep}' before vowel")
