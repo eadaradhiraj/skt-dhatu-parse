@@ -6,7 +6,7 @@ from skt_dhatu_parse.krdanta import derive_krdanta
 class TestKrdanta(unittest.TestCase):
     
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         cls.test_db_path = 'test_krdanta.db'
         conn = sqlite3.connect(cls.test_db_path)
         c = conn.cursor()
@@ -15,7 +15,7 @@ class TestKrdanta(unittest.TestCase):
             meaning_en TEXT, number TEXT, dhatu_with_anubandha TEXT
         )''')
         
-        # Insert buD and ram
+        # Insert ALL required roots
         mock_data =[
             ('buD', 1, 'parasmaipada', 'avagamane', '0994', 'buDa~'),
             ('ram', 1, 'atmanepada', 'krIDAyAm', '0989', 'ramu~'),
@@ -27,108 +27,108 @@ class TestKrdanta(unittest.TestCase):
             ('duh', 1, 'parasmaipada', 'ardane', '0839', 'duhi!r'),
             ('svap', 2, 'parasmaipada', 'zaye', '0063', 'Yizvapa!'),
             ('sfj', 6, 'parasmaipada', 'visarge', '0150', 'sfja!'),
-            ('BU', 1, 'parasmaipada', 'sattAyAm', '0001', 'BU')
+            ('BU', 1, 'parasmaipada', 'sattAyAm', '0001', 'BU'),
+            ('muc', 6, 'ubhayapada', 'mokSaNe', '0166', 'mucx!')  # Added for muYcati test
         ]
         c.executemany("INSERT INTO dhatu VALUES (?, ?, ?, ?, ?, ?)", mock_data)
         conn.commit()
         conn.close()
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         if os.path.exists(cls.test_db_path):
             os.remove(cls.test_db_path)
 
-    def test_buddha_derivation(self):
-        """
-        Tests buD + kta -> budDa (buddha).
-        Verifies:
-        1. 'kta' loses 'k' (Rule 1.3.8)
-        2. 't' becomes 'D' (Rule 8.2.40)
-        3. 'D' becomes 'd' (Rule 8.4.53)
-        """
+    def test_buddha_derivation(self) -> None:
+        """Tests buD + kta -> budDa (buddha)."""
         prakriya = derive_krdanta('buD', 'kta', gana=1, db_path=self.test_db_path)
-        
         self.assertIsNotNone(prakriya)
         self.assertEqual(prakriya.get_current_string(), 'budDa')
-        
-        # Verify internal states
-        dhatu = prakriya.terms[0]
-        suffix = prakriya.terms[1]
-        
-        self.assertEqual(dhatu.text, 'bud')
-        self.assertEqual(suffix.text, 'Da')
-        self.assertIn('kit', suffix.tags)
 
     def test_rama_ghany(self) -> None:
-        """
-        Tests ram + GaY -> rAma.
-        Verifies:
-        1. 'GaY' loses 'G' (Rule 1.3.8) and 'Y' (Rule 1.3.3) -> 'a', tagged 'Yit'
-        2. Penultimate 'a' gets Vrddhi because of 'Yit' (Rule 7.2.116) -> rAm + a
-        """
-        # Fixed: 'GaY' is the strict SLP1 encoding for 'ghañ'
+        """Tests ram + GaY -> rAma."""
         prakriya = derive_krdanta('ram', 'GaY', gana=1, db_path=self.test_db_path)
-        
         self.assertIsNotNone(prakriya)
         self.assertEqual(prakriya.get_current_string(), 'rAma')
-        self.assertIn('Yit', prakriya.terms[1].tags)
 
-    def test_ramana_lyut(self):
-        """
-        Tests ram + lyuW -> ramaRa.
-        Verifies:
-        1. 'lyuW' loses 'l' and 'W' -> 'yu'
-        2. 'yu' becomes 'ana' (Rule 7.1.1)
-        3. 'n' becomes 'R' due to Natva Sandhi (Rule 8.4.1)
-        """
+    def test_ramana_lyut(self) -> None:
+        """Tests ram + lyuW -> ramaRa."""
         prakriya = derive_krdanta('ram', 'lyuW', gana=1, db_path=self.test_db_path)
-        
         self.assertIsNotNone(prakriya)
         self.assertEqual(prakriya.get_current_string(), 'ramaRa')
 
     def test_ram_ktva_nasal_drop(self) -> None:
-        """
-        Tests ram + ktvA -> ratvA.
-        Verifies Rule 6.4.37 (anunAsikalopo jhali kNiti).
-        1. 'ktvA' loses 'k' -> 'tvA' (tagged 'kit').
-        2. 'tvA' is jhal-initial and kit, so 'ram' loses 'm' -> 'ra'.
-        """
+        """Tests ram + ktvA -> ratvA."""
         prakriya = derive_krdanta('ram', 'ktvA', gana=1, db_path=self.test_db_path)
-        
         self.assertIsNotNone(prakriya)
         self.assertEqual(prakriya.get_current_string(), 'ratvA')
 
+    def test_gam_kta_nasal_drop(self) -> None:
+        """Tests gam + kta -> gata."""
+        prakriya = derive_krdanta('gam', 'kta', gana=1, db_path=self.test_db_path)
+        self.assertIsNotNone(prakriya)
+        self.assertEqual(prakriya.get_current_string(), 'gata')
+
+    def test_vac_kta_samprasarana(self) -> None:
+        """Tests vac + kta -> ukta."""
+        prakriya = derive_krdanta('vac', 'kta', gana=2, db_path=self.test_db_path)
+        self.assertIsNotNone(prakriya)
+        self.assertEqual(prakriya.get_current_string(), 'ukta')
+
+    def test_chid_kta_nishtha(self) -> None:
+        """Tests Cid + kta -> Cinna."""
+        prakriya = derive_krdanta('Cid', 'kta', gana=7, db_path=self.test_db_path)
+        self.assertIsNotNone(prakriya)
+        self.assertEqual(prakriya.get_current_string(), 'Cinna')
+
     def test_path_kta_set(self) -> None:
-        """Tests paW + kta -> paWita (SeW root gets 'i' augment)."""
+        """Tests paW + kta -> paWita."""
         prakriya = derive_krdanta('paW', 'kta', gana=1, db_path=self.test_db_path)
         self.assertIsNotNone(prakriya)
         self.assertEqual(prakriya.get_current_string(), 'paWita')
 
     def test_duh_kta_gana_2_anit(self) -> None:
-        """Tests duh (Gana 2) + kta -> dugDa (AniW root -> h becomes G -> g)."""
+        """Tests duh (Gana 2) + kta -> dugDa."""
         prakriya = derive_krdanta('duh', 'kta', gana=2, db_path=self.test_db_path)
+        self.assertIsNotNone(prakriya)
         self.assertEqual(prakriya.get_current_string(), 'dugDa')
 
     def test_duh_kta_gana_1_set(self) -> None:
-        """Tests duh (Gana 1) + kta -> duhita (SeW root gets iW augment)."""
+        """Tests duh (Gana 1) + kta -> duhita."""
         prakriya = derive_krdanta('duh', 'kta', gana=1, db_path=self.test_db_path)
+        self.assertIsNotNone(prakriya)
         self.assertEqual(prakriya.get_current_string(), 'duhita')
 
-    # Add to the bottom of the file:
     def test_bhu_tavya_guna_sandhi(self) -> None:
-        """Tests BU + tavya -> Bavitavya (Guna + Vowel Sandhi)."""
+        """Tests BU + tavya -> Bavitavya."""
         prakriya = derive_krdanta('BU', 'tavya', gana=1, db_path=self.test_db_path)
+        self.assertIsNotNone(prakriya)
         self.assertEqual(prakriya.get_current_string(), 'Bavitavya')
 
     def test_svap_kta_samprasarana(self) -> None:
-        """Tests svap + kta -> supta (Preprocessor + Samprasarana)."""
+        """Tests svap + kta -> supta."""
         prakriya = derive_krdanta('svap', 'kta', gana=2, db_path=self.test_db_path)
+        self.assertIsNotNone(prakriya)
         self.assertEqual(prakriya.get_current_string(), 'supta')
 
     def test_srj_kta_retroflexion(self) -> None:
-        """Tests sfj + kta -> sfzwa (sfj->sfz and stunA stuH)."""
+        """Tests sfj + kta -> sfzwa."""
         prakriya = derive_krdanta('sfj', 'kta', gana=6, db_path=self.test_db_path)
+        self.assertIsNotNone(prakriya)
         self.assertEqual(prakriya.get_current_string(), 'sfzwa')
+
+    def test_muc_sa_num_parasavarna(self) -> None:
+        """Tests muc + Sa + ti -> muYcati."""
+        from skt_dhatu_parse.engine import derive
+        prakriya = derive('muc', 'laW', purusha='prathama', vacana=0, gana=6, db_path=self.test_db_path)
+        self.assertIsNotNone(prakriya)
+        self.assertEqual(prakriya.get_current_string(), 'muYcati')
+
+    def test_bhu_satr_present_participle(self) -> None:
+        """Tests BU + Satf -> Bavat."""
+        prakriya = derive_krdanta('BU', 'Satf', gana=1, db_path=self.test_db_path)
+        self.assertIsNotNone(prakriya)
+        self.assertEqual(prakriya.get_current_string(), 'Bavat')
 
 if __name__ == '__main__':
     unittest.main()

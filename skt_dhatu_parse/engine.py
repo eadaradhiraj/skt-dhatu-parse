@@ -6,41 +6,29 @@ from .dhatu_loader import get_dhatu, DEFAULT_DB_PATH
 from .models import Term, Prakriya
 from .anubandha import resolve_it_markers
 from .rules import (
-    substitute_lakara, insert_vikarana, atmanepada_tere, 
-    idito_num_dhatoh, sarvadhatuka_ardhadhatukayoh, eco_yayavayah,
-    ato_dirgho_yayi, rutva_visarga, jhonta, ato_gune, 
-    at_agama, itasca, it_agama, adesa_pratyayayoh, hali_ca,
-    tasthasthamipam, samyogantasya_lopah, ur_at,
-    thasah_se, ato_nitah, khari_ca, kuhos_cuh, aco_nniti,
-    liti_dhator_anabhyasasya, hrasvah, bhavater_ah, abhyase_car_ca, bhuvo_vug_lunlitoh,
-    upasarga_sandhi, upasarga_satva, dhatvadeh_sah_sah_no_nah, paghra_sthadi_adesha,
-    sna_sandhi, rashabhyam_no_nah, iko_yanaci
+    substitute_lakara, insert_vikarana, atmanepada_tere, idito_num_dhatoh, sarvadhatuka_ardhadhatukayoh, 
+    eco_yayavayah, ato_dirgho_yayi, rutva_visarga, jhonta, ato_gune, at_agama, itasca, it_agama, 
+    adesa_pratyayayoh, hali_ca, tasthasthamipam, samyogantasya_lopah, ur_at, thasah_se, ato_nitah, 
+    khari_ca, kuhos_cuh, aco_nniti, liti_dhator_anabhyasasya, hrasvah, bhavater_ah, abhyase_car_ca, 
+    bhuvo_vug_lunlitoh, upasarga_sandhi, upasarga_satva, dhatvadeh_sah_sah_no_nah, paghra_sthadi_adesha,
+    sna_sandhi, rashabhyam_no_nah, iko_yanaci, se_mucadinam, anusvarasya_yayi_parasavarnah
 )
 
-def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', 
-           purusha: str = 'prathama', vacana: int = 0,
-           gana: int = None,
-           db_path: str = DEFAULT_DB_PATH,
-           custom_dhatu: Term = None,
-           upasargas: list[str] = None,
-           voice: str = None) -> Prakriya:
+def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'prathama', vacana: int = 0,
+           gana: int = None, db_path: str = DEFAULT_DB_PATH, custom_dhatu: Term = None,
+           upasargas: list[str] = None, voice: str = None) -> Prakriya:
            
     prakriya = Prakriya()
-    
     if upasargas:
-        for u in upasargas:
-            prakriya.add_term(Term(u, 'upasarga'))
+        for u in upasargas: prakriya.add_term(Term(u, 'upasarga'))
         
     if custom_dhatu:
         dhatu = custom_dhatu
-        if not any(tag.startswith('gana_') for tag in dhatu.tags):
-            dhatu.tags.add('gana_1')
-        if 'parasmaipada' not in dhatu.tags and 'atmanepada' not in dhatu.tags:
-            dhatu.tags.add('parasmaipada')
+        if not any(tag.startswith('gana_') for tag in dhatu.tags): dhatu.tags.add('gana_1')
+        if 'parasmaipada' not in dhatu.tags and 'atmanepada' not in dhatu.tags: dhatu.tags.add('parasmaipada')
     else:
         dhatus = get_dhatu(dhatu_slp1, gana=gana, db_path=db_path)
-        if not dhatus: 
-            return None
+        if not dhatus: return None
         dhatu = dhatus[0] 
         
         if voice:
@@ -49,9 +37,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW',
             dhatu.tags.discard('ubhayapada')
             dhatu.tags.add(voice)
             
-        # Upasarga Override: vi/parA + krI -> atmanepada ONLY
-        # check the last upasarga in the list
-        if dhatu_slp1 == 'krI' and upasargas and upasargas[-1] in ['vi', 'parA']:
+        if dhatu_slp1 == 'krI' and upasargas and upasargas[-1] in['vi', 'parA']:
             dhatu.tags.discard('parasmaipada')
             dhatu.tags.discard('ubhayapada')
             dhatu.tags.add('atmanepada')
@@ -72,8 +58,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW',
     
     # 4. Resolve Meta-Markers for Prefix/Lakara
     for term in prakriya.terms:
-        if term.term_type != 'dhatu':
-            resolve_it_markers(term)
+        if term.term_type != 'dhatu': resolve_it_markers(term)
     
     # 5. Substitute Lakara
     substitute_lakara(prakriya, purusha=purusha, vacana=vacana)
@@ -92,28 +77,29 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW',
     # 8. Insert Vikarana
     insert_vikarana(prakriya)
     vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa'), None)
-    if vikarana:
-        resolve_it_markers(vikarana)
+    if vikarana: resolve_it_markers(vikarana)
         
     # 9. Gana 9 and Root Substitutions
     sna_sandhi(prakriya)
+    se_mucadinam(prakriya)
     paghra_sthadi_adesha(prakriya)  
     it_agama(prakriya)          
     
     # 10. Abhyasa (Reduplication)
     liti_dhator_anabhyasasya(prakriya) 
     hrasvah(prakriya)
-    ur_at(prakriya)                    # kf -> ka            
+    ur_at(prakriya)                    
     bhavater_ah(prakriya)              
     abhyase_car_ca(prakriya)
-    kuhos_cuh(prakriya)                # ka -> ca      
+    kuhos_cuh(prakriya)                
     bhuvo_vug_lunlitoh(prakriya)       
     
     # 11. Core Phonetics
     hali_ca(prakriya)
-    aco_nniti(prakriya)                # kf + Ral -> kAr              
+    aco_nniti(prakriya)                              
     sarvadhatuka_ardhadhatukayoh(prakriya)  
     eco_yayavayah(prakriya)                 
+    iko_yanaci(prakriya)
     
     # 12. Sandhi and Final Consonants
     ato_dirgho_yayi(prakriya)               
@@ -121,8 +107,10 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW',
     ato_gune(prakriya)                      
     adesa_pratyayayoh(prakriya)             
     rashabhyam_no_nah(prakriya)
-    khari_ca(prakriya)                      # ad + ti -> atti
-    samyogantasya_lopah(prakriya)           # 8.2.23: Drops 't' from 'nt'   
+    
+    khari_ca(prakriya)                      
+    samyogantasya_lopah(prakriya)           
+    anusvarasya_yayi_parasavarnah(prakriya)
     upasarga_satva(prakriya)                
     upasarga_sandhi(prakriya)               
     rutva_visarga(prakriya)                 
