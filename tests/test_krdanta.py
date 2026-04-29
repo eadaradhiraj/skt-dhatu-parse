@@ -87,5 +87,25 @@ class TestKrdanta(unittest.TestCase):
                 prakriya = derive_krdanta('BU', affix, gana=1)
                 self.assertEqual(prakriya.get_current_string(), expected)
 
+    def test_upasarga_krdanta(self) -> None:
+        prakriya = derive_krdanta('gam', 'kta', gana=1, upasargas=['A'])
+        self.assertEqual(prakriya.get_current_string(), 'Agata')
+        
+    def test_pa_kta(self) -> None:
+        prakriya = derive_krdanta('pA', 'kta', gana=1)
+        self.assertEqual(prakriya.get_current_string(), 'pIta')
+        
+    def test_da_kta(self) -> None:
+        prakriya = derive_krdanta('dA', 'kta', gana=3)
+        self.assertEqual(prakriya.get_current_string(), 'datta')
+
+    def test_da_yat(self) -> None:
+        prakriya = derive_krdanta('dA', 'yat', gana=3)
+        self.assertEqual(prakriya.get_current_string(), 'deya')
+
+    def test_da_rvul(self) -> None:
+        prakriya = derive_krdanta('dA', 'Rvul', gana=3)
+        self.assertEqual(prakriya.get_current_string(), 'dAyaka')
+
 if __name__ == '__main__':
     unittest.main()

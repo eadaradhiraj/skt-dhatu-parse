@@ -114,5 +114,31 @@ class TestPipeline(unittest.TestCase):
         prakriya = derive('kf', 'liW', purusha='prathama', vacana=1, gana=8)
         self.assertEqual(prakriya.get_current_string(), 'cakratuH')
 
+    def test_perfect_tense_kr_dual(self) -> None:
+        prakriya = derive('kf', 'liW', purusha='prathama', vacana=1, gana=8)
+        self.assertEqual(prakriya.get_current_string(), 'cakratuH')
+
+    def test_models_repr_and_history(self) -> None:
+        """Covers the __repr__ and stdout logging in models.py"""
+        from skt_dhatu_parse.models import Term, Prakriya
+        import io
+        import sys
+        
+        t = Term('BU', 'dhatu')
+        repr_str = repr(t)
+        self.assertTrue(repr_str.startswith("Term(text='BU'"))
+        
+        p = Prakriya()
+        p.add_term(t)
+        p.log("Test log entry")
+        
+        # Capture stdout to test the print statement silently
+        captured_output = io.StringIO()
+        sys.stdout = captured_output
+        p.print_history()
+        sys.stdout = sys.__stdout__
+        
+        self.assertIn("Test log entry", captured_output.getvalue())
+
 if __name__ == '__main__':
     unittest.main()

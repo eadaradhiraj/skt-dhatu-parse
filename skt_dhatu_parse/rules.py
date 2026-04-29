@@ -191,6 +191,10 @@ def it_agama(prakriya: Prakriya) -> None:
         if clean_dhatu in ANIT_ROOTS: is_anit = True
         elif clean_dhatu == 'duh' and 'gana_2' in dhatu.tags: is_anit = True
             
+        # Causatives and Secondary Roots (sanādi) are polysyllabic and thus always Seṭ
+        if 'sanadi' in dhatu.tags:
+            is_anit = False
+            
     for term in prakriya.terms[1:]:
         if 'ardhadhatuka' in term.tags and term.text and term.text[0] in VAL_CONSONANTS:
             if dhatu and dhatu.text == 'kf' and 'liW' in term.tags: continue
@@ -644,6 +648,7 @@ def sanadyanta_dhatavah(prakriya: Prakriya) -> None:
         dhatu = prakriya.terms[0]
         suffix = prakriya.terms[1]
         dhatu.text = dhatu.text + suffix.text
+        dhatu.tags.add('sanadi')
         prakriya.terms = [dhatu]
         prakriya.log(f"Rule 3.1.32: Merged into Secondary Root -> '{dhatu.text}'")
 

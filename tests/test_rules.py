@@ -5,9 +5,9 @@ from skt_dhatu_parse.rules import (
     jhalam_jas_jhasi, jhasas_tathor_dho_dhah, tasthasthamipam, yuvor_anakau,
     dhatvadeh_sah_sah_no_nah, rashabhyam_no_nah, sna_sandhi, upasarga_satva,
     anunasikalopo_jhali_kniti, vacisvapiyajadinam_kiti, choh_kuh, radabhyam_nishthato_nah,
-    vrasca_bhrasja_sruja_mruja, stuna_stuh, nascapadantasya_jhali, dhatvadeh_sah_sah_no_nah,
+    vrasca_bhrasja_sruja_mruja, stuna_stuh, nascapadantasya_jhali,
     ho_dhah_dader_ghah, ur_at, srujidrusor_jhaly_amakiti, kr_u_morphing, vikarana_guna,
-    sarvadhatuka_ardhadhatukayoh, kuhos_cuh
+    sarvadhatuka_ardhadhatukayoh, kuhos_cuh, stha_adi_ita, ato_yuk, id_yati, akah_savarne_dirghah
 )
 
 class TestRules(unittest.TestCase):
@@ -300,6 +300,52 @@ class TestRules(unittest.TestCase):
         p.add_term(Term('tavya', 'pratyaya')) # 't' is jhal
         nascapadantasya_jhali(p)
         self.assertEqual(p.terms[0].text, 'gaM')
+
+    def test_stha_adi_ita(self) -> None:
+        """Covers A -> i / a substitutions for specific roots."""
+        mappings =[('sTA', 'sTi'), ('pA', 'pI'), ('dA', 'dat'), ('mA', 'mi')]
+        for orig, expected in mappings:
+            p = Prakriya()
+            p.add_term(Term(orig, 'dhatu'))
+            suf = Term('ta', 'pratyaya')
+            suf.tags.add('kit')
+            p.add_term(suf)
+            stha_adi_ita(p)
+            self.assertEqual(p.terms[0].text, expected)
+
+    def test_ato_yuk(self) -> None:
+        """Covers adding 'yuk' augment to A-ending roots before Nit/Yit affixes."""
+        p = Prakriya()
+        p.add_term(Term('dA', 'dhatu'))
+        suf = Term('aka', 'pratyaya')
+        suf.tags.add('Rit')
+        p.add_term(suf)
+        ato_yuk(p)
+        self.assertEqual(p.terms[0].text, 'dAy')
+
+    def test_id_yati(self) -> None:
+        """Covers A -> e before 'yat' affix."""
+        p = Prakriya()
+        p.add_term(Term('dA', 'dhatu'))
+        suf = Term('yat', 'pratyaya')
+        p.add_term(suf)
+        id_yati(p)
+        self.assertEqual(p.terms[0].text, 'de')
+
+    def test_akah_savarne_dirghah(self) -> None:
+        """Covers Universal Savarna Dirgha Sandhi (Long Vowel Sandhi)."""
+        tests =[
+            ('sTA', 'anIya', 'sTA', 'nIya'),
+            ('pari', 'iz', 'parI', 'z'),
+            ('BAnu', 'udaya', 'BAnU', 'daya')
+        ]
+        for t1_text, t2_text, e1, e2 in tests:
+            p = Prakriya()
+            p.add_term(Term(t1_text, 'dhatu'))
+            p.add_term(Term(t2_text, 'pratyaya'))
+            akah_savarne_dirghah(p)
+            self.assertEqual(p.terms[0].text, e1)
+            self.assertEqual(p.terms[1].text, e2)
 
 if __name__ == '__main__':
     unittest.main()
