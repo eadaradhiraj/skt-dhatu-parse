@@ -16,8 +16,13 @@ from .rules import (
     vacisvapiyajadinam_kiti,   
     choh_kuh,                  
     radabhyam_nishthato_nah,
-    it_agama,
-    ho_dhah_dader_ghah
+    it_agama,             
+    ho_dhah_dader_ghah,
+    dhatvadeh_sah_sah_no_nah, 
+    sarvadhatuka_ardhadhatukayoh, 
+    eco_yayavayah, 
+    vrasca_bhrasja_sruja_mruja, 
+    stuna_stuh 
 )
 
 def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_path: str = DEFAULT_DB_PATH) -> Prakriya:
@@ -29,33 +34,38 @@ def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_
     dhatu = dhatus[0] 
     prakriya.add_term(dhatu)
     
-    # 2. Resolve Dhatu Meta-Markers
+    # 2. Resolve Dhatu Meta-Markers & PREPROCESS
     resolve_it_markers(dhatu)
+    dhatvadeh_sah_sah_no_nah(prakriya)  # Fixes Yizvapa -> svap
     idito_num_dhatoh(prakriya)
     
     # 3. Add Krt Pratyaya 
     pratyaya = Term(pratyaya_upadeza, 'pratyaya')
-    pratyaya.tags.add('ardhadhatuka') # Rule 3.4.114
+    pratyaya.tags.add('ardhadhatuka') 
     prakriya.add_term(pratyaya)
     
     # 4. Resolve Pratyaya Markers 
     resolve_it_markers(pratyaya)
-
-    # 5. Apply iW Augment (SeT/AniW logic)
-    it_agama(prakriya)                # paW + ta -> paW + ita
     
-    # 6. Suffix Text Replacements && Internal Root Vowel Morphing
-    yuvor_anakau(prakriya) 
+    # 5. Apply iW Augment (SeT/AniW logic)
+    it_agama(prakriya)                
+    
+    # 6. Suffix Text Replacements & Vowel Morphing
+    yuvor_anakau(prakriya)    
     ata_upadhayah(prakriya)
-    vacisvapiyajadinam_kiti(prakriya) # vac -> uc
+    vacisvapiyajadinam_kiti(prakriya)
+    sarvadhatuka_ardhadhatukayoh(prakriya)  # BU -> Bo
+    eco_yayavayah(prakriya)                 # Bo + i -> Bavi
     
     # 7. Consonant Sandhi & Deletions
     anunasikalopo_jhali_kniti(prakriya)  
-    radabhyam_nishthato_nah(prakriya) # Cid + ta -> Cin + na
-    choh_kuh(prakriya)                # uc + ta -> uk + ta
-    ho_dhah_dader_ghah(prakriya)      # duh + ta -> duG + ta
-    jhasas_tathor_dho_dhah(prakriya)  # duG + ta -> duG + Da
-    jhalam_jas_jhasi(prakriya)        # duG + Da -> dug + Da  
+    radabhyam_nishthato_nah(prakriya) 
+    vrasca_bhrasja_sruja_mruja(prakriya) # sfj -> sfz
+    choh_kuh(prakriya)                
+    ho_dhah_dader_ghah(prakriya)      
+    jhasas_tathor_dho_dhah(prakriya)  
+    jhalam_jas_jhasi(prakriya)        
+    stuna_stuh(prakriya)                 # ta -> wa
     rashabhyam_no_nah(prakriya)       
     
     return prakriya

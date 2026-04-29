@@ -230,16 +230,22 @@ def samyogantasya_lopah(prakriya: Prakriya) -> None:
 
 def it_agama(prakriya: Prakriya) -> None:
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
-    ANIT_ROOTS =[
-        'ji', 'dA', 'Sru', 'pA', 'han', 'dfS', 'buD', 
-        'ram', 'gam', 'nam', 'vac', 'Cid', 'muc', 'duh', 'svap', 'yaj', 'Bid'
-    ]
-    is_anit = dhatu and (dhatu.text in ANIT_ROOTS)
     
+    is_anit = False
+    if dhatu:
+        ANIT_ROOTS =['ji', 'dA', 'Sru', 'pA', 'han', 'dfS', 'buD', 'ram', 'gam', 'nam', 'vac', 'Cid', 'muc', 'svap', 'yaj', 'Bid', 'sfj']
+        if dhatu.text in ANIT_ROOTS:
+            is_anit = True
+        elif dhatu.text == 'duh' and 'gana_2' in dhatu.tags:
+            is_anit = True
+            
     for term in prakriya.terms[1:]:
         if 'ardhadhatuka' in term.tags and term.text and term.text[0] in VAL_CONSONANTS:
             if not is_anit:
                 term.text = 'i' + term.text
+                prakriya.log(f"Rule 7.2.35: Added 'iw' augment to '{term.upadeza}'")
+            else:
+                prakriya.log(f"Rule 7.2.10 (AniW): 'iw' augment blocked for '{term.upadeza}'")
 
 def adesa_pratyayayoh(prakriya: Prakriya) -> None:
     for i, curr_term in enumerate(prakriya.terms):
@@ -267,8 +273,12 @@ def jhasas_tathor_dho_dhah(prakriya: Prakriya) -> None:
         dhatu = prakriya.terms[-2]
         suffix = prakriya.terms[-1]
         if dhatu.text and dhatu.text[-1] in JHAS_CONSONANTS:
-            if suffix.text.startswith('t'): suffix.text = 'D' + suffix.text[1:]
-            elif suffix.text.startswith('T'): suffix.text = 'D' + suffix.text[1:]
+            if suffix.text.startswith('t'): 
+                suffix.text = 'D' + suffix.text[1:]
+                prakriya.log("Rule 8.2.40: 't' -> 'dh' ('D') after jhaz")
+            elif suffix.text.startswith('T'): 
+                suffix.text = 'D' + suffix.text[1:]
+                prakriya.log("Rule 8.2.40: 'th' -> 'dh' ('D') after jhaz")
 
 def jhalam_jas_jhasi(prakriya: Prakriya) -> None:
     if len(prakriya.terms) >= 2:
@@ -278,12 +288,14 @@ def jhalam_jas_jhasi(prakriya: Prakriya) -> None:
             last_char = dhatu.text[-1]
             jas_char = last_char
             if last_char in['k', 'K', 'g', 'G', 'h']: jas_char = 'g'
-            elif last_char in ['c', 'C', 'j', 'J', 'S']: jas_char = 'j'
+            elif last_char in['c', 'C', 'j', 'J', 'S']: jas_char = 'j'
             elif last_char in ['w', 'W', 'q', 'Q', 'z']: jas_char = 'q'
             elif last_char in['t', 'T', 'd', 'D', 's']: jas_char = 'd'
             elif last_char in['p', 'P', 'b', 'B']: jas_char = 'b'
+            
             if jas_char != last_char:
                 dhatu.text = dhatu.text[:-1] + jas_char
+                prakriya.log(f"Rule 8.4.53: Changed '{last_char}' to '{jas_char}' (jaS Sandhi)")
 
 def yuvor_anakau(prakriya: Prakriya) -> None:
     for term in prakriya.terms:
@@ -566,3 +578,40 @@ def ho_dhah_dader_ghah(prakriya: Prakriya) -> None:
         else:
             dhatu.text = dhatu.text[:-1] + 'Q'
             prakriya.log("Rule 8.2.31: 'h' -> 'Q' (ho DhaH)")
+
+def vrasca_bhrasja_sruja_mruja(prakriya: Prakriya) -> None:
+    """
+    Rule 8.2.36: vrazca-Brasja-sfja-mfja-yaja-rAja-BrAja-cCaSAM zaH
+    The final letter of these specific roots becomes 'z' (ṣ) before a jhal consonant.
+    (e.g., sfj + ta -> sfz + ta).
+    """
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    if not dhatu: return
+    idx = prakriya.terms.index(dhatu)
+    if idx + 1 >= len(prakriya.terms): return
+    suffix = prakriya.terms[idx + 1]
+
+    if suffix.text and suffix.text[0] in JHAL_CONSONANTS:
+        targets =['vrazc', 'Brajj', 'Brasj', 'sfj', 'mfj', 'yaj', 'rAj', 'BrAj']
+        if dhatu.text in targets:
+            dhatu.text = dhatu.text[:-1] + 'z'
+            prakriya.log(f"Rule 8.2.36: Final palatal of '{dhatu.text[:-1]}' became 'z'")
+
+def stuna_stuh(prakriya: Prakriya) -> None:
+    """
+    Rule 8.4.41: zwunA zwuH
+    A dental consonant (like t/th) becomes a retroflex (w/W) when next to a retroflex (like z).
+    (e.g., sfz + ta -> sfzwa).
+    """
+    if len(prakriya.terms) >= 2:
+        dhatu = prakriya.terms[-2]
+        suffix = prakriya.terms[-1]
+        
+        # If Dhatu ends in 'z' and Suffix starts with a dental 't' or 'T' (th)
+        if dhatu.text and dhatu.text[-1] == 'z':
+            if suffix.text.startswith('t'):
+                suffix.text = 'w' + suffix.text[1:]
+                prakriya.log("Rule 8.4.41: 't' -> 'w' after 'z' (zwunA zwuH)")
+            elif suffix.text.startswith('T'):
+                suffix.text = 'W' + suffix.text[1:]
+                prakriya.log("Rule 8.4.41: 'T' -> 'W' after 'z' (zwunA zwuH)")

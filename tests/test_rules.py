@@ -4,7 +4,8 @@ from skt_dhatu_parse.rules import (
     apply_guna, apply_vrddhi, paghra_sthadi_adesha, upasarga_sandhi, 
     jhalam_jas_jhasi, jhasas_tathor_dho_dhah, tasthasthamipam, yuvor_anakau,
     dhatvadeh_sah_sah_no_nah, rashabhyam_no_nah, sna_sandhi, upasarga_satva,
-    anunasikalopo_jhali_kniti, vacisvapiyajadinam_kiti, choh_kuh, radabhyam_nishthato_nah
+    anunasikalopo_jhali_kniti, vacisvapiyajadinam_kiti, choh_kuh, radabhyam_nishthato_nah,
+    vrasca_bhrasja_sruja_mruja, stuna_stuh
 )
 
 class TestRules(unittest.TestCase):
@@ -198,6 +199,28 @@ class TestRules(unittest.TestCase):
         p2.add_term(Term('ta', 'pratyaya'))
         ho_dhah_dader_ghah(p2)
         self.assertEqual(p2.terms[0].text, 'liQ')
+
+    def test_vrasca_bhrasja_sruja_mruja(self) -> None:
+        """Covers palatal to retroflex (j -> z) before jhal."""
+        p = Prakriya()
+        p.add_term(Term('sfj', 'dhatu'))
+        p.add_term(Term('ta', 'pratyaya'))
+        vrasca_bhrasja_sruja_mruja(p)
+        self.assertEqual(p.terms[0].text, 'sfz')
+
+    def test_stuna_stuh(self) -> None:
+        """Covers dental to retroflex (t/th -> w/W) after retroflex."""
+        p1 = Prakriya()
+        p1.add_term(Term('sfz', 'dhatu'))
+        p1.add_term(Term('ta', 'pratyaya'))
+        stuna_stuh(p1)
+        self.assertEqual(p1.terms[1].text, 'wa')
+
+        p2 = Prakriya()
+        p2.add_term(Term('sfz', 'dhatu'))
+        p2.add_term(Term('Ta', 'pratyaya')) # 'Ta' is SLP1 for 'tha'
+        stuna_stuh(p2)
+        self.assertEqual(p2.terms[1].text, 'Wa')
 
 if __name__ == '__main__':
     unittest.main()

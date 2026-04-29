@@ -19,8 +19,15 @@ class TestKrdanta(unittest.TestCase):
         mock_data =[
             ('buD', 1, 'parasmaipada', 'avagamane', '0994', 'buDa~'),
             ('ram', 1, 'atmanepada', 'krIDAyAm', '0989', 'ramu~'),
+            ('gam', 1, 'parasmaipada', 'gatau', '1037', 'gamlx~'),
+            ('vac', 2, 'parasmaipada', 'paribhASaNe', '0058', 'vaca~'),
+            ('Cid', 7, 'ubhayapada', 'dvaidhIkaraNe', '0003', 'Cidi!r'),
             ('paW', 1, 'parasmaipada', 'vyaktAyAM vAci', '0381', 'paWa~'),
-            ('duh', 2, 'ubhayapada', 'prapUraNe', '0004', 'duha~')
+            ('duh', 2, 'ubhayapada', 'prapUraNe', '0004', 'duha~'),
+            ('duh', 1, 'parasmaipada', 'ardane', '0839', 'duhi!r'),
+            ('svap', 2, 'parasmaipada', 'zaye', '0063', 'Yizvapa!'),
+            ('sfj', 6, 'parasmaipada', 'visarge', '0150', 'sfja!'),
+            ('BU', 1, 'parasmaipada', 'sattAyAm', '0001', 'BU')
         ]
         c.executemany("INSERT INTO dhatu VALUES (?, ?, ?, ?, ?, ?)", mock_data)
         conn.commit()
@@ -97,11 +104,31 @@ class TestKrdanta(unittest.TestCase):
         self.assertIsNotNone(prakriya)
         self.assertEqual(prakriya.get_current_string(), 'paWita')
 
-    def test_duh_kta_ho_dhah(self) -> None:
-        """Tests duh + kta -> dugDa (h -> G -> g)."""
+    def test_duh_kta_gana_2_anit(self) -> None:
+        """Tests duh (Gana 2) + kta -> dugDa (AniW root -> h becomes G -> g)."""
         prakriya = derive_krdanta('duh', 'kta', gana=2, db_path=self.test_db_path)
-        self.assertIsNotNone(prakriya)
         self.assertEqual(prakriya.get_current_string(), 'dugDa')
+
+    def test_duh_kta_gana_1_set(self) -> None:
+        """Tests duh (Gana 1) + kta -> duhita (SeW root gets iW augment)."""
+        prakriya = derive_krdanta('duh', 'kta', gana=1, db_path=self.test_db_path)
+        self.assertEqual(prakriya.get_current_string(), 'duhita')
+
+    # Add to the bottom of the file:
+    def test_bhu_tavya_guna_sandhi(self) -> None:
+        """Tests BU + tavya -> Bavitavya (Guna + Vowel Sandhi)."""
+        prakriya = derive_krdanta('BU', 'tavya', gana=1, db_path=self.test_db_path)
+        self.assertEqual(prakriya.get_current_string(), 'Bavitavya')
+
+    def test_svap_kta_samprasarana(self) -> None:
+        """Tests svap + kta -> supta (Preprocessor + Samprasarana)."""
+        prakriya = derive_krdanta('svap', 'kta', gana=2, db_path=self.test_db_path)
+        self.assertEqual(prakriya.get_current_string(), 'supta')
+
+    def test_srj_kta_retroflexion(self) -> None:
+        """Tests sfj + kta -> sfzwa (sfj->sfz and stunA stuH)."""
+        prakriya = derive_krdanta('sfj', 'kta', gana=6, db_path=self.test_db_path)
+        self.assertEqual(prakriya.get_current_string(), 'sfzwa')
 
 if __name__ == '__main__':
     unittest.main()
