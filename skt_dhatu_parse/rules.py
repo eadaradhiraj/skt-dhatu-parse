@@ -368,33 +368,30 @@ def ata_upadhayah(prakriya: Prakriya) -> None:
             prakriya.log(f"Rule 7.2.116: ata upadhAyAH Vrddhi -> '{dhatu.text}'")
 
 def eco_yayavayah(prakriya: Prakriya) -> None:
-    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
-    if not dhatu: return
-    idx = prakriya.terms.index(dhatu)
-    if idx + 1 >= len(prakriya.terms): return
-    next_term = prakriya.terms[idx + 1]
-    
-    text = dhatu.text
-    if text and text[-1] in EC_VOWELS and next_term.text:
-        last_char = text[-1]
-        next_char = next_term.text[0]
-        rep = None
-        
-        if is_vowel(next_char):
-            if last_char == 'e': rep = 'ay'
-            elif last_char == 'o': rep = 'av'
-            elif last_char == 'E': rep = 'Ay'
-            elif last_char == 'O': rep = 'Av'
-            if rep:
-                dhatu.text = text[:-1] + rep
-                prakriya.log(f"Rule 6.1.78: eco'yavAyAvaH -> '{dhatu.text}'")
-                
-        elif next_char == 'y' and last_char in ['o', 'O']:
-            if last_char == 'o': rep = 'av'
-            elif last_char == 'O': rep = 'Av'
-            if rep:
-                dhatu.text = text[:-1] + rep
-                prakriya.log(f"Rule 6.1.79: vAnto yi pratyaye -> '{dhatu.text}'")
+    for i in range(len(prakriya.terms)-1):
+        t1 = prakriya.terms[i]
+        t2 = prakriya.terms[i+1]
+        text = t1.text
+        if text and text[-1] in EC_VOWELS and t2.text:
+            last_char = text[-1]
+            next_char = t2.text[0]
+            rep = None
+            
+            if is_vowel(next_char):
+                if last_char == 'e': rep = 'ay'
+                elif last_char == 'o': rep = 'av'
+                elif last_char == 'E': rep = 'Ay'
+                elif last_char == 'O': rep = 'Av'
+                if rep:
+                    t1.text = text[:-1] + rep
+                    prakriya.log(f"Rule 6.1.78: eco'yavAyAvaH -> '{t1.text}'")
+                    
+            elif next_char == 'y' and last_char in ['o', 'O']:
+                if last_char == 'o': rep = 'av'
+                elif last_char == 'O': rep = 'Av'
+                if rep:
+                    t1.text = text[:-1] + rep
+                    prakriya.log(f"Rule 6.1.79: vAnto yi pratyaye -> '{t1.text}'")
 
 def iko_yanaci(prakriya: Prakriya) -> None:
     for i in range(len(prakriya.terms) - 1):
@@ -431,12 +428,13 @@ def ato_gune(prakriya: Prakriya) -> None:
         prakriya.log(f"Rule 6.1.97: Merged Vikarana 'a' + Suffix '{suffix.text[0]}'")
 
 def ato_nitah(prakriya: Prakriya) -> None:
-    if len(prakriya.terms) >= 3:
-        vikarana = prakriya.terms[1]
-        suffix = prakriya.terms[-1]
-        if vikarana.text.endswith('a') and suffix.text.startswith('A') and 'pit' not in suffix.tags:
-            vikarana.text = vikarana.text[:-1]
-            suffix.text = 'e' + suffix.text[1:]
+    """Rule 7.2.81: Ato NitaH. a + A -> e for Nit affixes."""
+    for i in range(len(prakriya.terms)-1):
+        t1 = prakriya.terms[i]
+        t2 = prakriya.terms[i+1]
+        if t1.term_type == 'vikaraRa' and t1.text.endswith('a') and t2.text.startswith('A') and 'pit' not in t2.tags:
+            t1.text = t1.text[:-1]
+            t2.text = 'e' + t2.text[1:]
             prakriya.log("Rule 7.2.81: Ato NitaH (a + A -> e)")
 
 # ==========================================
@@ -1047,11 +1045,12 @@ def gatistha_sic_lopa(prakriya: Prakriya) -> None:
             prakriya.log("Rule 2.4.77: sic elided after gA, sTA, dA, pA, BU")
 
 def ato_heh(prakriya: Prakriya) -> None:
-    vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa'), None)
-    suffix = prakriya.terms[-1]
-    if vikarana and vikarana.text.endswith('a') and suffix.text == 'hi':
-        suffix.text = ''
-        prakriya.log("Rule 6.4.105: ato heH (dropped 'hi' after 'a')")
+    for i in range(len(prakriya.terms)-1):
+        t1 = prakriya.terms[i]
+        t2 = prakriya.terms[i+1]
+        if t1.text.endswith('a') and t2.text == 'hi':
+            t2.text = ''
+            prakriya.log("Rule 6.4.105: ato heH (dropped 'hi' after 'a')")
 
 def ato_yeyah(prakriya: Prakriya) -> None:
     vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa'), None)
@@ -1101,10 +1100,33 @@ def usy_apadantat(prakriya: Prakriya) -> None:
 
 def jher_jus(prakriya: Prakriya) -> None:
     suffix = prakriya.terms[-1]
-    if 'liN' in suffix.tags and suffix.upadeza == 'Ji':
-        suffix.text = 'us'
-        suffix.upadeza = 'us' 
-        prakriya.log("Rule 3.4.108: jher jus (Ji -> us for liN)")
+    if suffix.upadeza == 'Ji':
+        if 'liN' in suffix.tags or 'luN' in suffix.tags:
+            suffix.text = 'us'
+            suffix.upadeza = 'us' 
+            prakriya.log("Rule 3.4.108: jher jus (Ji -> us)")
+
+def jhasya_ran(prakriya: Prakriya) -> None:
+    suffix = prakriya.terms[-1]
+    if 'liN' in suffix.tags and suffix.upadeza == 'Ja':
+        suffix.text = 'ran'
+        suffix.upadeza = 'ran'
+        prakriya.log("Rule 3.4.105: jhasya ran (Ja -> ran for liN)")
+
+def ito_at(prakriya: Prakriya) -> None:
+    suffix = prakriya.terms[-1]
+    if 'liN' in suffix.tags and suffix.upadeza == 'iw':
+        suffix.text = 'a'
+        suffix.upadeza = 'a'
+        prakriya.log("Rule 3.4.106: iwo't (iw -> a for liN)")
+
+def utasca_pratyayad(prakriya: Prakriya) -> None:
+    """Rule 6.4.106: utaś ca pratyayād. Drops 'hi' after an affix ending in 'u'."""
+    vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa'), None)
+    suffix = prakriya.terms[-1]
+    if vikarana and vikarana.text.endswith('u') and suffix.text == 'hi':
+        suffix.text = ''
+        prakriya.log("Rule 6.4.106: utaśca (dropped 'hi' after 'u')")
 
 def mer_nih(prakriya: Prakriya) -> None:
     suffix = prakriya.terms[-1]

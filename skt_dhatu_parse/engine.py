@@ -16,7 +16,7 @@ from .rules import (
     slau_reduplication, snasor_allopah, sarvadhatukam_apit, tasyasti_lopa,
     jher_jus, mer_nih, ser_hi, at_uttasya, nityam_nitah, er_uh, lin_agamas, cli_agama, 
     gatistha_sic_lopa, ato_heh, ato_yeyah, lin_salopo_anantyasya, ad_gunah, lopo_vyorvali, usy_apadantat,
-    akah_savarne_dirghah
+    akah_savarne_dirghah, jhasya_ran, ito_at, utasca_pratyayad
 )
 
 def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'prathama', vacana: int = 0,
@@ -71,7 +71,9 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     # 6. Early Suffix Replacements (NOW PLUGGED IN!)
     mer_nih(prakriya)
     jher_jus(prakriya)
-    jhonta(prakriya)            
+    jhasya_ran(prakriya)
+    ito_at(prakriya)
+    jhonta(prakriya)          
     thasah_se(prakriya)         
     tasthasthamipam(prakriya)
     ser_hi(prakriya)
@@ -124,6 +126,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     ato_yeyah(prakriya)
     lin_salopo_anantyasya(prakriya)
     ato_heh(prakriya)
+    utasca_pratyayad(prakriya)
     tasyasti_lopa(prakriya)
 
     hali_ca(prakriya)
