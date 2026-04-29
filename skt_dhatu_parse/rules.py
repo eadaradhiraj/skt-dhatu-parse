@@ -1,7 +1,6 @@
 """
 rules.py
-The comprehensive library of Paninian Sutras (phonological and morphological operations).
-Each function represents a specific rule from the Ashtadhyayi.
+The comprehensive library of Paninian Sutras.
 """
 from .shivasutras import get_pratyahara, is_vowel, SLP1_VOWELS
 from .models import Term, Prakriya
@@ -20,14 +19,12 @@ KHAR_CONSONANTS = set(get_pratyahara('K', 'r'))
 CHAR_CONSONANTS = set(get_pratyahara('c', 'r'))      
 YAY_PRATYAHARA = set(get_pratyahara('y', 'y'))
 
-# Pāṇini Rule 1.4.58: prādayaḥ (The 22 Upasargas)
 UPASARGAS =[
     'pra', 'parA', 'apa', 'sam', 'anu', 'ava', 'nis', 'nir', 
     'dus', 'dur', 'vi', 'A', 'ni', 'aDi', 'api', 'ati', 
     'su', 'ud', 'aBi', 'prati', 'pari', 'upa'
 ]
 
-# --- 18 Verbal Suffixes (Rule 3.4.78: tiptasjhisip...) ---
 TIN_PARASMAIPADA = {
     'prathama': ['tip', 'tas', 'Ji'],
     'madhyama': ['sip', 'Tas', 'Ta'],
@@ -40,20 +37,18 @@ TIN_ATMANEPADA = {
 }
 TIN_PARASMAIPADA_LIT = {
     'prathama':['Ral', 'atus', 'us'],
-    'madhyama': ['Tal', 'aTus', 'a'],
+    'madhyama':['Tal', 'aTus', 'a'],
     'uttama':   ['Ral', 'va', 'ma']
 }
 
 def apply_guna(char: str) -> str:
-    """Returns the Guna (1st grade strengthening) of a vowel."""
     if char in['i', 'I']: return 'e'
     if char in ['u', 'U']: return 'o'
-    if char in ['f', 'F']: return 'ar'
+    if char in['f', 'F']: return 'ar'
     if char in ['x']: return 'al'
     return char
 
 def apply_vrddhi(char: str) -> str:
-    """Returns the Vrddhi (2nd grade strengthening) of a vowel."""
     if char in ['a']: return 'A'
     if char in ['i', 'I', 'e']: return 'E'
     if char in['u', 'U', 'o']: return 'O'
@@ -66,7 +61,6 @@ def apply_vrddhi(char: str) -> str:
 # ==========================================
 
 def substitute_lakara(prakriya: Prakriya, purusha: str = 'prathama', vacana: int = 0) -> None:
-    """Rule 3.4.78: Substitutes the abstract Lakara with the 18 concrete TiN affixes."""
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     lakara = prakriya.terms[-1] 
     is_lit = 'liW' in lakara.tags
@@ -83,7 +77,6 @@ def substitute_lakara(prakriya: Prakriya, purusha: str = 'prathama', vacana: int
     lakara.term_type = 'pratyaya'
     lakara.tags.add('tin') 
     
-    # Rule 3.4.115/113: Sārvadhātuka vs Ārdhadhātuka designation
     if is_lit: 
         lakara.tags.add('ardhadhatuka')
         if new_suffix in['Ral', 'Tal']: lakara.tags.add('pit')
@@ -93,7 +86,6 @@ def substitute_lakara(prakriya: Prakriya, purusha: str = 'prathama', vacana: int
     prakriya.log(f"Rule 3.4.78: Substituted lakara with '{new_suffix}'")
 
 def insert_vikarana(prakriya: Prakriya) -> None:
-    """Rules 3.1.68+: Inserts class-specific infixes (Sap, Syan, Sa, SnA) or Tense augments (sya)."""
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     suffix = prakriya.terms[-1]
     if not dhatu: return
@@ -111,6 +103,7 @@ def insert_vikarana(prakriya: Prakriya) -> None:
     if 'gana_1' in dhatu.tags: vik = Term('Sap', 'vikaraRa')
     elif 'gana_4' in dhatu.tags: vik = Term('Syan', 'vikaraRa')
     elif 'gana_6' in dhatu.tags: vik = Term('Sa', 'vikaraRa')
+    elif 'gana_8' in dhatu.tags: vik = Term('u', 'vikaraRa') # <--- NEW: Gana 8
     elif 'gana_9' in dhatu.tags: vik = Term('SnA', 'vikaraRa')
     else: return
         
@@ -118,7 +111,6 @@ def insert_vikarana(prakriya: Prakriya) -> None:
     prakriya.log(f"Inserted Vikarana '{vik.upadeza}'")
 
 def atmanepada_tere(prakriya: Prakriya) -> None:
-    """Rule 3.4.79: ṭita ātmanepadānāṃ ṭere. Changes terminal 'a' to 'e' for Atmanepada suffixes (ta -> te)."""
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     suffix = prakriya.terms[-1]
     if dhatu and 'atmanepada' in dhatu.tags and 'Wit' in suffix.tags:
@@ -130,14 +122,12 @@ def atmanepada_tere(prakriya: Prakriya) -> None:
                 break
 
 def thasah_se(prakriya: Prakriya) -> None:
-    """Rule 3.4.80: thāsaḥ se. Replaces 'thās' with 'se' in ṭit lakāras."""
     suffix = prakriya.terms[-1]
     if suffix.text == 'TAs' and 'Wit' in suffix.tags:
         suffix.text = 'se'
         prakriya.log("Rule 3.4.80: Replaced 'TAs' with 'se'")
 
 def tasthasthamipam(prakriya: Prakriya) -> None:
-    """Rule 3.4.101: tasthasthamipāṃ... Replaces dual/plural affixes in Past Tense (laN)."""
     lakara = next((t for t in prakriya.terms if t.term_type == 'lakara' or 'laN' in t.tags), None)
     suffix = prakriya.terms[-1]
     if lakara and 'laN' in lakara.tags:
@@ -148,7 +138,6 @@ def tasthasthamipam(prakriya: Prakriya) -> None:
         prakriya.log(f"Rule 3.4.101: Past tense replacement -> '{suffix.text}'")
 
 def jhonta(prakriya: Prakriya) -> None:
-    """Rule 7.1.3 & 7.1.5: jho'ntaḥ. Morphs the plural 'Jh' affix into 'ant' or 'at'."""
     suffix = prakriya.terms[-1]
     if suffix.text.startswith('J'):
         dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
@@ -163,7 +152,6 @@ def jhonta(prakriya: Prakriya) -> None:
             prakriya.log("Rule 7.1.3: 'Jh' -> 'ant'")
 
 def at_agama(prakriya: Prakriya) -> None:
-    """Rule 6.4.71: luṅlaṅ... Adds the 'aW' prefix for Past Tense."""
     lakara = prakriya.terms[-1]
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     if dhatu and 'laN' in lakara.tags:
@@ -173,14 +161,18 @@ def at_agama(prakriya: Prakriya) -> None:
         prakriya.log("Rule 6.4.71: Inserted 'aw' past tense augment")
 
 def itasca(prakriya: Prakriya) -> None:
-    """Rule 3.4.100: itaśca. Drops terminal 'i' from Parasmaipada affixes in laN."""
     suffix = prakriya.terms[-1]
     if 'laN' in suffix.tags and suffix.text.endswith('i'):
         suffix.text = suffix.text[:-1]
         prakriya.log("Rule 3.4.100: Dropped terminal 'i'")
 
+def hali_ca(prakriya: Prakriya) -> None:
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    if dhatu and dhatu.text == 'div':
+        dhatu.text = 'dIv'
+        prakriya.log("Rule 8.2.77: Lengthened 'div' to 'dIv'")
+
 def it_agama(prakriya: Prakriya) -> None:
-    """Rule 7.2.35 & 7.2.10: Applies 'iW' augment to val-initial Ardhadhatuka suffixes, blocked for AniT roots."""
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     is_anit = False
     if dhatu:
@@ -198,7 +190,6 @@ def it_agama(prakriya: Prakriya) -> None:
                 prakriya.log(f"Rule 7.2.10: AniW blocked 'iw' for '{term.upadeza}'")
 
 def idito_num_dhatoh(prakriya: Prakriya) -> None:
-    """Rule 7.1.58: idito num dhātoḥ. Adds 'num' (nasal M) augment inside idit roots."""
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     if dhatu and 'idit' in dhatu.tags:
         if dhatu.text in['Cid', 'Bid']: return 
@@ -214,7 +205,6 @@ def idito_num_dhatoh(prakriya: Prakriya) -> None:
 # ==========================================
 
 def liti_dhator_anabhyasasya(prakriya: Prakriya) -> None:
-    """Rule 6.1.8: Clones the root for the Perfect Tense (liW)."""
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     suffix = prakriya.terms[-1]
     if dhatu and 'liW' in suffix.tags:
@@ -225,7 +215,6 @@ def liti_dhator_anabhyasasya(prakriya: Prakriya) -> None:
         prakriya.log(f"Rule 6.1.8: Reduplicated root -> '{abhyasa.text}'")
 
 def hrasvah(prakriya: Prakriya) -> None:
-    """Rule 7.4.59: Shortens the vowel of the reduplicated abhyasa."""
     abhyasa = next((t for t in prakriya.terms if t.term_type == 'abhyasa'), None)
     if abhyasa:
         text = abhyasa.text
@@ -236,14 +225,12 @@ def hrasvah(prakriya: Prakriya) -> None:
         prakriya.log(f"Rule 7.4.59: Shortened Abhyasa -> '{abhyasa.text}'")
 
 def ur_at(prakriya: Prakriya) -> None:
-    """Rule 7.4.66: Changes 'f' to 'a' in the abhyasa."""
     abhyasa = next((t for t in prakriya.terms if t.term_type == 'abhyasa'), None)
     if abhyasa and ('f' in abhyasa.text or 'F' in abhyasa.text):
         abhyasa.text = abhyasa.text.replace('f', 'a').replace('F', 'a')
         prakriya.log("Rule 7.4.66: 'f' -> 'a' in abhyasa")
 
 def kuhos_cuh(prakriya: Prakriya) -> None:
-    """Rule 7.4.62: Velars and 'h' become Palatals in the abhyasa (ka -> ca)."""
     abhyasa = next((t for t in prakriya.terms if t.term_type == 'abhyasa'), None)
     if abhyasa:
         text = abhyasa.text
@@ -254,7 +241,6 @@ def kuhos_cuh(prakriya: Prakriya) -> None:
             prakriya.log(f"Rule 7.4.62: kuhoS cuH -> '{abhyasa.text}'")
 
 def bhavater_ah(prakriya: Prakriya) -> None:
-    """Rule 7.4.73: Exception for 'bhū' where the abhyasa vowel becomes 'a' (bu -> ba)."""
     abhyasa = next((t for t in prakriya.terms if t.term_type == 'abhyasa'), None)
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     if abhyasa and dhatu and dhatu.upadeza == 'BU':
@@ -262,7 +248,6 @@ def bhavater_ah(prakriya: Prakriya) -> None:
         prakriya.log(f"Rule 7.4.73: bhavater aH -> '{abhyasa.text}'")
 
 def abhyase_car_ca(prakriya: Prakriya) -> None:
-    """Rule 8.4.54: De-aspirates consonants in the abhyasa."""
     abhyasa = next((t for t in prakriya.terms if t.term_type == 'abhyasa'), None)
     if abhyasa:
         text = abhyasa.text
@@ -273,7 +258,6 @@ def abhyase_car_ca(prakriya: Prakriya) -> None:
             prakriya.log(f"Rule 8.4.54: abhyAse car ca -> '{abhyasa.text}'")
 
 def bhuvo_vug_lunlitoh(prakriya: Prakriya) -> None:
-    """Rule 6.4.88: Appends 'v' augment to 'bhū' before vowels."""
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     suffix = prakriya.terms[-1]
     if dhatu and dhatu.upadeza == 'BU' and 'liW' in suffix.tags:
@@ -286,7 +270,6 @@ def bhuvo_vug_lunlitoh(prakriya: Prakriya) -> None:
 # ==========================================
 
 def sarvadhatuka_ardhadhatukayoh(prakriya: Prakriya) -> None:
-    """Rule 7.3.84: Applies Guna to 'ik' vowels before Sarvadhatuka/Ardhadhatuka, blocked by kit/Nit."""
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     if not dhatu: return
     idx = prakriya.terms.index(dhatu)
@@ -297,21 +280,21 @@ def sarvadhatuka_ardhadhatukayoh(prakriya: Prakriya) -> None:
     is_ardha = 'ardhadhatuka' in next_term.tags
     is_apit = 'pit' not in next_term.tags
     
-    # Rule 1.2.4: Apit sarvadhatuka behaves as Nit
-    if is_sarva and is_apit: 
-        next_term.tags.add('Nit')
-    # Rule 1.1.5: kNiti ca (blocks Guna)
-    if 'Nit' in next_term.tags or 'kit' in next_term.tags: 
-        return
+    if is_sarva and is_apit: next_term.tags.add('Nit')
+    if 'Nit' in next_term.tags or 'kit' in next_term.tags: return
         
     if is_sarva or is_ardha:
         text = dhatu.text
+        # Rule 7.3.84: Terminal ik vowels
         if text and text[-1] in IK_VOWELS:
             dhatu.text = text[:-1] + apply_guna(text[-1])
             prakriya.log(f"Rule 7.3.84: Guna applied -> '{dhatu.text}'")
+        # --- NEW: Rule 7.3.86: Penultimate short ik vowels (pugantalaghUpadhasya) ---
+        elif len(text) >= 2 and text[-2] in['i', 'u', 'f', 'x'] and text[-1] not in SLP1_VOWELS:
+            dhatu.text = text[:-2] + apply_guna(text[-2]) + text[-1]
+            prakriya.log(f"Rule 7.3.86 (pugantalaghUpadhasya): Penultimate Guna -> '{dhatu.text}'")
 
 def aco_nniti(prakriya: Prakriya) -> None:
-    """Rule 7.2.115: Applies Vrddhi to terminal vowels before Yit/Rit affixes (e.g., Causatives)."""
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     if not dhatu: return
     idx = prakriya.terms.index(dhatu)
@@ -325,7 +308,6 @@ def aco_nniti(prakriya: Prakriya) -> None:
             prakriya.log(f"Rule 7.2.115: aco YRiti Vrddhi -> '{dhatu.text}'")
 
 def ata_upadhayah(prakriya: Prakriya) -> None:
-    """Rule 7.2.116: Applies Vrddhi to penultimate 'a' before Yit/Rit affixes."""
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     suffix = prakriya.terms[-1] 
     if dhatu and ('Yit' in suffix.tags or 'Rit' in suffix.tags):
@@ -335,7 +317,6 @@ def ata_upadhayah(prakriya: Prakriya) -> None:
             prakriya.log(f"Rule 7.2.116: ata upadhAyAH Vrddhi -> '{dhatu.text}'")
 
 def eco_yayavayah(prakriya: Prakriya) -> None:
-    """Rule 6.1.78: eco'yavAyAvaH. e/o/ai/au become ay/av/Ay/Av before vowels."""
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     if not dhatu: return
     idx = prakriya.terms.index(dhatu)
@@ -353,7 +334,6 @@ def eco_yayavayah(prakriya: Prakriya) -> None:
         prakriya.log(f"Rule 6.1.78: eco'yavAyAvaH -> '{dhatu.text}'")
 
 def iko_yanaci(prakriya: Prakriya) -> None:
-    """Rule 6.1.77: iko yaRaci. i/u/f/x become y/v/r/l before vowels."""
     for i in range(len(prakriya.terms) - 1):
         term1 = prakriya.terms[i]
         term2 = prakriya.terms[i+1]
@@ -369,7 +349,6 @@ def iko_yanaci(prakriya: Prakriya) -> None:
                 prakriya.log(f"Rule 6.1.77: iko yaRaci -> '{term1.text}'")
 
 def ato_dirgho_yayi(prakriya: Prakriya) -> None:
-    """Rule 7.3.101: ato dIrgho yaYi. Lengthens 'a' before 'y, v, m' in Sarvadhatuka affixes."""
     vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa'), None)
     suffix = prakriya.terms[-1]
     if vikarana and vikarana.text.endswith('a') and suffix.text and suffix.text[0] in YAY_CONSONANTS:
@@ -377,7 +356,6 @@ def ato_dirgho_yayi(prakriya: Prakriya) -> None:
         prakriya.log("Rule 7.3.101: Lengthened 'a' to 'A'")
 
 def ato_gune(prakriya: Prakriya) -> None:
-    """Rule 6.1.97: ato guNe. Pararupa Sandhi (a + a/e/o -> a/e/o)."""
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa'), None)
     suffix = prakriya.terms[-1]
@@ -390,7 +368,6 @@ def ato_gune(prakriya: Prakriya) -> None:
         prakriya.log(f"Rule 6.1.97: Merged Vikarana 'a' + Suffix '{suffix.text[0]}'")
 
 def ato_nitah(prakriya: Prakriya) -> None:
-    """Rule 7.2.81: Ato NitaH. 'a' + 'A' becomes 'iy'/'e' for apit suffixes."""
     if len(prakriya.terms) >= 3:
         vikarana = prakriya.terms[1]
         suffix = prakriya.terms[-1]
@@ -404,7 +381,6 @@ def ato_nitah(prakriya: Prakriya) -> None:
 # ==========================================
 
 def adesa_pratyayayoh(prakriya: Prakriya) -> None:
-    """Rule 8.3.59: AdeSapratyayayoH. Changes 's' to 'z' after iR vowels or velars in affixes."""
     for i, curr_term in enumerate(prakriya.terms):
         if curr_term.term_type in ['dhatu', 'upasarga', 'abhyasa']: continue
         text = curr_term.text
@@ -412,7 +388,7 @@ def adesa_pratyayayoh(prakriya: Prakriya) -> None:
             idx = text.find('s')
             is_last_term = (i == len(prakriya.terms) - 1)
             is_last_char = (idx == len(text) - 1)
-            if is_last_term and is_last_char: continue # Rule 8.3.55
+            if is_last_term and is_last_char: continue 
             
             if idx > 0: prev_char = text[idx-1]
             else:
@@ -424,7 +400,6 @@ def adesa_pratyayayoh(prakriya: Prakriya) -> None:
                 prakriya.log(f"Rule 8.3.59: Changed 's' to 'z' after '{prev_char}'")
 
 def jhasas_tathor_dho_dhah(prakriya: Prakriya) -> None:
-    """Rule 8.2.40: jhaSastathor dho'dhaH. 't'/'th' -> 'D' after voiced aspirates."""
     if len(prakriya.terms) >= 2:
         dhatu = prakriya.terms[-2]
         suffix = prakriya.terms[-1]
@@ -437,7 +412,6 @@ def jhasas_tathor_dho_dhah(prakriya: Prakriya) -> None:
                 prakriya.log("Rule 8.2.40: 'T' -> 'D' after jhaz")
 
 def jhalam_jas_jhasi(prakriya: Prakriya) -> None:
-    """Rule 8.4.53: jhalAM jaS jhaSi. Voiced aspirates become unaspirated before soft consonants."""
     if len(prakriya.terms) >= 2:
         dhatu = prakriya.terms[-2]
         suffix = prakriya.terms[-1]
@@ -448,14 +422,13 @@ def jhalam_jas_jhasi(prakriya: Prakriya) -> None:
             elif last_char in['c', 'C', 'j', 'J', 'S']: jas_char = 'j'
             elif last_char in['w', 'W', 'q', 'Q', 'z']: jas_char = 'q'
             elif last_char in['t', 'T', 'd', 'D', 's']: jas_char = 'd'
-            elif last_char in ['p', 'P', 'b', 'B']: jas_char = 'b'
+            elif last_char in['p', 'P', 'b', 'B']: jas_char = 'b'
             
             if jas_char != last_char:
                 dhatu.text = dhatu.text[:-1] + jas_char
                 prakriya.log(f"Rule 8.4.53: Changed '{last_char}' to '{jas_char}' (jaS)")
 
 def khari_ca(prakriya: Prakriya) -> None:
-    """Rule 8.4.55: khari ca. Soft consonants un-voice before hard consonants (e.g., ad + ti -> atti)."""
     if len(prakriya.terms) >= 2:
         dhatu = prakriya.terms[-2]
         suffix = prakriya.terms[-1]
@@ -467,19 +440,25 @@ def khari_ca(prakriya: Prakriya) -> None:
                 prakriya.log(f"Rule 8.4.55: Changed '{last_char}' to '{char_map[last_char]}' (khari ca)")
 
 def rashabhyam_no_nah(prakriya: Prakriya) -> None:
-    """Rule 8.4.1 & 8.4.2: raSAbhyAM no NaH. Converts 'n' to 'R' (ṇ) after r/ṣ, unless blocked."""
     has_trigger = False
     blocked = False
     allowed_intervening = set(SLP1_VOWELS).union(set('hyvrkKgGNpPbBmM'))
     for term in prakriya.terms:
         new_text = ""
-        for char in term.text:
+        for i, char in enumerate(term.text):
             if char in['r', 'z', 'f', 'F']:
                 has_trigger = True
                 blocked = False 
                 new_text += char
             elif has_trigger and not blocked:
-                if char == 'n': new_text += 'R'
+                if char == 'n': 
+                    # --- NEW: Check if 'n' is immediately followed by a dental (t/th/d/dh/s) ---
+                    next_char = term.text[i+1] if i + 1 < len(term.text) else ''
+                    if next_char in ['t', 'T', 'd', 'D', 's']:
+                        new_text += 'n'  # Blocked by the following dental!
+                    else:
+                        new_text += 'R'
+                        prakriya.log("Rule 8.4.1 (Natva): 'n' -> 'R'")
                 elif char not in allowed_intervening:
                     blocked = True
                     new_text += char
@@ -487,10 +466,8 @@ def rashabhyam_no_nah(prakriya: Prakriya) -> None:
             else: new_text += char
         if term.text != new_text:
             term.text = new_text
-            prakriya.log(f"Rule 8.4.1: Natva Sandhi (n -> R) applied in '{term.text}'")
 
 def stuna_stuh(prakriya: Prakriya) -> None:
-    """Rule 8.4.41: zwunA zwuH. Dental consonants become retroflex next to a retroflex."""
     if len(prakriya.terms) >= 2:
         dhatu = prakriya.terms[-2]
         suffix = prakriya.terms[-1]
@@ -503,7 +480,6 @@ def stuna_stuh(prakriya: Prakriya) -> None:
                 prakriya.log("Rule 8.4.41: 'T' -> 'W' (zwunA zwuH)")
 
 def vrasca_bhrasja_sruja_mruja(prakriya: Prakriya) -> None:
-    """Rule 8.2.36: ...cCaSAM zaH. Final palatals of specific roots become 'z' before jhal."""
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     if not dhatu: return
     idx = prakriya.terms.index(dhatu)
@@ -517,7 +493,6 @@ def vrasca_bhrasja_sruja_mruja(prakriya: Prakriya) -> None:
             prakriya.log(f"Rule 8.2.36: Final palatal became 'z' -> '{dhatu.text}'")
 
 def ho_dhah_dader_ghah(prakriya: Prakriya) -> None:
-    """Rule 8.2.31 & 8.2.32: 'h' -> 'Q' (or 'G' for 'd'-initial roots) before jhal."""
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     if not dhatu: return
     idx = prakriya.terms.index(dhatu)
@@ -533,7 +508,6 @@ def ho_dhah_dader_ghah(prakriya: Prakriya) -> None:
             prakriya.log("Rule 8.2.31: 'h' -> 'Q' (ho DhaH)")
 
 def choh_kuh(prakriya: Prakriya) -> None:
-    """Rule 8.2.30: coH kuH. Palatals (c, j) become Velars (k, g) before a jhal consonant."""
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     suffix = prakriya.terms[-1]
     if dhatu and suffix and suffix.text and suffix.text[0] in JHAL_CONSONANTS:
@@ -544,7 +518,6 @@ def choh_kuh(prakriya: Prakriya) -> None:
             prakriya.log(f"Rule 8.2.30: coH kuH ({last_char} -> {map_ku[last_char]})")
 
 def radabhyam_nishthato_nah(prakriya: Prakriya) -> None:
-    """Rule 8.2.42: radAbhyAM nizThAto naH... For nizThA affixes (kta/ktavatu), 't' -> 'n' after 'r/d'."""
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     suffix = prakriya.terms[-1]
     if dhatu and suffix and suffix.upadeza in['kta', 'ktavatu']:
@@ -556,7 +529,6 @@ def radabhyam_nishthato_nah(prakriya: Prakriya) -> None:
                 prakriya.log("Rule 8.2.42: nizThA 't' -> 'n'")
 
 def samyogantasya_lopah(prakriya: Prakriya) -> None:
-    """Rule 8.2.23: saMyogAntasya lopaH. Drops the final consonant in a word-final cluster."""
     suffix = prakriya.terms[-1]
     text = suffix.text
     if len(text) >= 2 and text[-1] in SLP1_CONSONANTS and text[-2] in SLP1_CONSONANTS:
@@ -564,7 +536,6 @@ def samyogantasya_lopah(prakriya: Prakriya) -> None:
         prakriya.log(f"Rule 8.2.23: Dropped final consonant -> '{suffix.text}'")
 
 def rutva_visarga(prakriya: Prakriya) -> None:
-    """Rule 8.3.15: kharavasAnayor visarjanIyaH. Converts word-final 's' into Visarga 'H'."""
     suffix = prakriya.terms[-1]
     if suffix.text.endswith('s'):
         suffix.text = suffix.text[:-1] + 'H'
@@ -575,7 +546,6 @@ def rutva_visarga(prakriya: Prakriya) -> None:
 # ==========================================
 
 def dhatvadeh_sah_sah_no_nah(prakriya: Prakriya) -> None:
-    """Rules 6.1.64 & 6.1.65: Initial 'z' -> 's', initial 'R' -> 'n'."""
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     if dhatu and dhatu.text:
         text = dhatu.text
@@ -590,7 +560,6 @@ def dhatvadeh_sah_sah_no_nah(prakriya: Prakriya) -> None:
             prakriya.log("Rule 6.1.65: Initial 'R' -> 'n'")
 
 def paghra_sthadi_adesha(prakriya: Prakriya) -> None:
-    """Rule 7.3.78: Replaces specific roots before 'Sit' affixes (e.g., sTA -> tizWa)."""
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     if not dhatu: return
     idx = prakriya.terms.index(dhatu)
@@ -608,7 +577,6 @@ def paghra_sthadi_adesha(prakriya: Prakriya) -> None:
             prakriya.log(f"Rule 7.3.78: Root replaced -> '{dhatu.text}'")
 
 def pug_nau(prakriya: Prakriya) -> None:
-    """Rule 7.3.36: ... pug RO. Adds 'puk' augment to A-ending roots before Causative (Ric)."""
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     if not dhatu: return
     ric_term = next((t for t in prakriya.terms if t.upadeza == 'Ric'), None)
@@ -617,7 +585,6 @@ def pug_nau(prakriya: Prakriya) -> None:
         prakriya.log("Rule 7.3.36: Added 'puk' augment -> '{dhatu.text}'")
 
 def yuvor_anakau(prakriya: Prakriya) -> None:
-    """Rule 7.1.1: yuvor anAkau. Replaces 'yu'/'vu' with 'ana'/'aka' in affixes."""
     for term in prakriya.terms:
         if term.term_type == 'pratyaya':
             if term.text == 'yu': 
@@ -628,7 +595,6 @@ def yuvor_anakau(prakriya: Prakriya) -> None:
                 prakriya.log("Rule 7.1.1: 'vu' -> 'aka'")
 
 def vacisvapiyajadinam_kiti(prakriya: Prakriya) -> None:
-    """Rule 6.1.15: Samprasarana (v/y -> u/i) for vac/svap/yaj before 'kit' affixes."""
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     suffix = prakriya.terms[-1]
     if dhatu and 'kit' in suffix.tags:
@@ -643,7 +609,6 @@ def vacisvapiyajadinam_kiti(prakriya: Prakriya) -> None:
             prakriya.log("Rule 6.1.15: Samprasarana (yaj -> ij)")
 
 def sanadyanta_dhatavah(prakriya: Prakriya) -> None:
-    """Rule 3.1.32: sanAdyantA dhAtavaH. Forges a new Dhatu from secondary affixes (e.g. Causative)."""
     if len(prakriya.terms) >= 2:
         dhatu = prakriya.terms[0]
         suffix = prakriya.terms[1]
@@ -652,7 +617,6 @@ def sanadyanta_dhatavah(prakriya: Prakriya) -> None:
         prakriya.log(f"Rule 3.1.32: Merged into Secondary Root -> '{dhatu.text}'")
 
 def sna_sandhi(prakriya: Prakriya) -> None:
-    """Rule 6.4.112 & 6.4.113: Gana 9 'SnA' drops 'A' before vowel, becomes 'nI' before consonant."""
     vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa'), None)
     suffix = prakriya.terms[-1]
     if vikarana and vikarana.text == 'nA': 
@@ -666,7 +630,6 @@ def sna_sandhi(prakriya: Prakriya) -> None:
                 prakriya.log("Rule 6.4.113: 'nA' -> 'nI' before consonant")
 
 def anunasikalopo_jhali_kniti(prakriya: Prakriya) -> None:
-    """Rule 6.4.37: Deletes final nasal (m, n) of specific roots before jhal-initial kit/Nit."""
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     if not dhatu: return
     idx = prakriya.terms.index(dhatu)
@@ -675,16 +638,15 @@ def anunasikalopo_jhali_kniti(prakriya: Prakriya) -> None:
 
     is_kit_or_nit = 'kit' in suffix.tags or 'Nit' in suffix.tags
     starts_with_jhal = suffix.text and suffix.text[0] in JHAL_CONSONANTS
-    ends_with_nasal = dhatu.text and dhatu.text[-1] in ['m', 'n']
+    ends_with_nasal = dhatu.text and dhatu.text[-1] in['m', 'n']
 
     if is_kit_or_nit and starts_with_jhal and ends_with_nasal:
-        ANUDATTA_NASAL_ROOTS = ['ram', 'gam', 'han', 'man', 'yam', 'van', 'tan', 'nam']
+        ANUDATTA_NASAL_ROOTS =['ram', 'gam', 'han', 'man', 'yam', 'van', 'tan', 'nam']
         if dhatu.text in ANUDATTA_NASAL_ROOTS:
             dhatu.text = dhatu.text[:-1]
             prakriya.log(f"Rule 6.4.37: Dropped nasal -> '{dhatu.text}'")
 
 def se_mucadinam(prakriya: Prakriya) -> None:
-    """Rule 7.1.59: Adds 'num' augment inside specific roots before 'Sa' (Gana 6) vikarana."""
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa'), None)
     if dhatu and vikarana and vikarana.upadeza == 'Sa':
@@ -698,7 +660,6 @@ def se_mucadinam(prakriya: Prakriya) -> None:
                     break
 
 def anusvarasya_yayi_parasavarnah(prakriya: Prakriya) -> None:
-    """Rule 8.4.58: Anusvara (M) becomes the nasal of the following yay-consonant's class."""
     for term in prakriya.terms:
         if 'M' in term.text:
             text = term.text
@@ -708,8 +669,8 @@ def anusvarasya_yayi_parasavarnah(prakriya: Prakriya) -> None:
                     next_char = text[i+1]
                     if next_char in['k', 'K', 'g', 'G', 'N']: new_text += 'N'
                     elif next_char in['c', 'C', 'j', 'J', 'Y']: new_text += 'Y'
-                    elif next_char in ['w', 'W', 'q', 'Q', 'R']: new_text += 'R'
-                    elif next_char in ['t', 'T', 'd', 'D', 'n']: new_text += 'n'
+                    elif next_char in['w', 'W', 'q', 'Q', 'R']: new_text += 'R'
+                    elif next_char in['t', 'T', 'd', 'D', 'n']: new_text += 'n'
                     elif next_char in['p', 'P', 'b', 'B', 'm']: new_text += 'm'
                     else: new_text += 'M'
                 else:
@@ -723,7 +684,6 @@ def anusvarasya_yayi_parasavarnah(prakriya: Prakriya) -> None:
 # ==========================================
 
 def upasarga_satva(prakriya: Prakriya) -> None:
-    """Rule 8.3.65: Upasarga Satva. Initial 's' of root becomes 'z' after iN-ending Upasarga."""
     upasargas =[t for t in prakriya.terms if t.term_type == 'upasarga']
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     if upasargas and dhatu and upasargas[-1].text:
@@ -733,7 +693,6 @@ def upasarga_satva(prakriya: Prakriya) -> None:
                 prakriya.log("Rule 8.3.65: Upasarga Satva (sT -> zW)")
 
 def upasarga_sandhi(prakriya: Prakriya) -> None:
-    """Rules 6.1.101 & 6.1.87: Vowel Sandhi folding multiple Upasargas from right to left."""
     upasarga_indices =[i for i, t in enumerate(prakriya.terms) if t.term_type == 'upasarga']
     for idx in reversed(upasarga_indices):
         upasarga = prakriya.terms[idx]
@@ -768,3 +727,29 @@ def upasarga_sandhi(prakriya: Prakriya) -> None:
             elif upasarga.text.endswith('u') or upasarga.text.endswith('U'):
                 upasarga.text = upasarga.text[:-1] + 'v'
                 prakriya.log("Rule 6.1.77: Upasarga YaN (v)")
+
+def vikarana_guna(prakriya: Prakriya) -> None:
+    """Rule 7.3.84: Applies Guna to Vikarana (e.g., 'u' -> 'o') before strong affixes."""
+    vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa'), None)
+    suffix = prakriya.terms[-1]
+    if vikarana and vikarana.text == 'u' and 'pit' in suffix.tags:
+        vikarana.text = 'o'
+        prakriya.log("Rule 7.3.84: Guna applied to Vikarana 'u' -> 'o'")
+
+def kr_u_morphing(prakriya: Prakriya) -> None:
+    """Rule 6.4.110 & 6.4.108: Modifies 'kf' to 'kar' or 'kur' before 'u', and drops 'u'."""
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa'), None)
+    suffix = prakriya.terms[-1]
+    
+    if dhatu and dhatu.upadeza == 'qukfY' and vikarana and vikarana.upadeza == 'u':
+        if 'pit' not in suffix.tags:
+            dhatu.text = 'kur'
+            prakriya.log("Rule 6.4.110: 'kf' -> 'kur' before weak 'u'")
+            # Rule 6.4.108: Drop 'u' before v and m
+            if suffix.text.startswith('v') or suffix.text.startswith('m'):
+                vikarana.text = ''
+                prakriya.log("Rule 6.4.108: Dropped 'u' before 'v/m'")
+        else:
+            dhatu.text = 'kar'
+            prakriya.log("Rule 7.3.84: 'kf' -> 'kar' before strong 'u'")

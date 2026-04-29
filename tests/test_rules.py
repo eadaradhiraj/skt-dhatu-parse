@@ -238,5 +238,47 @@ class TestRules(unittest.TestCase):
             kuhos_cuh(p)
             self.assertEqual(p.terms[0].text, expected)
 
+    def test_sarvadhatuka_ardhadhatukayoh_laghupadha(self) -> None:
+        p = Prakriya()
+        p.add_term(Term('buD', 'dhatu'))
+        suf = Term('Ric', 'pratyaya')
+        suf.tags.add('ardhadhatuka')
+        p.add_term(suf)
+        from skt_dhatu_parse.rules import sarvadhatuka_ardhadhatukayoh
+        sarvadhatuka_ardhadhatukayoh(p)
+        self.assertEqual(p.terms[0].text, 'boD')
+
+    def test_vikarana_guna(self) -> None:
+        p = Prakriya()
+        vik = Term('u', 'vikaraRa')
+        p.add_term(vik)
+        suf = Term('ti', 'pratyaya')
+        suf.tags.add('pit')
+        p.add_term(suf)
+        from skt_dhatu_parse.rules import vikarana_guna
+        vikarana_guna(p)
+        self.assertEqual(vik.text, 'o')
+
+    def test_kr_u_morphing(self) -> None:
+        from skt_dhatu_parse.rules import kr_u_morphing
+        
+        p = Prakriya()
+        t1 = Term('qukfY', 'dhatu')
+        t1.text = 'kf'
+        p.add_term(t1)
+        p.add_term(Term('u', 'vikaraRa'))
+        p.add_term(Term('tas', 'pratyaya')) # No pit tag
+        kr_u_morphing(p)
+        self.assertEqual(p.terms[0].text, 'kur')
+        
+        p2 = Prakriya()
+        t2 = Term('qukfY', 'dhatu')
+        t2.text = 'kf'
+        p2.add_term(t2)
+        p2.add_term(Term('u', 'vikaraRa'))
+        p2.add_term(Term('vas', 'pratyaya'))
+        kr_u_morphing(p2)
+        self.assertEqual(p2.terms[1].text, '') # u is dropped before v
+
 if __name__ == '__main__':
     unittest.main()

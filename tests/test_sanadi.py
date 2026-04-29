@@ -18,7 +18,8 @@ class TestSanadi(unittest.TestCase):
         # We test BU (Terminal vowel) and ram (Penultimate 'a')
         mock_data =[
             ('BU', 1, 'parasmaipada', 'sattAyAm', '0001', 'BU'),
-            ('ram', 1, 'atmanepada', 'krIDAyAm', '0989', 'ramu~')
+            ('ram', 1, 'atmanepada', 'krIDAyAm', '0989', 'ramu~'),
+            ('buD', 1, 'parasmaipada', 'avagamane', '0994', 'buDa~')
         ]
         c.executemany("INSERT INTO dhatu VALUES (?, ?, ?, ?, ?, ?)", mock_data)
         conn.commit()
@@ -52,6 +53,11 @@ class TestSanadi(unittest.TestCase):
         
         self.assertIsNotNone(prakriya)
         self.assertEqual(prakriya.get_current_string(), 'rAmi')
+
+    def test_causative_budh(self) -> None:
+        """Tests buD + Ric -> boDi (Penultimate Guna)."""
+        prakriya = derive_secondary_root('buD', 'Ric', gana=1, db_path=self.test_db_path)
+        self.assertEqual(prakriya.get_current_string(), 'boDi')
 
 if __name__ == '__main__':
     unittest.main()

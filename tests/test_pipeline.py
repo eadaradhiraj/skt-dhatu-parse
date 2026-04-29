@@ -98,9 +98,6 @@ class TestPipeline(unittest.TestCase):
         self.assertIsNone(derive_krdanta('xyz', 'kta', db_path=self.test_db_path))
         self.assertIsNone(derive_secondary_root('xyz', 'Ric', db_path=self.test_db_path))
 
-    # ==========================================
-    # NEW TESTS FOR 100% COVERAGE
-    # ==========================================
     def test_gana_9_vikri_singular(self) -> None:
         """Test Gana 9 (SnA -> nI), Natva Sandhi, and Upasarga Atmanepada override: vi-krI + laW -> vikrIRIte"""
         prakriya = derive('krI', 'laW', purusha='prathama', vacana=0, gana=9, upasargas=['vi'], db_path=self.test_db_path)
@@ -155,6 +152,22 @@ class TestPipeline(unittest.TestCase):
         """Test liW Dual: kf + liW -> cakratuH (iko yaNaci)"""
         prakriya = derive('kf', 'liW', purusha='prathama', vacana=1, gana=8, db_path=self.test_db_path)
         self.assertEqual(prakriya.get_current_string(), 'cakratuH')
+
+    def test_gana_8_kr_singular(self) -> None:
+        prakriya = derive('kf', 'laW', purusha='prathama', vacana=0, gana=8, db_path=self.test_db_path)
+        self.assertEqual(prakriya.get_current_string(), 'karoti')
+
+    def test_gana_8_kr_dual(self) -> None:
+        prakriya = derive('kf', 'laW', purusha='prathama', vacana=1, gana=8, db_path=self.test_db_path)
+        self.assertEqual(prakriya.get_current_string(), 'kurutaH')
+
+    def test_gana_8_kr_plural(self) -> None:
+        prakriya = derive('kf', 'laW', purusha='prathama', vacana=2, gana=8, db_path=self.test_db_path)
+        self.assertEqual(prakriya.get_current_string(), 'kurvanti')
+
+    def test_gana_8_kr_uttama_dual(self) -> None:
+        prakriya = derive('kf', 'laW', purusha='uttama', vacana=1, gana=8, db_path=self.test_db_path)
+        self.assertEqual(prakriya.get_current_string(), 'kurvaH')
 
 if __name__ == '__main__':
     unittest.main()

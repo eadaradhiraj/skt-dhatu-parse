@@ -11,7 +11,8 @@ from .rules import (
     adesa_pratyayayoh, hali_ca, tasthasthamipam, samyogantasya_lopah, ur_at, thasah_se, ato_nitah, 
     khari_ca, kuhos_cuh, aco_nniti, liti_dhator_anabhyasasya, hrasvah, bhavater_ah, abhyase_car_ca, 
     bhuvo_vug_lunlitoh, upasarga_sandhi, upasarga_satva, dhatvadeh_sah_sah_no_nah, paghra_sthadi_adesha,
-    sna_sandhi, rashabhyam_no_nah, iko_yanaci, se_mucadinam, anusvarasya_yayi_parasavarnah
+    sna_sandhi, rashabhyam_no_nah, iko_yanaci, se_mucadinam, anusvarasya_yayi_parasavarnah,
+    vikarana_guna, kr_u_morphing
 )
 
 def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'prathama', vacana: int = 0,
@@ -82,7 +83,9 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     # 9. Gana 9 and Root Substitutions
     sna_sandhi(prakriya)
     se_mucadinam(prakriya)
-    paghra_sthadi_adesha(prakriya)  
+    paghra_sthadi_adesha(prakriya)
+    vikarana_guna(prakriya)
+    kr_u_morphing(prakriya)
     it_agama(prakriya)          
     
     # 10. Abhyasa (Reduplication)

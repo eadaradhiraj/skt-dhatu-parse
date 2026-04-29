@@ -19,7 +19,7 @@ class TestKrdanta(unittest.TestCase):
         mock_data =[
             ('buD', 1, 'parasmaipada', 'avagamane', '0994', 'buDa~'),
             ('ram', 1, 'atmanepada', 'krIDAyAm', '0989', 'ramu~'),
-            ('gam', 1, 'parasmaipada', 'gatau', '1037', 'gamlx~'),
+            ('gam', 1, 'parasmaipada', 'gatau', '1037', 'gamx~'),
             ('vac', 2, 'parasmaipada', 'paribhASaNe', '0058', 'vaca~'),
             ('Cid', 7, 'ubhayapada', 'dvaidhIkaraNe', '0003', 'Cidi!r'),
             ('paW', 1, 'parasmaipada', 'vyaktAyAM vAci', '0381', 'paWa~'),

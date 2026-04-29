@@ -7,7 +7,8 @@ from .models import Term, Prakriya
 from .anubandha import resolve_it_markers
 from .rules import (
     idito_num_dhatoh, ata_upadhayah, aco_nniti, eco_yayavayah,
-    sanadyanta_dhatavah, dhatvadeh_sah_sah_no_nah, pug_nau
+    sanadyanta_dhatavah, dhatvadeh_sah_sah_no_nah, pug_nau,
+    sarvadhatuka_ardhadhatukayoh
 )
 
 def derive_secondary_root(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_path: str = DEFAULT_DB_PATH) -> Prakriya:
@@ -25,10 +26,12 @@ def derive_secondary_root(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = No
     pratyaya = Term(pratyaya_upadeza, 'pratyaya')
     prakriya.add_term(pratyaya)
     resolve_it_markers(pratyaya)
-    
+
+    # 5. Apply Vrddhi & Augment Rules
     pug_nau(prakriya)        
     ata_upadhayah(prakriya)  
-    aco_nniti(prakriya)      
+    aco_nniti(prakriya)
+    sarvadhatuka_ardhadhatukayoh(prakriya)   
     
     eco_yayavayah(prakriya)  
     sanadyanta_dhatavah(prakriya)
