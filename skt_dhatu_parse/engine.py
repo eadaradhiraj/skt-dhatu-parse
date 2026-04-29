@@ -136,12 +136,12 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     eco_yayavayah(prakriya)                 
     iko_yanaci(prakriya)
     
-    # 12. Sandhi and Final Consonants
+     # 12. Sandhi and Final Consonants
     ato_dirgho_yayi(prakriya)               
-    ato_nitah(prakriya)                     
+    ato_nitah(prakriya) 
+    usy_apadantat(prakriya)                 # Must precede ad_gunah to prevent A+u -> o
     ad_gunah(prakriya)
     ato_gune(prakriya)
-    usy_apadantat(prakriya)
     akah_savarne_dirghah(prakriya)
     lopo_vyorvali(prakriya)
     adesa_pratyayayoh(prakriya)             

@@ -504,7 +504,7 @@ def rashabhyam_no_nah(prakriya: Prakriya) -> None:
     has_trigger = False
     blocked = False
     allowed_intervening = set(SLP1_VOWELS).union(set('hyvrkKgGNpPbBmM'))
-    for term in prakriya.terms:
+    for term_idx, term in enumerate(prakriya.terms):
         new_text = ""
         for i, char in enumerate(term.text):
             if char in['r', 'z', 'f', 'F']:
@@ -513,10 +513,16 @@ def rashabhyam_no_nah(prakriya: Prakriya) -> None:
                 new_text += char
             elif has_trigger and not blocked:
                 if char == 'n': 
-                    # --- NEW: Check if 'n' is immediately followed by a dental (t/th/d/dh/s) ---
                     next_char = term.text[i+1] if i + 1 < len(term.text) else ''
-                    if next_char in ['t', 'T', 'd', 'D', 's']:
-                        new_text += 'n'  # Blocked by the following dental!
+                    
+                    # Check padānta (word-final): Is this the last character of the final term?
+                    is_padanta = (term_idx == len(prakriya.terms) - 1) and (i == len(term.text) - 1)
+                    
+                    if is_padanta:
+                        new_text += 'n'
+                        prakriya.log("Rule 8.4.37: padAntasya blocked Natva at word-end")
+                    elif next_char in['t', 'T', 'd', 'D', 's']:
+                        new_text += 'n'  # Blocked by the following dental
                     else:
                         new_text += 'R'
                         prakriya.log("Rule 8.4.1 (Natva): 'n' -> 'R'")
