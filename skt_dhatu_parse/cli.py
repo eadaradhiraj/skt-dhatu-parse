@@ -50,6 +50,7 @@ def main() -> None:
     parser.add_argument("-v", "--vacana", type=int, default=0, choices=[0, 1, 2], help="Number")
     parser.add_argument("-t", "--table", action="store_true", help="Print the full 3x3 conjugation table")
     parser.add_argument("--krt", type=str, help="Generate a Primary Derivative (Kṛdanta)")
+    parser.add_argument("--all-krt", action="store_true", help="Generate all common Kṛdanta forms")
     parser.add_argument("--causative", action="store_true", help="Generate the Causative (Ṇic) secondary root")
     parser.add_argument("--voice", choices=["parasmaipada", "atmanepada"], help="Force a specific voice")
     parser.add_argument("--history", action="store_true", help="Show derivation history")
@@ -61,7 +62,7 @@ def main() -> None:
     if '-' in raw_dhatu:
         parts = raw_dhatu.split('-')
         raw_dhatu = parts[-1]  # The last element is the dhatu
-        upasargas = []
+        upasargas =[]
         for p in parts[:-1]:   # Everything before is an upasarga
             if p in UPASARGAS:
                 upasargas.append(p)
@@ -89,7 +90,25 @@ def main() -> None:
             sys.exit(1)
 
     # 2. Main Output Routing
-    if args.krt:
+    if args.all_krt:
+        pratyayas =[
+            "kta", "ktavatu", "ktvA", "tumun", "tavya", "anIyar", 
+            "yat", "Ryat", "Satf", "lyuW", "Rvul", "tfc", "GaY"
+        ]
+        
+        print(f"\n✨ All Common Kṛdanta Forms for: {raw_dhatu} (Gaṇa {gana})\n")
+        print(f"{'Affix (Upadeśa)':<20} | {'Derived Form'}")
+        print("-" * 40)
+        
+        for p in pratyayas:
+            p_prakriya = derive_krdanta(raw_dhatu, p, gana=gana)
+            if p_prakriya:
+                print(f"{p:<20} | {p_prakriya.get_current_string()}")
+            else:
+                print(f"{p:<20} | Failed")
+        print()
+        
+    elif args.krt:
         prakriya = derive_krdanta(raw_dhatu, args.krt, gana=gana) 
         if prakriya:
             print(f"\n✨ Kṛdanta Result: {prakriya.get_current_string()}\n")

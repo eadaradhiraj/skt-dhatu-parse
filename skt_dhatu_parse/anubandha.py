@@ -50,10 +50,16 @@ def resolve_it_markers(term: Term) -> None:
     # ==========================================
     if term.term_type in['pratyaya', 'vikaraRa', 'lakara', 'Agama']:
         
-        # Preprocessor for Satf (Present Participle) to drop the pedagogical 'f'
+        # Preprocessors for tricky pedagogical affixes without SLP1 nasal markers
         if term.upadeza == 'Satf':
             term.tags.add('fdit')
-            term.text = term.text.replace('f', '')
+            term.text = 'Sat'
+        elif term.upadeza == 'ktavatu':
+            term.tags.add('udit')
+            term.text = 'ktavat'
+        elif term.upadeza == 'tumun':
+            term.tags.add('udit')
+            term.text = 'tumn' # hal antyam will naturally drop the 'n' leaving 'tum'
             
         # Rule 1.3.7: cuwU (Initial Palatals 'c-varga' and Retroflexes 'w-varga' are 'it')
         if len(term.text) > 0:

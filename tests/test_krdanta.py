@@ -74,5 +74,18 @@ class TestKrdanta(unittest.TestCase):
         prakriya = derive_krdanta('gam', 'tavya', gana=1)
         self.assertEqual(prakriya.get_current_string(), 'gantavya')
 
+    def test_bhu_all_krdantas(self) -> None:
+        """Tests the comprehensive generation of Krdantas for BU."""
+        expected_forms = {
+            'kta': 'BUta', 'ktavatu': 'BUtavat', 'ktvA': 'BUtvA',
+            'tumun': 'Bavitum', 'tavya': 'Bavitavya', 'anIyar': 'BavanIya',
+            'yat': 'Bavya', 'Ryat': 'BAvya', 'Satf': 'Bavat',
+            'lyuW': 'Bavana', 'Rvul': 'BAvaka', 'tfc': 'Bavitf', 'GaY': 'BAva'
+        }
+        for affix, expected in expected_forms.items():
+            with self.subTest(affix=affix):
+                prakriya = derive_krdanta('BU', affix, gana=1)
+                self.assertEqual(prakriya.get_current_string(), expected)
+
 if __name__ == '__main__':
     unittest.main()

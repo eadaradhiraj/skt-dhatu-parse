@@ -183,6 +183,13 @@ def it_agama(prakriya: Prakriya) -> None:
     for term in prakriya.terms[1:]:
         if 'ardhadhatuka' in term.tags and term.text and term.text[0] in VAL_CONSONANTS:
             if dhatu and dhatu.text == 'kf' and 'liW' in term.tags: continue
+            
+            # Rule 7.2.11 sryukah kiti: Block 'iw' for roots ending in 'uk' or 'SrI' when affix is 'kit'
+            is_kit = 'kit' in term.tags
+            if is_kit and dhatu and dhatu.text and (dhatu.text == 'SrI' or dhatu.text[-1] in['u', 'U', 'f', 'F', 'x', 'X']):
+                prakriya.log(f"Rule 7.2.11: sryukah kiti blocked 'iw' for '{term.upadeza}'")
+                continue
+                
             if not is_anit: 
                 term.text = 'i' + term.text
                 prakriya.log(f"Rule 7.2.35: Added 'iw' augment to '{term.upadeza}'")
@@ -322,14 +329,26 @@ def eco_yayavayah(prakriya: Prakriya) -> None:
     next_term = prakriya.terms[idx + 1]
     
     text = dhatu.text
-    if text and text[-1] in EC_VOWELS and next_term.text and is_vowel(next_term.text[0]):
+    if text and text[-1] in EC_VOWELS and next_term.text:
         last_char = text[-1]
-        if last_char == 'e': rep = 'ay'
-        elif last_char == 'o': rep = 'av'
-        elif last_char == 'E': rep = 'Ay'
-        elif last_char == 'O': rep = 'Av'
-        dhatu.text = text[:-1] + rep
-        prakriya.log(f"Rule 6.1.78: eco'yavAyAvaH -> '{dhatu.text}'")
+        next_char = next_term.text[0]
+        rep = None
+        
+        if is_vowel(next_char):
+            if last_char == 'e': rep = 'ay'
+            elif last_char == 'o': rep = 'av'
+            elif last_char == 'E': rep = 'Ay'
+            elif last_char == 'O': rep = 'Av'
+            if rep:
+                dhatu.text = text[:-1] + rep
+                prakriya.log(f"Rule 6.1.78: eco'yavAyAvaH -> '{dhatu.text}'")
+                
+        elif next_char == 'y' and last_char in ['o', 'O']:
+            if last_char == 'o': rep = 'av'
+            elif last_char == 'O': rep = 'Av'
+            if rep:
+                dhatu.text = text[:-1] + rep
+                prakriya.log(f"Rule 6.1.79: vAnto yi pratyaye -> '{dhatu.text}'")
 
 def iko_yanaci(prakriya: Prakriya) -> None:
     for i in range(len(prakriya.terms) - 1):
