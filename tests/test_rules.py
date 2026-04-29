@@ -284,5 +284,22 @@ class TestRules(unittest.TestCase):
         kr_u_morphing(p2)
         self.assertEqual(p2.terms[1].text, '') # u is dropped before v
 
+    def test_srujidrusor_jhaly_amakiti(self) -> None:
+        from skt_dhatu_parse.rules import srujidrusor_jhaly_amakiti
+        p = Prakriya()
+        p.add_term(Term('dfS', 'dhatu'))
+        p.add_term(Term('tavya', 'pratyaya')) # non-kit jhal affix
+        srujidrusor_jhaly_amakiti(p)
+        self.assertEqual(p.terms[0].text, 'draS')
+        
+        # Should be blocked by a 'kit' affix (like kta)
+        p2 = Prakriya()
+        p2.add_term(Term('dfS', 'dhatu'))
+        suf = Term('ta', 'pratyaya')
+        suf.tags.add('kit')
+        p2.add_term(suf)
+        srujidrusor_jhaly_amakiti(p2)
+        self.assertEqual(p2.terms[0].text, 'dfS')
+
 if __name__ == '__main__':
     unittest.main()

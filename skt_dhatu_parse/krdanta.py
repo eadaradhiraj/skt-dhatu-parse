@@ -10,7 +10,8 @@ from .rules import (
     ata_upadhayah, rashabhyam_no_nah, anunasikalopo_jhali_kniti, vacisvapiyajadinam_kiti,   
     choh_kuh, radabhyam_nishthato_nah, it_agama, ho_dhah_dader_ghah, dhatvadeh_sah_sah_no_nah, 
     sarvadhatuka_ardhadhatukayoh, eco_yayavayah, vrasca_bhrasja_sruja_mruja, stuna_stuh,
-    khari_ca, insert_vikarana, sna_sandhi, se_mucadinam, anusvarasya_yayi_parasavarnah, ato_gune
+    khari_ca, insert_vikarana, sna_sandhi, se_mucadinam, anusvarasya_yayi_parasavarnah, ato_gune,
+    srujidrusor_jhaly_amakiti
 )
 
 def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_path: str = DEFAULT_DB_PATH) -> Prakriya:
@@ -42,20 +43,20 @@ def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_
     yuvor_anakau(prakriya)    
     ata_upadhayah(prakriya)
     vacisvapiyajadinam_kiti(prakriya)
-    
+    srujidrusor_jhaly_amakiti(prakriya)  # dfS -> draS
     sarvadhatuka_ardhadhatukayoh(prakriya)  
     eco_yayavayah(prakriya)                 
     ato_gune(prakriya)
     
     anunasikalopo_jhali_kniti(prakriya)  
-    radabhyam_nishthato_nah(prakriya) 
-    vrasca_bhrasja_sruja_mruja(prakriya) 
+    radabhyam_nishthato_nah(prakriya)
+    vrasca_bhrasja_sruja_mruja(prakriya) # draS -> draz
     choh_kuh(prakriya)                
     ho_dhah_dader_ghah(prakriya)      
     jhasas_tathor_dho_dhah(prakriya)  
     jhalam_jas_jhasi(prakriya)
     khari_ca(prakriya)  
-    stuna_stuh(prakriya)                 
+    stuna_stuh(prakriya)    # draz + tavya -> drazwavya               
     anusvarasya_yayi_parasavarnah(prakriya)
     rashabhyam_no_nah(prakriya)       
     

@@ -358,7 +358,7 @@ def ato_gune(prakriya: Prakriya) -> None:
     vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa'), None)
     suffix = prakriya.terms[-1]
     
-    if dhatu and vikarana and dhatu.text.endswith('a') and vikarana.text.startswith('a'):
+    if dhatu and vikarana and dhatu.text.endswith('a') and vikarana.text[0] in ['a', 'A']:
         dhatu.text = dhatu.text[:-1]
         prakriya.log("Rule 6.1.97: Merged Dhatu 'a' + Vikarana 'a'")
     if vikarana and vikarana.text.endswith('a') and suffix.text and suffix.text[0] in ['a', 'e', 'o']:
@@ -583,7 +583,7 @@ def pug_nau(prakriya: Prakriya) -> None:
     ric_term = next((t for t in prakriya.terms if t.upadeza == 'Ric'), None)
     if ric_term and dhatu.text.endswith('A'):
         dhatu.text = dhatu.text + 'p'
-        prakriya.log("Rule 7.3.36: Added 'puk' augment -> '{dhatu.text}'")
+        prakriya.log(f"Rule 7.3.36: Added 'puk' augment -> '{dhatu.text}'")
 
 def yuvor_anakau(prakriya: Prakriya) -> None:
     for term in prakriya.terms:
@@ -771,3 +771,26 @@ def haladi_seshah(prakriya: Prakriya) -> None:
         if new_text != text:
             abhyasa.text = new_text
             prakriya.log(f"Rule 7.4.60 (halAdi zezaH): -> '{abhyasa.text}'")
+
+def srujidrusor_jhaly_amakiti(prakriya: Prakriya) -> None:
+    """
+    Rule 6.1.58: sfjidfSojhalyamakiti
+    Adds the 'am' augment (which shifts 'f' to 'ra') to sfj and dfS 
+    before jhal-initial non-kit affixes (like tavya or tumun).
+    """
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    if not dhatu: return
+    idx = prakriya.terms.index(dhatu)
+    if idx + 1 >= len(prakriya.terms): return
+    suffix = prakriya.terms[idx + 1]
+
+    is_jhal = suffix.text and suffix.text[0] in JHAL_CONSONANTS
+    is_akit = 'kit' not in suffix.tags and 'Nit' not in suffix.tags
+
+    if is_jhal and is_akit:
+        if dhatu.text == 'dfS':
+            dhatu.text = 'draS'
+            prakriya.log("Rule 6.1.58: 'dfS' -> 'draS' (am augment)")
+        elif dhatu.text == 'sfj':
+            dhatu.text = 'sraj'
+            prakriya.log("Rule 6.1.58: 'sfj' -> 'sraj' (am augment)")

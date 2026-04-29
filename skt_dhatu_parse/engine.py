@@ -12,7 +12,7 @@ from .rules import (
     khari_ca, kuhos_cuh, aco_nniti, liti_dhator_anabhyasasya, hrasvah, bhavater_ah, abhyase_car_ca, 
     bhuvo_vug_lunlitoh, upasarga_sandhi, upasarga_satva, dhatvadeh_sah_sah_no_nah, paghra_sthadi_adesha,
     sna_sandhi, rashabhyam_no_nah, iko_yanaci, se_mucadinam, anusvarasya_yayi_parasavarnah,
-    vikarana_guna, kr_u_morphing, haladi_seshah, ata_upadhayah
+    vikarana_guna, kr_u_morphing, haladi_seshah, ata_upadhayah, jhasas_tathor_dho_dhah, jhalam_jas_jhasi
 )
 
 def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'prathama', vacana: int = 0,
@@ -112,6 +112,9 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     ato_gune(prakriya)                      
     adesa_pratyayayoh(prakriya)             
     rashabhyam_no_nah(prakriya)
+
+    jhasas_tathor_dho_dhah(prakriya)        # buD + Ta -> buD + Da
+    jhalam_jas_jhasi(prakriya)              # buD + Da -> bud + Da
     
     khari_ca(prakriya)                      
     samyogantasya_lopah(prakriya)           
