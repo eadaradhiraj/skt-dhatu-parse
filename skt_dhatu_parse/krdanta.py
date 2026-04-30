@@ -5,16 +5,7 @@ Pipeline for Primary Derivatives (Participles/Krdantas).
 from .dhatu_loader import get_dhatu, DEFAULT_DB_PATH
 from .models import Term, Prakriya
 from .anubandha import resolve_it_markers
-from .rules import (
-    idito_num_dhatoh, jhasas_tathor_dho_dhah, jhalam_jas_jhasi, yuvor_anakau,        
-    ata_upadhayah, rashabhyam_no_nah, anunasikalopo_jhali_kniti, vacisvapiyajadinam_kiti,   
-    choh_kuh, radabhyam_nishthato_nah, it_agama, ho_dhah_dader_ghah, dhatvadeh_sah_sah_no_nah, 
-    sarvadhatuka_ardhadhatukayoh, eco_yayavayah, vrasca_bhrasja_sruja_mruja, stuna_stuh,
-    khari_ca, insert_vikarana, sna_sandhi, se_mucadinam, anusvarasya_yayi_parasavarnah, ato_gune,
-    srujidrusor_jhaly_amakiti, nascapadantasya_jhali, aco_nniti, paghra_sthadi_adesha,
-    upasarga_sandhi, upasarga_satva, akah_savarne_dirghah, stha_adi_ita, ato_yuk, id_yati, sarvadhatukam_apit,
-    gam_hana_jana_lopa, che_ca, iko_yanaci, vikarana_guna, kr_u_morphing, snasor_allopah, iko_yanaci
-)
+from . import rules
 
 def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_path: str = DEFAULT_DB_PATH, upasargas: list[str] = None) -> Prakriya:
     prakriya = Prakriya()
@@ -29,8 +20,8 @@ def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_
     prakriya.add_term(dhatu)
     
     resolve_it_markers(dhatu)
-    dhatvadeh_sah_sah_no_nah(prakriya)  
-    idito_num_dhatoh(prakriya)
+    rules.dhatvadeh_sah_sah_no_nah(prakriya)  
+    rules.idito_num_dhatoh(prakriya)
     
     pratyaya = Term(pratyaya_upadeza, 'pratyaya')
     prakriya.add_term(pratyaya)
@@ -41,57 +32,58 @@ def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_
         
     # 2. Vikarana & Sārvadhātuka Morphing
     if 'sarvadhatuka' in pratyaya.tags:
-        insert_vikarana(prakriya)
+        rules.insert_vikarana(prakriya)
         vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa'), None)
         if vikarana: resolve_it_markers(vikarana)
-        sarvadhatukam_apit(prakriya=prakriya)
-        sna_sandhi(prakriya)
-        se_mucadinam(prakriya)
-        paghra_sthadi_adesha(prakriya) # Essential for gacCha / tiṣṭha etc.
-        vikarana_guna(prakriya)
-        kr_u_morphing(prakriya)
-        snasor_allopah(prakriya)
+        rules.sarvadhatukam_apit(prakriya)
+        rules.sna_sandhi(prakriya)
+        rules.se_mucadinam(prakriya)
+        rules.paghra_sthadi_adesha(prakriya) 
+
+        rules.vikarana_guna(prakriya)
+        rules.kr_u_morphing(prakriya)
+        rules.snasor_allopah(prakriya)
 
     # 3. Augments & Internal Morphing
-    id_yati(prakriya)
-    ato_yuk(prakriya)
-    yuvor_anakau(prakriya)    
-    stha_adi_ita(prakriya)
-    it_agama(prakriya)                
-    aco_nniti(prakriya)
-    ata_upadhayah(prakriya)
-    gam_hana_jana_lopa(prakriya)
-    vacisvapiyajadinam_kiti(prakriya)
-    srujidrusor_jhaly_amakiti(prakriya)
-    che_ca(prakriya)
-
-    # 3.5 Remove empty terms (luk, Slu, lopa) to allow proper adjacent Sandhi
-    prakriya.terms = [t for t in prakriya.terms if t.text]
+    rules.id_yati(prakriya)
+    rules.ato_yuk(prakriya)
+    rules.yuvor_anakau(prakriya)    
+    rules.stha_adi_ita(prakriya)
+    rules.it_agama(prakriya)                
+    rules.aco_nniti(prakriya)
+    rules.ata_upadhayah(prakriya)
+    rules.gam_hana_jana_lopa(prakriya)
+    rules.vacisvapiyajadinam_kiti(prakriya)
+    rules.srujidrusor_jhaly_amakiti(prakriya)  
+    rules.che_ca(prakriya)                           
+    
+    # 3.5 Remove empty terms
+    prakriya.terms =[t for t in prakriya.terms if t.text]
     
     # 4. Phonetic Vowel Rules
-    sarvadhatuka_ardhadhatukayoh(prakriya)  
-    eco_yayavayah(prakriya)   
-    iko_yanaci(prakriya)              
-    ato_gune(prakriya)                 # Must run BEFORE Savarṇa Dīrgha!
-    akah_savarne_dirghah(prakriya)
+    rules.sarvadhatuka_ardhadhatukayoh(prakriya)  
+    rules.eco_yayavayah(prakriya)                 
+    rules.iko_yanaci(prakriya)
+    rules.ato_gune(prakriya)                 
+    rules.akah_savarne_dirghah(prakriya)
     
     # 5. Consonant Sandhi
-    anunasikalopo_jhali_kniti(prakriya)  
-    radabhyam_nishthato_nah(prakriya)
-    vrasca_bhrasja_sruja_mruja(prakriya) 
-    choh_kuh(prakriya)                
-    ho_dhah_dader_ghah(prakriya)      
-    jhasas_tathor_dho_dhah(prakriya)  
-    jhalam_jas_jhasi(prakriya)
-    khari_ca(prakriya)  
-    stuna_stuh(prakriya)    
-    nascapadantasya_jhali(prakriya)          
-    anusvarasya_yayi_parasavarnah(prakriya)  
-    anusvarasya_yayi_parasavarnah(prakriya)
-    rashabhyam_no_nah(prakriya)       
+    rules.anunasikalopo_jhali_kniti(prakriya)  
+    rules.radabhyam_nishthato_nah(prakriya)
+    rules.vrasca_bhrasja_sruja_mruja(prakriya) 
+    rules.choh_kuh(prakriya)                
+    rules.ho_dhah_dader_ghah(prakriya)      
+    rules.jhasas_tathor_dho_dhah(prakriya)  
+    rules.jhalam_jas_jhasi(prakriya)
+    rules.khari_ca(prakriya)  
+    rules.stuna_stuh(prakriya)    
+    rules.nascapadantasya_jhali(prakriya)          
+    rules.anusvarasya_yayi_parasavarnah(prakriya)  
+    rules.anusvarasya_yayi_parasavarnah(prakriya)
+    rules.rashabhyam_no_nah(prakriya)       
     
     # 6. Upasarga Final Application
-    upasarga_satva(prakriya)
-    upasarga_sandhi(prakriya)
+    rules.upasarga_satva(prakriya)
+    rules.upasarga_sandhi(prakriya)
     
     return prakriya

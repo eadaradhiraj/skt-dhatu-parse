@@ -282,5 +282,33 @@ class TestPipeline(unittest.TestCase):
         p2 = derive('kf', 'luN', purusha='prathama', vacana=2, gana=8)
         self.assertEqual(p2.get_current_string(), 'akArzuH')
 
+    def test_gana_7_chid(self) -> None:
+        """Gaṇa 7: Cid tests Śnam (infix) insertion."""
+        p1 = derive('Cid', 'laW', purusha='prathama', vacana=0, gana=7) 
+        self.assertEqual(p1.get_current_string(), 'Cinatti')
+        p2 = derive('Cid', 'laW', purusha='prathama', vacana=1, gana=7) 
+        self.assertEqual(p2.get_current_string(), 'CinttaH')
+
+    def test_gana_2_bru(self) -> None:
+        """Gaṇa 2: brU tests bruva Iw augment and YaN sandhi."""
+        p1 = derive('brU', 'laW', purusha='prathama', vacana=0, gana=2) 
+        self.assertEqual(p1.get_current_string(), 'bravIti')
+        p2 = derive('brU', 'laW', purusha='prathama', vacana=1, gana=2) 
+        self.assertEqual(p2.get_current_string(), 'brUtaH')
+
+    def test_gana_3_dha(self) -> None:
+        """Gaṇa 3: DA tests do dad ghoH and dadhas tathorś ca."""
+        p1 = derive('DA', 'laW', purusha='prathama', vacana=0, gana=3) 
+        self.assertEqual(p1.get_current_string(), 'daDAti')
+        p2 = derive('DA', 'laW', purusha='prathama', vacana=1, gana=3) 
+        self.assertEqual(p2.get_current_string(), 'DattaH')
+
+    def test_lit_gam(self) -> None:
+        """Tests liW for gam (kuhos cuh and mo no dhatoh)."""
+        p1 = derive('gam', 'liW', purusha='prathama', vacana=0, gana=1) 
+        self.assertEqual(p1.get_current_string(), 'jagAma')
+        p2 = derive('gam', 'liW', purusha='uttama', vacana=1, gana=1) 
+        self.assertEqual(p2.get_current_string(), 'jaganva')
+
 if __name__ == '__main__':
     unittest.main()

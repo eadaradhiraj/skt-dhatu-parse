@@ -5,11 +5,7 @@ Pipeline for Secondary Roots (Causative, Desiderative, etc.)
 from .dhatu_loader import get_dhatu, DEFAULT_DB_PATH
 from .models import Term, Prakriya
 from .anubandha import resolve_it_markers
-from .rules import (
-    idito_num_dhatoh, ata_upadhayah, aco_nniti, eco_yayavayah,
-    sanadyanta_dhatavah, dhatvadeh_sah_sah_no_nah, pug_nau,
-    sarvadhatuka_ardhadhatukayoh
-)
+from . import rules
 
 def derive_secondary_root(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_path: str = DEFAULT_DB_PATH) -> Prakriya:
     """Derives a new secondary Dhatu (like a Causative) from a base Dhatu."""
@@ -20,8 +16,8 @@ def derive_secondary_root(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = No
     prakriya.add_term(dhatu)
     
     resolve_it_markers(dhatu)
-    dhatvadeh_sah_sah_no_nah(prakriya)  
-    idito_num_dhatoh(prakriya)
+    rules.dhatvadeh_sah_sah_no_nah(prakriya)  
+    rules.idito_num_dhatoh(prakriya)
     
     # 3. Add Secondary Affix (e.g., 'Ric')
     pratyaya = Term(pratyaya_upadeza, 'pratyaya')
@@ -32,12 +28,12 @@ def derive_secondary_root(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = No
     resolve_it_markers(pratyaya)       # Strips 'Ric' to 'i' + Rit
 
     # 5. Apply Vrddhi & Augment Rules
-    pug_nau(prakriya)        
-    ata_upadhayah(prakriya)  
-    aco_nniti(prakriya)
-    sarvadhatuka_ardhadhatukayoh(prakriya)   
+    rules.pug_nau(prakriya)        
+    rules.ata_upadhayah(prakriya)  
+    rules.aco_nniti(prakriya)
+    rules.sarvadhatuka_ardhadhatukayoh(prakriya)   
     
-    eco_yayavayah(prakriya)  
-    sanadyanta_dhatavah(prakriya)
+    rules.eco_yayavayah(prakriya)  
+    rules.sanadyanta_dhatavah(prakriya)
     
     return prakriya

@@ -5,21 +5,7 @@ The main orchestrator for the Paninian derivation pipeline (Prakriya).
 from .dhatu_loader import get_dhatu, DEFAULT_DB_PATH
 from .models import Term, Prakriya
 from .anubandha import resolve_it_markers
-from .rules import (
-    substitute_lakara, insert_vikarana, atmanepada_tere, idito_num_dhatoh, sarvadhatuka_ardhadhatukayoh, 
-    eco_yayavayah, ato_dirgho_yayi, rutva_visarga, jhonta, ato_gune, at_agama, itasca, it_agama, 
-    adesa_pratyayayoh, hali_ca, tasthasthamipam, samyogantasya_lopah, ur_at, thasah_se, ato_nitah, 
-    khari_ca, kuhos_cuh, aco_nniti, liti_dhator_anabhyasasya, hrasvah, bhavater_ah, abhyase_car_ca, 
-    bhuvo_vug_lunlitoh, upasarga_sandhi, upasarga_satva, dhatvadeh_sah_sah_no_nah, paghra_sthadi_adesha,
-    sna_sandhi, rashabhyam_no_nah, iko_yanaci, se_mucadinam, anusvarasya_yayi_parasavarnah,
-    vikarana_guna, kr_u_morphing, haladi_seshah, ata_upadhayah, jhasas_tathor_dho_dhah, jhalam_jas_jhasi, nascapadantasya_jhali,
-    slau_reduplication, snasor_allopah, sarvadhatukam_apit, tasyasti_lopa,
-    jher_jus, mer_nih, ser_hi, at_uttasya, nityam_nitah, er_uh, lin_agamas, cli_agama, 
-    gatistha_sic_lopa, ato_heh, ato_yeyah, lin_salopo_anantyasya, ad_gunah, lopo_vyorvali, usy_apadantat,anunasikalopo_jhali_kniti,
-    akah_savarne_dirghah, jhasya_ran, ito_at, utasca_pratyayad, gam_hana_jana_lopa,
-    ho_dhah_dader_ghah, vrasca_bhrasja_sruja_mruja, choh_kuh, che_ca, stuna_stuh, ekaco_baso_bhas, sadhoh_kas_si,
-    srujidrusor_jhaly_amakiti, sici_vrddhih, asti_sico_aprkte, do_dad_ghoh, snabhyastayor_atah
-)
+from . import rules
 
 def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'prathama', vacana: int = 0,
            gana: int = None, db_path: str = DEFAULT_DB_PATH, custom_dhatu: Term = None,
@@ -56,131 +42,136 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     
     # 2. Resolve Dhatu Anubandhas and Preprocessing
     resolve_it_markers(dhatu)
-    dhatvadeh_sah_sah_no_nah(prakriya)  
-    idito_num_dhatoh(prakriya)  
+    rules.dhatvadeh_sah_sah_no_nah(prakriya)  
+    rules.idito_num_dhatoh(prakriya)  
     
     # 3. Add Lakara and Past Tense Prefix (aW)
     lakara = Term(lakara_name, 'lakara')
     lakara.tags.add(lakara_name) 
     prakriya.add_term(lakara)
-    at_agama(prakriya)           
+    rules.at_agama(prakriya)           
     
     # 4. Resolve Meta-Markers for Prefix/Lakara
     for term in prakriya.terms:
         if term.term_type != 'dhatu': resolve_it_markers(term)
     
     # 5. Substitute Lakara
-    substitute_lakara(prakriya, purusha=purusha, vacana=vacana)
+    rules.substitute_lakara(prakriya, purusha=purusha, vacana=vacana)
     
     # 6. Early Suffix Replacements
-    mer_nih(prakriya)
-    jher_jus(prakriya)
-    jhasya_ran(prakriya)
-    ito_at(prakriya)
-    jhonta(prakriya)            
-    thasah_se(prakriya)         
-    tasthasthamipam(prakriya)
-    ser_hi(prakriya)
-    at_uttasya(prakriya)
+    rules.mer_nih(prakriya)
+    rules.jher_jus(prakriya)
+    rules.jhasya_ran(prakriya)
+    rules.ito_at(prakriya)
+    rules.jhonta(prakriya)            
+    rules.thasah_se(prakriya)         
+    rules.tasthasthamipam(prakriya)
+    rules.ser_hi(prakriya)
+    rules.at_uttasya(prakriya)
     
     # 7. Resolve Suffix Markers and Morphing
     suffix = prakriya.terms[-1]
     resolve_it_markers(suffix)
-    atmanepada_tere(prakriya)   
-    itasca(prakriya)            
-    nityam_nitah(prakriya)
-    er_uh(prakriya)
+    rules.atmanepada_tere(prakriya)   
+    rules.itasca(prakriya)            
+    rules.nityam_nitah(prakriya)
+    rules.er_uh(prakriya)
 
     # 8. Insert Vikarana & Special Lakara Agamas
-    insert_vikarana(prakriya)
-    cli_agama(prakriya)
-    lin_agamas(prakriya)
+    rules.insert_vikarana(prakriya)
+    rules.cli_agama(prakriya)
+    rules.lin_agamas(prakriya)
     
     vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa' and t.upadeza != 'cli'), None)
     if vikarana: resolve_it_markers(vikarana)
+    rules.mit_aco_antyat_parah(prakriya)
 
     # 8.5 Early Elisions
-    gatistha_sic_lopa(prakriya)
-    sici_vrddhih(prakriya)
-    asti_sico_aprkte(prakriya)
+    rules.bruva_it(prakriya)
+    rules.gatistha_sic_lopa(prakriya)
+    rules.sici_vrddhih(prakriya)
+    rules.asti_sico_aprkte(prakriya)
 
     # 9. Gana 9 and Root Substitutions
-    sarvadhatukam_apit(prakriya)
-    sna_sandhi(prakriya)
-    se_mucadinam(prakriya)
-    paghra_sthadi_adesha(prakriya)
-    vikarana_guna(prakriya)
-    kr_u_morphing(prakriya)
-    snasor_allopah(prakriya)
-    it_agama(prakriya)          
+    rules.sarvadhatukam_apit(prakriya)
+    rules.sna_sandhi(prakriya)
+    rules.se_mucadinam(prakriya)
+    rules.paghra_sthadi_adesha(prakriya)
+    rules.vikarana_guna(prakriya)
+    rules.kr_u_morphing(prakriya)
+    rules.snasor_allopah(prakriya)
+    rules.it_agama(prakriya)          
     
     # 10. Abhyasa (Reduplication)
-    liti_dhator_anabhyasasya(prakriya)
-    slau_reduplication(prakriya)
+    rules.liti_dhator_anabhyasasya(prakriya)
+    rules.slau_reduplication(prakriya)
 
     # 10.1 Remove empty terms (luk, Slu) to allow boundary checks for Abhyasa rules
     prakriya.terms =[t for t in prakriya.terms if t.text]
 
-    haladi_seshah(prakriya)            
-    do_dad_ghoh(prakriya)
-    snabhyastayor_atah(prakriya)
-    hrasvah(prakriya)
-    ur_at(prakriya)                    
-    bhavater_ah(prakriya)              
-    abhyase_car_ca(prakriya)
-    kuhos_cuh(prakriya)                
-    bhuvo_vug_lunlitoh(prakriya)      
+    rules.haladi_seshah(prakriya)            
+    rules.do_dad_ghoh(prakriya)
+    rules.snabhyastayor_atah(prakriya)
+    rules.hrasvah(prakriya)
+    rules.ur_at(prakriya)                    
+    rules.bhavater_ah(prakriya)              
+    rules.abhyase_car_ca(prakriya)
+    rules.kuhos_cuh(prakriya)                
+    rules.bhuvo_vug_lunlitoh(prakriya)      
     
     # 10.5 Remove empty terms
     prakriya.terms =[t for t in prakriya.terms if t.text]
 
     # 11. Core Phonetics
-    gam_hana_jana_lopa(prakriya)
-    ato_yeyah(prakriya)
-    lin_salopo_anantyasya(prakriya)
-    ato_heh(prakriya)
-    utasca_pratyayad(prakriya)
-    tasyasti_lopa(prakriya)
+    rules.gam_hana_jana_lopa(prakriya)
+    rules.ato_yeyah(prakriya)
+    rules.lin_salopo_anantyasya(prakriya)
+    rules.ato_heh(prakriya)
+    rules.utasca_pratyayad(prakriya)
+    rules.tasyasti_lopa(prakriya)
 
-    hali_ca(prakriya)
-    srujidrusor_jhaly_amakiti(prakriya)
-    aco_nniti(prakriya)
-    ata_upadhayah(prakriya)           
-    sarvadhatuka_ardhadhatukayoh(prakriya)  
-    eco_yayavayah(prakriya)                 
-    iko_yanaci(prakriya)
+    rules.hali_ca(prakriya)
+    rules.srujidrusor_jhaly_amakiti(prakriya)
+    rules.aco_nniti(prakriya)
+    rules.ata_upadhayah(prakriya)           
+    rules.sarvadhatuka_ardhadhatukayoh(prakriya)  
+    rules.eco_yayavayah(prakriya)                 
+    rules.iko_yanaci(prakriya)
     
     # 12. Sandhi and Final Consonants
-    ato_dirgho_yayi(prakriya)               
-    ato_nitah(prakriya) 
-    usy_apadantat(prakriya)                 
-    ad_gunah(prakriya)
-    ato_gune(prakriya)
-    akah_savarne_dirghah(prakriya)
-    lopo_vyorvali(prakriya)
+    rules.ato_dirgho_yayi(prakriya)               
+    rules.ato_nitah(prakriya) 
+    rules.usy_apadantat(prakriya)                 
+    rules.ad_gunah(prakriya)
+    rules.ato_gune(prakriya)
+    rules.akah_savarne_dirghah(prakriya)
+    rules.lopo_vyorvali(prakriya)
     
-    anunasikalopo_jhali_kniti(prakriya)
-    vrasca_bhrasja_sruja_mruja(prakriya)
-    choh_kuh(prakriya)
-    che_ca(prakriya)
+    rules.anunasikalopo_jhali_kniti(prakriya)
+    rules.vrasca_bhrasja_sruja_mruja(prakriya)
+    rules.choh_kuh(prakriya)
+    rules.che_ca(prakriya)
     
-    ho_dhah_dader_ghah(prakriya)
-    ekaco_baso_bhas(prakriya)
-    sadhoh_kas_si(prakriya)
+    rules.ho_dhah_dader_ghah(prakriya)
+    rules.ekaco_baso_bhas(prakriya)
+    rules.sadhoh_kas_si(prakriya)
     
-    adesa_pratyayayoh(prakriya)             
-    rashabhyam_no_nah(prakriya)
+    rules.mo_no_dhatoh(prakriya)
+    rules.adesa_pratyayayoh(prakriya)             
+    rules.rashabhyam_no_nah(prakriya)
 
-    jhasas_tathor_dho_dhah(prakriya)        
-    jhalam_jas_jhasi(prakriya)              
-    stuna_stuh(prakriya)
+    rules.dadhas_tathor_ca(prakriya)
+
+    rules.jhasas_tathor_dho_dhah(prakriya)        
+    rules.jhalam_jas_jhasi(prakriya)              
+    rules.stuna_stuh(prakriya)
     
-    khari_ca(prakriya)                      
-    samyogantasya_lopah(prakriya)
-    nascapadantasya_jhali(prakriya)         
-    anusvarasya_yayi_parasavarnah(prakriya)
-    upasarga_satva(prakriya)                
-    upasarga_sandhi(prakriya)               
-    rutva_visarga(prakriya)                 
+    rules.khari_ca(prakriya)                      
+    rules.samyogantasya_lopah(prakriya)
+    rules.nascapadantasya_jhali(prakriya)         
+    rules.anusvarasya_yayi_parasavarnah(prakriya)
+    rules.upasarga_satva(prakriya)                
+    rules.upasarga_sandhi(prakriya)               
+    rules.rutva_visarga(prakriya)                 
     
     return prakriya
