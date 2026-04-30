@@ -160,7 +160,10 @@ def bruva_it(prakriya: Prakriya) -> None:
             
     if not suffix: return
 
-    if dhatu.upadeza == 'brU' and ('sarvadhatuka' in suffix.tags or 'tin' in suffix.tags) and 'pit' in suffix.tags:
+    # Use the clean tag to match against 'brU' regardless of original upadeśa markers (like brUY)
+    clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
+
+    if clean_dhatu == 'brU' and ('sarvadhatuka' in suffix.tags or 'tin' in suffix.tags) and 'pit' in suffix.tags:
         if suffix.text and suffix.text[0] in SLP1_CONSONANTS:
             agama = Term('I', 'Agama')
             agama.tags.add('sarvadhatuka')
@@ -1408,3 +1411,14 @@ def snabhyastayor_atah(prakriya: Prakriya) -> None:
     if is_weak and is_vowel and dhatu.text.endswith('A'):
         dhatu.text = dhatu.text[:-1]
         prakriya.log("Rule 6.4.112: śnābhyastayor ātaḥ (Dropped A)")
+
+def aci_snu_dhatu_bhruvam(prakriya: Prakriya) -> None:
+    """Rule 6.4.77: aci śnudhātubhruvāṃ... Root 'U' becomes 'uv' before vowels."""
+    for i in range(len(prakriya.terms)-1):
+        t1 = prakriya.terms[i]
+        t2 = prakriya.terms[i+1]
+        if t1.term_type == 'dhatu' and t1.text.endswith('U') and t2.text and is_vowel(t2.text[0]):
+            # Pāṇini 6.4.87 (huśnuvoḥ) forces yaṇ for Snu, but brU gets normal uvaṅ
+            if t1.text == 'brU':
+                t1.text = t1.text[:-1] + 'uv'
+                prakriya.log("Rule 6.4.77: aci śnudhātubhruvāṃ (U -> uv before vowel)")

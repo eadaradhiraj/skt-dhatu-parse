@@ -136,6 +136,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.ata_upadhayah(prakriya)           
     rules.sarvadhatuka_ardhadhatukayoh(prakriya)  
     rules.eco_yayavayah(prakriya)                 
+    rules.aci_snu_dhatu_bhruvam(prakriya)
     rules.iko_yanaci(prakriya)
     
     # 12. Sandhi and Final Consonants
