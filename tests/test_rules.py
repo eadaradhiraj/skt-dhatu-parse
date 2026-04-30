@@ -7,7 +7,9 @@ from skt_dhatu_parse.rules import (
     anunasikalopo_jhali_kniti, vacisvapiyajadinam_kiti, choh_kuh, radabhyam_nishthato_nah,
     vrasca_bhrasja_sruja_mruja, stuna_stuh, nascapadantasya_jhali,
     ho_dhah_dader_ghah, ur_at, srujidrusor_jhaly_amakiti, kr_u_morphing, vikarana_guna,
-    sarvadhatuka_ardhadhatukayoh, kuhos_cuh, stha_adi_ita, ato_yuk, id_yati, akah_savarne_dirghah
+    sarvadhatuka_ardhadhatukayoh, kuhos_cuh, stha_adi_ita, ato_yuk, id_yati,
+    akah_savarne_dirghah, gam_hana_jana_lopa, che_ca, ekaco_baso_bhas, sadhoh_kas_si,
+    jhasya_ran, ito_at, utasca_pratyayad
 )
 
 class TestRules(unittest.TestCase):
@@ -346,6 +348,72 @@ class TestRules(unittest.TestCase):
             akah_savarne_dirghah(p)
             self.assertEqual(p.terms[0].text, e1)
             self.assertEqual(p.terms[1].text, e2)
+
+    def test_gam_hana_jana_lopa(self) -> None:
+        """Covers dropping 'a' in gam/han/jan before weak vowel affixes."""
+        p = Prakriya()
+        dhatu = Term('han', 'dhatu')
+        dhatu.tags.add('clean_han') # Required for the rule to identify the original root
+        p.add_term(dhatu)
+        suf = Term('anti', 'pratyaya')
+        suf.tags.add('Nit')
+        p.add_term(suf)
+        
+        gam_hana_jana_lopa(p)
+        self.assertEqual(p.terms[0].text, 'Gn') # 'a' dropped, 'hn' became 'Gn'
+
+    def test_che_ca(self) -> None:
+        """Covers inserting 'c' before 'C' after a short vowel."""
+        p = Prakriya()
+        p.add_term(Term('pfC', 'dhatu')) # Intra-term test
+        che_ca(p)
+        self.assertEqual(p.terms[0].text, 'pfcC')
+        
+        p2 = Prakriya()
+        p2.add_term(Term('a', 'Agama')) # Cross-term test
+        p2.add_term(Term('CAdana', 'pratyaya'))
+        che_ca(p2)
+        self.assertEqual(p2.terms[1].text, 'cCAdana')
+
+    def test_ekaco_baso_bhas(self) -> None:
+        """Covers initial aspiration shift before 's' or 'dhv' (duh -> Dhuh)."""
+        p = Prakriya()
+        p.add_term(Term('duh', 'dhatu'))
+        p.add_term(Term('si', 'pratyaya'))
+        ekaco_baso_bhas(p)
+        self.assertEqual(p.terms[0].text, 'Duh')
+
+    def test_sadhoh_kas_si(self) -> None:
+        """Covers ṣ, ḍh, gh becoming 'k' before 's'."""
+        p = Prakriya()
+        p.add_term(Term('DuG', 'dhatu'))
+        p.add_term(Term('si', 'pratyaya'))
+        sadhoh_kas_si(p)
+        self.assertEqual(p.terms[0].text, 'Duk')
+
+    def test_liN_atmanepada_replacements(self) -> None:
+        """Covers jhasya ran and iṭo't rules for Atmanepada Optative."""
+        p1 = Prakriya()
+        s1 = Term('Ja', 'pratyaya')
+        s1.tags.add('liN')
+        p1.add_term(s1)
+        jhasya_ran(p1)
+        self.assertEqual(p1.terms[0].text, 'ran')
+        
+        p2 = Prakriya()
+        s2 = Term('iw', 'pratyaya')
+        s2.tags.add('liN')
+        p2.add_term(s2)
+        ito_at(p2)
+        self.assertEqual(p2.terms[0].text, 'a')
+
+    def test_utasca_pratyayad(self) -> None:
+        """Covers dropping 'hi' after an affix ending in 'u'."""
+        p = Prakriya()
+        p.add_term(Term('u', 'vikaraRa'))
+        p.add_term(Term('hi', 'pratyaya'))
+        utasca_pratyayad(p)
+        self.assertEqual(p.terms[1].text, '')
 
 if __name__ == '__main__':
     unittest.main()

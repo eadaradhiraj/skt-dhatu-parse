@@ -13,7 +13,7 @@ from .rules import (
     khari_ca, insert_vikarana, sna_sandhi, se_mucadinam, anusvarasya_yayi_parasavarnah, ato_gune,
     srujidrusor_jhaly_amakiti, nascapadantasya_jhali, aco_nniti, paghra_sthadi_adesha,
     upasarga_sandhi, upasarga_satva, akah_savarne_dirghah, stha_adi_ita, ato_yuk, id_yati, sarvadhatukam_apit,
-    gam_hana_jana_lopa, che_ca
+    gam_hana_jana_lopa, che_ca, iko_yanaci, vikarana_guna, kr_u_morphing, snasor_allopah, iko_yanaci
 )
 
 def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_path: str = DEFAULT_DB_PATH, upasargas: list[str] = None) -> Prakriya:
@@ -48,6 +48,9 @@ def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_
         sna_sandhi(prakriya)
         se_mucadinam(prakriya)
         paghra_sthadi_adesha(prakriya) # Essential for gacCha / tiṣṭha etc.
+        vikarana_guna(prakriya)
+        kr_u_morphing(prakriya)
+        snasor_allopah(prakriya)
 
     # 3. Augments & Internal Morphing
     id_yati(prakriya)
@@ -67,7 +70,8 @@ def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_
     
     # 4. Phonetic Vowel Rules
     sarvadhatuka_ardhadhatukayoh(prakriya)  
-    eco_yayavayah(prakriya)                 
+    eco_yayavayah(prakriya)   
+    iko_yanaci(prakriya)              
     ato_gune(prakriya)                 # Must run BEFORE Savarṇa Dīrgha!
     akah_savarne_dirghah(prakriya)
     

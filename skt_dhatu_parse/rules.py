@@ -548,7 +548,7 @@ def stuna_stuh(prakriya: Prakriya) -> None:
                 prakriya.log("Rule 8.4.41: 'T' -> 'W' (zwunA zwuH)")
 
 def vrasca_bhrasja_sruja_mruja(prakriya: Prakriya) -> None:
-    """Rule 8.2.36: ...cCaSAM zaH. Final palatals/C/S become 'z' before jhal."""
+    """Rule 8.2.36: ...cCaSAM zaH. Final palatals/cCh/S become 'z' before jhal."""
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     if not dhatu: return
     idx = prakriya.terms.index(dhatu)
@@ -562,7 +562,10 @@ def vrasca_bhrasja_sruja_mruja(prakriya: Prakriya) -> None:
         elif dhatu.text in ['Brajj', 'Brasj']:
             dhatu.text = dhatu.text[:-2] + 'z'
             prakriya.log(f"Rule 8.2.36: bhrasj... conjunct became 'z' -> '{dhatu.text}'")
-        elif dhatu.text in ['sfj', 'mfj', 'yaj', 'rAj', 'BrAj'] or dhatu.text.endswith('C') or dhatu.text.endswith('S'):
+        elif dhatu.text.endswith('cC'):
+            dhatu.text = dhatu.text[:-2] + 'z'
+            prakriya.log(f"Rule 8.2.36: cCha conjunct became 'z' -> '{dhatu.text}'")
+        elif dhatu.text in['sfj', 'mfj', 'yaj', 'rAj', 'BrAj'] or dhatu.text.endswith('C') or dhatu.text.endswith('S'):
             dhatu.text = dhatu.text[:-1] + 'z'
             prakriya.log(f"Rule 8.2.36: Final palatal/C/S became 'z' -> '{dhatu.text}'")
 
@@ -1047,6 +1050,7 @@ def cli_agama(prakriya: Prakriya) -> None:
         if clean_dhatu in ['gam']:
             cli.text = 'a'
             cli.tags.add('Nit')
+            cli.tags.add('aN') # Mark explicitly as the aN augment!
             prakriya.log("Rule 3.1.55: puSAdi... cli -> aN")
         else:
             cli.text = 's'
@@ -1195,7 +1199,7 @@ def er_uh(prakriya: Prakriya) -> None:
         prakriya.log("Rule 3.4.86: er uH (i -> u for loW)")
 
 def gam_hana_jana_lopa(prakriya: Prakriya) -> None:
-    """Rule 6.4.98: gam-hana-jana-khan-ghasāṃ lopaḥ. Drops 'a' before vowel weak affixes."""
+    """Rule 6.4.98: gam-hana-jana-khan-ghasāṃ lopaḥ kṅity anaṅi. Drops 'a' before vowel weak affixes."""
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     if not dhatu: return
     idx = prakriya.terms.index(dhatu)
@@ -1208,8 +1212,9 @@ def gam_hana_jana_lopa(prakriya: Prakriya) -> None:
         
     is_kit_or_nit = 'kit' in suffix.tags or 'Nit' in suffix.tags
     is_vowel_initial = suffix.text and is_vowel(suffix.text[0])
+    is_anang = 'aN' not in suffix.tags
     
-    if clean_dhatu in ['gam', 'han', 'jan', 'Kan', 'Gas'] and is_kit_or_nit and is_vowel_initial:
+    if clean_dhatu in ['gam', 'han', 'jan', 'Kan', 'Gas'] and is_kit_or_nit and is_vowel_initial and is_anang:
         if dhatu.text.endswith('am') or dhatu.text.endswith('an') or dhatu.text.endswith('as'):
             dhatu.text = dhatu.text[:-2] + dhatu.text[-1]
             prakriya.log(f"Rule 6.4.98: Dropped penultimate 'a' -> '{dhatu.text}'")
@@ -1239,3 +1244,29 @@ def che_ca(prakriya: Prakriya) -> None:
         if t1.text and t2.text and t2.text.startswith('C') and t1.text[-1] in['a', 'i', 'u', 'f', 'x']:
             t2.text = 'c' + t2.text
             prakriya.log("Rule 6.1.73: che ca (inserted 'c' before 'C' across terms)")
+
+def ekaco_baso_bhas(prakriya: Prakriya) -> None:
+    """Rule 8.2.37: ekāco baśo bhaṣ... Initial b/g/ḍ/d becomes bh/gh/ḍh/dh before 's'."""
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    if not dhatu: return
+    idx = prakriya.terms.index(dhatu)
+    if idx + 1 >= len(prakriya.terms): return
+    suffix = prakriya.terms[idx + 1]
+    
+    # If the root ends in a heavy aspirate and is followed by 's'
+    if dhatu.text and dhatu.text[-1] in['B', 'G', 'Q', 'D']:
+        if suffix.text.startswith('s') or suffix.text.startswith('Dv'):
+            bas_bhas = {'b': 'B', 'g': 'G', 'q': 'Q', 'd': 'D'}
+            if dhatu.text[0] in bas_bhas:
+                dhatu.text = bas_bhas[dhatu.text[0]] + dhatu.text[1:]
+                prakriya.log(f"Rule 8.2.37: ekāco baśo bhaṣ -> '{dhatu.text}'")
+
+def sadhoh_kas_si(prakriya: Prakriya) -> None:
+    """Rule 8.2.41: ṣaḍhoḥ kas si. ṣ, ḍh (and gh) become 'k' before 's'."""
+    if len(prakriya.terms) >= 2:
+        dhatu = prakriya.terms[-2]
+        suffix = prakriya.terms[-1]
+        if dhatu.text and suffix.text and suffix.text.startswith('s'):
+            if dhatu.text[-1] in['z', 'Q', 'G']:
+                dhatu.text = dhatu.text[:-1] + 'k'
+                prakriya.log("Rule 8.2.41: ṣaḍhoḥ kas si -> 'k' before 's'")

@@ -107,5 +107,24 @@ class TestKrdanta(unittest.TestCase):
         prakriya = derive_krdanta('dA', 'Rvul', gana=3)
         self.assertEqual(prakriya.get_current_string(), 'dAyaka')
 
+    def test_vrasc_samprasarana_and_retroflexion(self) -> None:
+        """Tests vraSc + kta -> vfzwa (samprasarana + cCh squashing)."""
+        prakriya = derive_krdanta('vraSc', 'kta', gana=6)
+        # Note: upadesa has nasal markers o!vraScU!, which strip cleanly to vraSc
+        self.assertEqual(prakriya.get_current_string(), 'vfzwa')
+
+    def test_prac_tavya_and_satr(self) -> None:
+        """Tests praC with both jhal retroflexion and che-ca 'c' augment."""
+        p_tavya = derive_krdanta('praC', 'tavya', gana=6)
+        self.assertEqual(p_tavya.get_current_string(), 'prazwavya')
+        
+        p_satr = derive_krdanta('praC', 'Satf', gana=6)
+        self.assertEqual(p_satr.get_current_string(), 'pfcCat')
+
+    def test_kr_satr(self) -> None:
+        """Tests kṛ + Śatṛ -> kurvat (u-morphing and yaṇ sandhi)."""
+        prakriya = derive_krdanta('kf', 'Satf', gana=8)
+        self.assertEqual(prakriya.get_current_string(), 'kurvat')
+
 if __name__ == '__main__':
     unittest.main()

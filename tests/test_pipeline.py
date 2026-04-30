@@ -209,5 +209,54 @@ class TestPipeline(unittest.TestCase):
         
         self.assertIn("Test log entry", captured_output.getvalue())
 
+    def test_gana_2_han(self) -> None:
+        """Gaṇa 2: han drops 'a' and shifts to 'Gn' before weak vowel affixes."""
+        p1 = derive('han', 'laW', purusha='prathama', vacana=0, gana=2) # Strong
+        self.assertEqual(p1.get_current_string(), 'hanti')
+        
+        p2 = derive('han', 'laW', purusha='prathama', vacana=2, gana=2) # Weak + Vowel
+        self.assertEqual(p2.get_current_string(), 'Gnanti')
+
+    def test_gana_2_duh(self) -> None:
+        """Gaṇa 2: duh tests aspiration shifts and khari-ca/jhalam-jaś."""
+        p1 = derive('duh', 'laW', purusha='prathama', vacana=0, gana=2) # dogdhi
+        self.assertEqual(p1.get_current_string(), 'dogDi')
+        
+        p2 = derive('duh', 'laW', purusha='madhyama', vacana=0, gana=2) # dhokṣi
+        self.assertEqual(p2.get_current_string(), 'Dokzi')
+        
+        p3 = derive('duh', 'laW', purusha='prathama', vacana=1, gana=2) # dugdhaḥ
+        self.assertEqual(p3.get_current_string(), 'dugDaH')
+    
+    def test_optative_atmanepada(self) -> None:
+        """Tests liN for Atmanepada (eDeta, eDeran)."""
+        p1 = derive('eD', 'liN', purusha='prathama', vacana=0, gana=1)
+        self.assertEqual(p1.get_current_string(), 'eDeta')
+        
+        p2 = derive('eD', 'liN', purusha='prathama', vacana=2, gana=1)
+        self.assertEqual(p2.get_current_string(), 'eDeran')
+
+    def test_imperative_gana_5(self) -> None:
+        """Tests loW for Gaṇa 5 (sunotu, sunu)."""
+        p1 = derive('su', 'loW', purusha='prathama', vacana=0, gana=5)
+        self.assertEqual(p1.get_current_string(), 'sunotu')
+        
+        p2 = derive('su', 'loW', purusha='madhyama', vacana=0, gana=5)
+        self.assertEqual(p2.get_current_string(), 'sunu') # 'hi' drops after 'u'
+        
+        p3 = derive('su', 'loW', purusha='uttama', vacana=0, gana=5)
+        self.assertEqual(p3.get_current_string(), 'sunavAni')
+
+    def test_gana_2_duh(self) -> None:
+        """Gaṇa 2: duh tests aspiration shifts and khari-ca/jhalam-jaś."""
+        p1 = derive('duh', 'laW', purusha='prathama', vacana=0, gana=2) # dogdhi
+        self.assertEqual(p1.get_current_string(), 'dogDi')
+        
+        p2 = derive('duh', 'laW', purusha='madhyama', vacana=0, gana=2) # dhokṣi
+        self.assertEqual(p2.get_current_string(), 'Dokzi')
+        
+        p3 = derive('duh', 'laW', purusha='prathama', vacana=1, gana=2) # dugdhaḥ
+        self.assertEqual(p3.get_current_string(), 'dugDaH')
+
 if __name__ == '__main__':
     unittest.main()

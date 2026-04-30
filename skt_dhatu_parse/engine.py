@@ -15,9 +15,9 @@ from .rules import (
     vikarana_guna, kr_u_morphing, haladi_seshah, ata_upadhayah, jhasas_tathor_dho_dhah, jhalam_jas_jhasi, nascapadantasya_jhali,
     slau_reduplication, snasor_allopah, sarvadhatukam_apit, tasyasti_lopa,
     jher_jus, mer_nih, ser_hi, at_uttasya, nityam_nitah, er_uh, lin_agamas, cli_agama, 
-    gatistha_sic_lopa, ato_heh, ato_yeyah, lin_salopo_anantyasya, ad_gunah, lopo_vyorvali, usy_apadantat,
+    gatistha_sic_lopa, ato_heh, ato_yeyah, lin_salopo_anantyasya, ad_gunah, lopo_vyorvali, usy_apadantat,anunasikalopo_jhali_kniti,
     akah_savarne_dirghah, jhasya_ran, ito_at, utasca_pratyayad, gam_hana_jana_lopa,
-    anunasikalopo_jhali_kniti, che_ca
+    ho_dhah_dader_ghah, vrasca_bhrasja_sruja_mruja, choh_kuh, che_ca, stuna_stuh, ekaco_baso_bhas, sadhoh_kas_si
 )
 
 def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'prathama', vacana: int = 0,
@@ -69,12 +69,12 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     # 5. Substitute Lakara
     substitute_lakara(prakriya, purusha=purusha, vacana=vacana)
     
-    # 6. Early Suffix Replacements (NOW PLUGGED IN!)
+    # 6. Early Suffix Replacements
     mer_nih(prakriya)
     jher_jus(prakriya)
     jhasya_ran(prakriya)
     ito_at(prakriya)
-    jhonta(prakriya)          
+    jhonta(prakriya)            
     thasah_se(prakriya)         
     tasthasthamipam(prakriya)
     ser_hi(prakriya)
@@ -133,8 +133,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
 
     hali_ca(prakriya)
     aco_nniti(prakriya)
-    ata_upadhayah(prakriya)
-    che_ca(prakriya)
+    ata_upadhayah(prakriya)           
     sarvadhatuka_ardhadhatukayoh(prakriya)  
     eco_yayavayah(prakriya)                 
     iko_yanaci(prakriya)
@@ -149,12 +148,20 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     lopo_vyorvali(prakriya)
     
     anunasikalopo_jhali_kniti(prakriya)
+    vrasca_bhrasja_sruja_mruja(prakriya)
+    choh_kuh(prakriya)
+    che_ca(prakriya)
+    
+    ho_dhah_dader_ghah(prakriya)
+    ekaco_baso_bhas(prakriya)
+    sadhoh_kas_si(prakriya)
     
     adesa_pratyayayoh(prakriya)             
     rashabhyam_no_nah(prakriya)
 
     jhasas_tathor_dho_dhah(prakriya)        
     jhalam_jas_jhasi(prakriya)              
+    stuna_stuh(prakriya)
     
     khari_ca(prakriya)                      
     samyogantasya_lopah(prakriya)
