@@ -17,7 +17,8 @@ from .rules import (
     jher_jus, mer_nih, ser_hi, at_uttasya, nityam_nitah, er_uh, lin_agamas, cli_agama, 
     gatistha_sic_lopa, ato_heh, ato_yeyah, lin_salopo_anantyasya, ad_gunah, lopo_vyorvali, usy_apadantat,anunasikalopo_jhali_kniti,
     akah_savarne_dirghah, jhasya_ran, ito_at, utasca_pratyayad, gam_hana_jana_lopa,
-    ho_dhah_dader_ghah, vrasca_bhrasja_sruja_mruja, choh_kuh, che_ca, stuna_stuh, ekaco_baso_bhas, sadhoh_kas_si
+    ho_dhah_dader_ghah, vrasca_bhrasja_sruja_mruja, choh_kuh, che_ca, stuna_stuh, ekaco_baso_bhas, sadhoh_kas_si,
+    srujidrusor_jhaly_amakiti, sici_vrddhih, asti_sico_aprkte, do_dad_ghoh, snabhyastayor_atah
 )
 
 def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'prathama', vacana: int = 0,
@@ -42,6 +43,8 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
             dhatu.tags.discard('atmanepada')
             dhatu.tags.discard('ubhayapada')
             dhatu.tags.add(voice)
+        elif 'ubhayapada' in dhatu.tags:
+            dhatu.tags.add('parasmaipada') # Default if no voice is forced
             
         if dhatu_slp1 == 'krI' and upasargas and upasargas[-1] in['vi', 'parA']:
             dhatu.tags.discard('parasmaipada')
@@ -98,6 +101,8 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
 
     # 8.5 Early Elisions
     gatistha_sic_lopa(prakriya)
+    sici_vrddhih(prakriya)
+    asti_sico_aprkte(prakriya)
 
     # 9. Gana 9 and Root Substitutions
     sarvadhatukam_apit(prakriya)
@@ -112,13 +117,19 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     # 10. Abhyasa (Reduplication)
     liti_dhator_anabhyasasya(prakriya)
     slau_reduplication(prakriya)
+
+    # 10.1 Remove empty terms (luk, Slu) to allow boundary checks for Abhyasa rules
+    prakriya.terms =[t for t in prakriya.terms if t.text]
+
     haladi_seshah(prakriya)            
+    do_dad_ghoh(prakriya)
+    snabhyastayor_atah(prakriya)
     hrasvah(prakriya)
     ur_at(prakriya)                    
     bhavater_ah(prakriya)              
     abhyase_car_ca(prakriya)
     kuhos_cuh(prakriya)                
-    bhuvo_vug_lunlitoh(prakriya)       
+    bhuvo_vug_lunlitoh(prakriya)      
     
     # 10.5 Remove empty terms
     prakriya.terms =[t for t in prakriya.terms if t.text]
@@ -132,6 +143,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     tasyasti_lopa(prakriya)
 
     hali_ca(prakriya)
+    srujidrusor_jhaly_amakiti(prakriya)
     aco_nniti(prakriya)
     ata_upadhayah(prakriya)           
     sarvadhatuka_ardhadhatukayoh(prakriya)  

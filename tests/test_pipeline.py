@@ -258,5 +258,29 @@ class TestPipeline(unittest.TestCase):
         p3 = derive('duh', 'laW', purusha='prathama', vacana=1, gana=2) # dugdhaḥ
         self.assertEqual(p3.get_current_string(), 'dugDaH')
 
+    def test_dfS_future(self) -> None:
+        """Tests dfS + lfW -> drakzyati (am augment + retroflexion + ṣaḍhoḥ kas si + ādeśa)."""
+        p1 = derive('dfS', 'lfW', purusha='prathama', vacana=0, gana=1)
+        self.assertEqual(p1.get_current_string(), 'drakzyati')
+
+    def test_gana_3_dA(self) -> None:
+        """Gaṇa 3: dA tests do dad ghoH and Slu elision."""
+        p1 = derive('dA', 'laW', purusha='prathama', vacana=0, gana=3) # Strong
+        self.assertEqual(p1.get_current_string(), 'dadAti')
+        
+        p2 = derive('dA', 'laW', purusha='prathama', vacana=1, gana=3) # Weak cons
+        self.assertEqual(p2.get_current_string(), 'dattaH')
+        
+        p3 = derive('dA', 'laW', purusha='prathama', vacana=2, gana=3) # Weak vowel
+        self.assertEqual(p3.get_current_string(), 'dadati')
+
+    def test_aorist_kr(self) -> None:
+        """Tests luN for kf (sici vrddhih and astisico'pṛkte)."""
+        p1 = derive('kf', 'luN', purusha='prathama', vacana=0, gana=8)
+        self.assertEqual(p1.get_current_string(), 'akArzIt')
+        
+        p2 = derive('kf', 'luN', purusha='prathama', vacana=2, gana=8)
+        self.assertEqual(p2.get_current_string(), 'akArzuH')
+
 if __name__ == '__main__':
     unittest.main()

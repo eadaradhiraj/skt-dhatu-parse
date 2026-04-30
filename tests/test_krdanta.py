@@ -126,5 +126,14 @@ class TestKrdanta(unittest.TestCase):
         prakriya = derive_krdanta('kf', 'Satf', gana=8)
         self.assertEqual(prakriya.get_current_string(), 'kurvat')
 
+    def test_yaj_samprasarana(self) -> None:
+        """Tests yaj + kta -> izwa."""
+        p1 = derive_krdanta('yaj', 'kta', gana=1)
+        self.assertEqual(p1.get_current_string(), 'izwa')
+        
+        # Tests that non-kit affixes DO NOT trigger samprasarana
+        p2 = derive_krdanta('yaj', 'tavya', gana=1)
+        self.assertEqual(p2.get_current_string(), 'yazwavya')
+
 if __name__ == '__main__':
     unittest.main()
