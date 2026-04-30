@@ -462,43 +462,43 @@ def adesa_pratyayayoh(prakriya: Prakriya) -> None:
                 prakriya.log(f"Rule 8.3.59: Changed 's' to 'z' after '{prev_char}'")
 
 def jhasas_tathor_dho_dhah(prakriya: Prakriya) -> None:
-    if len(prakriya.terms) >= 2:
-        dhatu = prakriya.terms[-2]
-        suffix = prakriya.terms[-1]
-        if dhatu.text and dhatu.text[-1] in JHAS_CONSONANTS:
-            if suffix.text.startswith('t'): 
-                suffix.text = 'D' + suffix.text[1:]
+    for i in range(len(prakriya.terms)-1):
+        t1 = prakriya.terms[i]
+        t2 = prakriya.terms[i+1]
+        if t1.text and t1.text[-1] in JHAS_CONSONANTS:
+            if t2.text.startswith('t'): 
+                t2.text = 'D' + t2.text[1:]
                 prakriya.log("Rule 8.2.40: 't' -> 'D' after jhaz")
-            elif suffix.text.startswith('T'): 
-                suffix.text = 'D' + suffix.text[1:]
+            elif t2.text.startswith('T'): 
+                t2.text = 'D' + t2.text[1:]
                 prakriya.log("Rule 8.2.40: 'T' -> 'D' after jhaz")
 
 def jhalam_jas_jhasi(prakriya: Prakriya) -> None:
-    if len(prakriya.terms) >= 2:
-        dhatu = prakriya.terms[-2]
-        suffix = prakriya.terms[-1]
-        if dhatu.text and dhatu.text[-1] in JHAL_CONSONANTS and suffix.text and suffix.text[0] in JHAS_SOFT_CONSONANTS:
-            last_char = dhatu.text[-1]
+    for i in range(len(prakriya.terms)-1):
+        t1 = prakriya.terms[i]
+        t2 = prakriya.terms[i+1]
+        if t1.text and t1.text[-1] in JHAL_CONSONANTS and t2.text and t2.text[0] in JHAS_SOFT_CONSONANTS:
+            last_char = t1.text[-1]
             jas_char = last_char
             if last_char in ['k', 'K', 'g', 'G', 'h']: jas_char = 'g'
             elif last_char in['c', 'C', 'j', 'J', 'S']: jas_char = 'j'
             elif last_char in['w', 'W', 'q', 'Q', 'z']: jas_char = 'q'
             elif last_char in['t', 'T', 'd', 'D', 's']: jas_char = 'd'
-            elif last_char in['p', 'P', 'b', 'B']: jas_char = 'b'
+            elif last_char in ['p', 'P', 'b', 'B']: jas_char = 'b'
             
             if jas_char != last_char:
-                dhatu.text = dhatu.text[:-1] + jas_char
+                t1.text = t1.text[:-1] + jas_char
                 prakriya.log(f"Rule 8.4.53: Changed '{last_char}' to '{jas_char}' (jaS)")
 
 def khari_ca(prakriya: Prakriya) -> None:
-    if len(prakriya.terms) >= 2:
-        dhatu = prakriya.terms[-2]
-        suffix = prakriya.terms[-1]
-        if dhatu.text and dhatu.text[-1] in JHAL_CONSONANTS and suffix.text and suffix.text[0] in KHAR_CONSONANTS:
-            last_char = dhatu.text[-1]
+    for i in range(len(prakriya.terms)-1):
+        t1 = prakriya.terms[i]
+        t2 = prakriya.terms[i+1]
+        if t1.text and t1.text[-1] in JHAL_CONSONANTS and t2.text and t2.text[0] in KHAR_CONSONANTS:
+            last_char = t1.text[-1]
             char_map = {'g':'k', 'G':'k', 'k':'k', 'K':'k', 'j':'c', 'J':'c', 'c':'c', 'C':'c', 'q':'w', 'Q':'w', 'w':'w', 'W':'w', 'd':'t', 'D':'t', 't':'t', 'T':'t', 'b':'p', 'B':'p', 'p':'p', 'P':'p'}
             if last_char in char_map and char_map[last_char] != last_char:
-                dhatu.text = dhatu.text[:-1] + char_map[last_char]
+                t1.text = t1.text[:-1] + char_map[last_char]
                 prakriya.log(f"Rule 8.4.55: Changed '{last_char}' to '{char_map[last_char]}' (khari ca)")
 
 def rashabhyam_no_nah(prakriya: Prakriya) -> None:
@@ -536,15 +536,15 @@ def rashabhyam_no_nah(prakriya: Prakriya) -> None:
             term.text = new_text
 
 def stuna_stuh(prakriya: Prakriya) -> None:
-    if len(prakriya.terms) >= 2:
-        dhatu = prakriya.terms[-2]
-        suffix = prakriya.terms[-1]
-        if dhatu.text and dhatu.text[-1] == 'z':
-            if suffix.text.startswith('t'): 
-                suffix.text = 'w' + suffix.text[1:]
+    for i in range(len(prakriya.terms)-1):
+        t1 = prakriya.terms[i]
+        t2 = prakriya.terms[i+1]
+        if t1.text and t1.text[-1] == 'z':
+            if t2.text.startswith('t'): 
+                t2.text = 'w' + t2.text[1:]
                 prakriya.log("Rule 8.4.41: 't' -> 'w' (zwunA zwuH)")
-            elif suffix.text.startswith('T'): 
-                suffix.text = 'W' + suffix.text[1:]
+            elif t2.text.startswith('T'): 
+                t2.text = 'W' + t2.text[1:]
                 prakriya.log("Rule 8.4.41: 'T' -> 'W' (zwunA zwuH)")
 
 def vrasca_bhrasja_sruja_mruja(prakriya: Prakriya) -> None:
@@ -585,14 +585,20 @@ def ho_dhah_dader_ghah(prakriya: Prakriya) -> None:
             prakriya.log("Rule 8.2.31: 'h' -> 'Q' (ho DhaH)")
 
 def choh_kuh(prakriya: Prakriya) -> None:
-    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
-    suffix = prakriya.terms[-1]
-    if dhatu and suffix and suffix.text and suffix.text[0] in JHAL_CONSONANTS:
-        last_char = dhatu.text[-1]
+    for i in range(len(prakriya.terms)):
+        t = prakriya.terms[i]
+        if not t.text: continue
+        last_char = t.text[-1]
         if last_char in ['c', 'C', 'j', 'J']:
-            map_ku = {'c':'k', 'C':'K', 'j':'g', 'J':'G'}
-            dhatu.text = dhatu.text[:-1] + map_ku[last_char]
-            prakriya.log(f"Rule 8.2.30: coH kuH ({last_char} -> {map_ku[last_char]})")
+            is_padanta = (i == len(prakriya.terms) - 1)
+            next_char_is_jhal = False
+            if not is_padanta and prakriya.terms[i+1].text:
+                next_char_is_jhal = prakriya.terms[i+1].text[0] in JHAL_CONSONANTS
+            
+            if is_padanta or next_char_is_jhal:
+                map_ku = {'c':'k', 'C':'K', 'j':'g', 'J':'G'}
+                t.text = t.text[:-1] + map_ku[last_char]
+                prakriya.log(f"Rule 8.2.30: coH kuH ({last_char} -> {map_ku[last_char]})")
 
 def radabhyam_nishthato_nah(prakriya: Prakriya) -> None:
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
