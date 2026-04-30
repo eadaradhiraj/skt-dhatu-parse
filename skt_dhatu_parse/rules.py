@@ -73,10 +73,14 @@ def substitute_lakara(prakriya: Prakriya, purusha: str = 'prathama', vacana: int
         new_suffix = TIN_PARASMAIPADA_LIT[purusha][vacana] if is_lit else TIN_PARASMAIPADA[purusha][vacana]
         
     lakara.text = new_suffix
-    lakara.upadeza = new_suffix  # This syncs the memory so specific tense replacements trigger!
+    lakara.upadeza = new_suffix
     lakara.term_type = 'pratyaya'
     lakara.tags.add('tin') 
     
+    # Add Wit tag to lakara if it's a Tit lakara (laW, liW, luW, lfW, leW, loW)
+    if any(lak in lakara.tags for lak in['laW', 'liW', 'luW', 'lfW', 'leW', 'loW']):
+        lakara.tags.add('Wit')
+        
     if is_lit: 
         lakara.tags.add('ardhadhatuka')
         if new_suffix in['Ral', 'Tal']: lakara.tags.add('pit')
@@ -184,29 +188,34 @@ def atmanepada_tere(prakriya: Prakriya) -> None:
 
 def thasah_se(prakriya: Prakriya) -> None:
     suffix = prakriya.terms[-1]
-    if suffix.text == 'TAs' and 'Wit' in suffix.tags:
+    if suffix.upadeza == 'TAs' and 'Wit' in suffix.tags:
         suffix.text = 'se'
+        suffix.upadeza = 'se'
         prakriya.log("Rule 3.4.80: Replaced 'TAs' with 'se'")
 
 def jhonta(prakriya: Prakriya) -> None:
     suffix = prakriya.terms[-1]
     if suffix.text.startswith('J'):
         dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+        clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text) if dhatu else ''
         is_atmanepada = dhatu and 'atmanepada' in dhatu.tags
-        is_anat = dhatu and 'gana_9' in dhatu.tags
-        is_abhyasta = dhatu and 'gana_3' in dhatu.tags  
+        is_abhyasta = dhatu and 'gana_3' in dhatu.tags
+        is_anat = dhatu and any(g in dhatu.tags for g in['gana_2', 'gana_3', 'gana_5', 'gana_7', 'gana_8', 'gana_9'])
         
-        # Avoid running if jher_jus already hit it (liN tense)
-        if suffix.text.startswith('J'):
-            if is_abhyasta:
-                suffix.text = 'at' + suffix.text[1:]
-                prakriya.log("Rule 7.1.4: 'Jh' -> 'at' (ad abhyastAt)")
-            elif is_atmanepada and is_anat: 
-                suffix.text = 'at' + suffix.text[1:]
-                prakriya.log("Rule 7.1.5: 'Jh' -> 'at'")
-            else: 
-                suffix.text = 'ant' + suffix.text[1:]
-                prakriya.log("Rule 7.1.3: 'Jh' -> 'ant'")
+        if suffix.upadeza == 'Ja' and 'liN' in suffix.tags:
+            pass # Handled by jhasya_ran
+        elif clean_dhatu == 'SI':
+            suffix.text = 'rat' + suffix.text[1:]
+            prakriya.log("Rule 7.1.6: śiṅo rut (Jh -> rat)")
+        elif is_abhyasta:
+            suffix.text = 'at' + suffix.text[1:]
+            prakriya.log("Rule 7.1.4: ad abhyastAt (Jh -> at)")
+        elif is_atmanepada and is_anat: 
+            suffix.text = 'at' + suffix.text[1:]
+            prakriya.log("Rule 7.1.5: ātmanepadeṣv anataḥ (Jh -> at)")
+        else: 
+            suffix.text = 'ant' + suffix.text[1:]
+            prakriya.log("Rule 7.1.3: jho 'ntaḥ (Jh -> ant)")
 
 def at_agama(prakriya: Prakriya) -> None:
     suffix = prakriya.terms[-1]
@@ -1422,3 +1431,31 @@ def aci_snu_dhatu_bhruvam(prakriya: Prakriya) -> None:
             if t1.text == 'brU':
                 t1.text = t1.text[:-1] + 'uv'
                 prakriya.log("Rule 6.4.77: aci śnudhātubhruvāṃ (U -> uv before vowel)")
+
+def sino_gunah(prakriya: Prakriya) -> None:
+    """Rule 7.4.22: śiṅo guṇaḥ. śī gets guṇa before all Sārvadhātuka affixes."""
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    suffix = prakriya.terms[-1]
+    if dhatu and suffix and ('sarvadhatuka' in suffix.tags or 'tin' in suffix.tags):
+        clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
+        if clean_dhatu == 'SI':
+            dhatu.text = 'Se'
+            prakriya.log("Rule 7.4.22: śiṅo guṇaḥ (SI -> Se)")
+
+def han_ghatva_tatva(prakriya: Prakriya) -> None:
+    """Rule 7.3.54 & 7.3.32: han -> ghāt before ṇit/ñit."""
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    if not dhatu: return
+    idx = prakriya.terms.index(dhatu)
+    if idx + 1 >= len(prakriya.terms): return
+    next_term = prakriya.terms[idx + 1]
+    
+    clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
+    
+    if clean_dhatu == 'han' and ('Rit' in next_term.tags or 'Yit' in next_term.tags):
+        if dhatu.text.startswith('h'):
+            dhatu.text = 'G' + dhatu.text[1:]
+            prakriya.log("Rule 7.3.54: ho hanter ñṇinneṣu (h -> G)")
+        if dhatu.text.endswith('n'):
+            dhatu.text = dhatu.text[:-1] + 't'
+            prakriya.log("Rule 7.3.32: hanato ṇinnali (n -> t)")
