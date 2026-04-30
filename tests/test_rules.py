@@ -378,10 +378,10 @@ class TestRules(unittest.TestCase):
     def test_ekaco_baso_bhas(self) -> None:
         """Covers initial aspiration shift before 's' or 'dhv' (duh -> Dhuh)."""
         p = Prakriya()
-        p.add_term(Term('duh', 'dhatu'))
+        p.add_term(Term('duG', 'dhatu')) # ho_dhah converts h -> G first
         p.add_term(Term('si', 'pratyaya'))
         ekaco_baso_bhas(p)
-        self.assertEqual(p.terms[0].text, 'Duh')
+        self.assertEqual(p.terms[0].text, 'DuG')
 
     def test_sadhoh_kas_si(self) -> None:
         """Covers ṣ, ḍh, gh becoming 'k' before 's'."""
