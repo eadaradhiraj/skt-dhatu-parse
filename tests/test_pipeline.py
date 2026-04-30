@@ -386,7 +386,7 @@ class TestPipeline(unittest.TestCase):
         p1 = derive('kf', 'loW', purusha='prathama', vacana=0, gana=8)
         self.assertEqual(p1.get_current_string(), 'karotu')
         p2 = derive('kf', 'loW', purusha='madhyama', vacana=0, gana=8)
-        self.assertEqual(p1.get_current_string(), 'kuru')  # hi drops after u
+        self.assertEqual(p2.get_current_string(), 'kuru')  # hi drops after u
         p3 = derive('kf', 'loW', purusha='uttama', vacana=0, gana=8)
         self.assertEqual(p3.get_current_string(), 'karavARi') # Natva
 
