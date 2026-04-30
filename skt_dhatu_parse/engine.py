@@ -16,7 +16,8 @@ from .rules import (
     slau_reduplication, snasor_allopah, sarvadhatukam_apit, tasyasti_lopa,
     jher_jus, mer_nih, ser_hi, at_uttasya, nityam_nitah, er_uh, lin_agamas, cli_agama, 
     gatistha_sic_lopa, ato_heh, ato_yeyah, lin_salopo_anantyasya, ad_gunah, lopo_vyorvali, usy_apadantat,
-    akah_savarne_dirghah, jhasya_ran, ito_at, utasca_pratyayad
+    akah_savarne_dirghah, jhasya_ran, ito_at, utasca_pratyayad, gam_hana_jana_lopa,
+    anunasikalopo_jhali_kniti, che_ca
 )
 
 def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'prathama', vacana: int = 0,
@@ -123,6 +124,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     prakriya.terms =[t for t in prakriya.terms if t.text]
 
     # 11. Core Phonetics
+    gam_hana_jana_lopa(prakriya)
     ato_yeyah(prakriya)
     lin_salopo_anantyasya(prakriya)
     ato_heh(prakriya)
@@ -131,19 +133,23 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
 
     hali_ca(prakriya)
     aco_nniti(prakriya)
-    ata_upadhayah(prakriya)           
+    ata_upadhayah(prakriya)
+    che_ca(prakriya)
     sarvadhatuka_ardhadhatukayoh(prakriya)  
     eco_yayavayah(prakriya)                 
     iko_yanaci(prakriya)
     
-     # 12. Sandhi and Final Consonants
+    # 12. Sandhi and Final Consonants
     ato_dirgho_yayi(prakriya)               
     ato_nitah(prakriya) 
-    usy_apadantat(prakriya)                 # Must precede ad_gunah to prevent A+u -> o
+    usy_apadantat(prakriya)                 
     ad_gunah(prakriya)
     ato_gune(prakriya)
     akah_savarne_dirghah(prakriya)
     lopo_vyorvali(prakriya)
+    
+    anunasikalopo_jhali_kniti(prakriya)
+    
     adesa_pratyayayoh(prakriya)             
     rashabhyam_no_nah(prakriya)
 

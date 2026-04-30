@@ -200,7 +200,8 @@ def it_agama(prakriya: Prakriya) -> None:
         # Expanded Core AniW roots
         ANIT_ROOTS =[
             'ji', 'dA', 'Sru', 'pA', 'han', 'dfS', 'buD', 'ram', 'gam', 'nam', 'vac', 
-            'Cid', 'muc', 'svap', 'yaj', 'Bid', 'sfj', 'sTA', 'jJA', 'snA', 'kf', 'kF'
+            'Cid', 'muc', 'svap', 'yaj', 'Bid', 'sfj', 'sTA', 'jJA', 'snA', 'kf', 'kF',
+            'vraSc', 'praC'
         ]
         if clean_dhatu in ANIT_ROOTS: is_anit = True
         elif clean_dhatu == 'duh' and 'gana_2' in dhatu.tags: is_anit = True
@@ -555,9 +556,13 @@ def vrasca_bhrasja_sruja_mruja(prakriya: Prakriya) -> None:
     suffix = prakriya.terms[idx + 1]
 
     if suffix.text and suffix.text[0] in JHAL_CONSONANTS:
-        targets =['vrazc', 'Brajj', 'Brasj', 'sfj', 'mfj', 'yaj', 'rAj', 'BrAj']
-        # includes roots ending in 'C' or 'S' ---
-        if dhatu.text in targets or dhatu.text.endswith('C') or dhatu.text.endswith('S'):
+        if dhatu.text in ['vraSc', 'vfSc']:
+            dhatu.text = dhatu.text[:-2] + 'z'
+            prakriya.log(f"Rule 8.2.36: vraśc... conjunct became 'z' -> '{dhatu.text}'")
+        elif dhatu.text in ['Brajj', 'Brasj']:
+            dhatu.text = dhatu.text[:-2] + 'z'
+            prakriya.log(f"Rule 8.2.36: bhrasj... conjunct became 'z' -> '{dhatu.text}'")
+        elif dhatu.text in ['sfj', 'mfj', 'yaj', 'rAj', 'BrAj'] or dhatu.text.endswith('C') or dhatu.text.endswith('S'):
             dhatu.text = dhatu.text[:-1] + 'z'
             prakriya.log(f"Rule 8.2.36: Final palatal/C/S became 'z' -> '{dhatu.text}'")
 
@@ -667,7 +672,7 @@ def yuvor_anakau(prakriya: Prakriya) -> None:
 def vacisvapiyajadinam_kiti(prakriya: Prakriya) -> None:
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     suffix = prakriya.terms[-1]
-    if dhatu and 'kit' in suffix.tags:
+    if dhatu and ('kit' in suffix.tags or 'Nit' in suffix.tags):
         if dhatu.text == 'vac': 
             dhatu.text = 'uc'
             prakriya.log("Rule 6.1.15: Samprasarana (vac -> uc)")
@@ -677,6 +682,12 @@ def vacisvapiyajadinam_kiti(prakriya: Prakriya) -> None:
         elif dhatu.text == 'yaj': 
             dhatu.text = 'ij'
             prakriya.log("Rule 6.1.15: Samprasarana (yaj -> ij)")
+        elif dhatu.text == 'vraSc':
+            dhatu.text = 'vfSc'
+            prakriya.log("Rule 6.1.16: Samprasarana (vraSc -> vfSc)")
+        elif dhatu.text == 'praC':
+            dhatu.text = 'pfC'
+            prakriya.log("Rule 6.1.16: Samprasarana (praC -> pfC)")
 
 def sanadyanta_dhatavah(prakriya: Prakriya) -> None:
     if len(prakriya.terms) >= 2:
@@ -713,7 +724,11 @@ def anunasikalopo_jhali_kniti(prakriya: Prakriya) -> None:
 
     if is_kit_or_nit and starts_with_jhal and ends_with_nasal:
         ANUDATTA_NASAL_ROOTS =['ram', 'gam', 'han', 'man', 'yam', 'van', 'tan', 'nam']
-        if dhatu.text in ANUDATTA_NASAL_ROOTS:
+        clean_dhatu = dhatu.text
+        for tag in dhatu.tags:
+            if tag.startswith('clean_'): clean_dhatu = tag.split('_')[1]
+        
+        if clean_dhatu in ANUDATTA_NASAL_ROOTS:
             dhatu.text = dhatu.text[:-1]
             prakriya.log(f"Rule 6.4.37: Dropped nasal -> '{dhatu.text}'")
 
@@ -1178,3 +1193,49 @@ def er_uh(prakriya: Prakriya) -> None:
     if 'loW' in suffix.tags and suffix.text.endswith('i') and suffix.upadeza in ['tip', 'Ji']:
         suffix.text = suffix.text[:-1] + 'u'
         prakriya.log("Rule 3.4.86: er uH (i -> u for loW)")
+
+def gam_hana_jana_lopa(prakriya: Prakriya) -> None:
+    """Rule 6.4.98: gam-hana-jana-khan-ghasāṃ lopaḥ. Drops 'a' before vowel weak affixes."""
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    if not dhatu: return
+    idx = prakriya.terms.index(dhatu)
+    if idx + 1 >= len(prakriya.terms): return
+    suffix = prakriya.terms[idx + 1]
+    
+    clean_dhatu = ''
+    for tag in dhatu.tags:
+        if tag.startswith('clean_'): clean_dhatu = tag.split('_')[1]
+        
+    is_kit_or_nit = 'kit' in suffix.tags or 'Nit' in suffix.tags
+    is_vowel_initial = suffix.text and is_vowel(suffix.text[0])
+    
+    if clean_dhatu in ['gam', 'han', 'jan', 'Kan', 'Gas'] and is_kit_or_nit and is_vowel_initial:
+        if dhatu.text.endswith('am') or dhatu.text.endswith('an') or dhatu.text.endswith('as'):
+            dhatu.text = dhatu.text[:-2] + dhatu.text[-1]
+            prakriya.log(f"Rule 6.4.98: Dropped penultimate 'a' -> '{dhatu.text}'")
+            
+        if clean_dhatu == 'han' and dhatu.text == 'hn':
+            dhatu.text = 'Gn'
+            prakriya.log("Rule 7.3.54 (implied for hn): 'hn' -> 'Gn'")
+
+def che_ca(prakriya: Prakriya) -> None:
+    """Rule 6.1.73: che ca. Adds 'tuk' (c) after a short vowel before 'C'."""
+    # 1. Intra-term insertion (e.g. pfC -> pfcC)
+    for term in prakriya.terms:
+        new_text = ""
+        for i, char in enumerate(term.text):
+            if char == 'C' and i > 0 and term.text[i-1] in['a', 'i', 'u', 'f', 'x']:
+                new_text += 'cC'
+            else:
+                new_text += char
+        if new_text != term.text:
+            term.text = new_text
+            prakriya.log("Rule 6.1.73: che ca (inserted 'c' before 'C')")
+            
+    # 2. Cross-term insertion (e.g. a + CAdya -> acCAdya)
+    for i in range(len(prakriya.terms)-1):
+        t1 = prakriya.terms[i]
+        t2 = prakriya.terms[i+1]
+        if t1.text and t2.text and t2.text.startswith('C') and t1.text[-1] in['a', 'i', 'u', 'f', 'x']:
+            t2.text = 'c' + t2.text
+            prakriya.log("Rule 6.1.73: che ca (inserted 'c' before 'C' across terms)")

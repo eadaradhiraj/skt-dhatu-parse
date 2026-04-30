@@ -38,12 +38,15 @@ def resolve_it_markers(term: Term) -> None:
     # ==========================================
     # Rule 1.3.2: upadeze'janunAsika it (Nasal vowels are 'it' markers)
     for marker in ['!', '~']:
-        if marker in term.text:
+        while marker in term.text:
             idx = term.text.find(marker)
             if idx > 0:
                 vowel = term.text[idx-1]
                 term.tags.add(f"{vowel}dit")
                 term.text = term.text[:idx-1] + term.text[idx+1:]
+            else:
+                # Failsafe if marker is at the very beginning
+                term.text = term.text.replace(marker, "", 1)
 
     # ==========================================
     # 3. MARKERS FOR AFFIXES (Pratyayas, Vikaranas, Lakaras, Agamas)

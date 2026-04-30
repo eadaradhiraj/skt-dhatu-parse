@@ -12,8 +12,8 @@ from .rules import (
     sarvadhatuka_ardhadhatukayoh, eco_yayavayah, vrasca_bhrasja_sruja_mruja, stuna_stuh,
     khari_ca, insert_vikarana, sna_sandhi, se_mucadinam, anusvarasya_yayi_parasavarnah, ato_gune,
     srujidrusor_jhaly_amakiti, nascapadantasya_jhali, aco_nniti, paghra_sthadi_adesha,
-    upasarga_sandhi, upasarga_satva, akah_savarne_dirghah, stha_adi_ita, ato_yuk, id_yati,
-    sarvadhatukam_apit
+    upasarga_sandhi, upasarga_satva, akah_savarne_dirghah, stha_adi_ita, ato_yuk, id_yati, sarvadhatukam_apit,
+    gam_hana_jana_lopa, che_ca
 )
 
 def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_path: str = DEFAULT_DB_PATH, upasargas: list[str] = None) -> Prakriya:
@@ -57,8 +57,10 @@ def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_
     it_agama(prakriya)                
     aco_nniti(prakriya)
     ata_upadhayah(prakriya)
+    gam_hana_jana_lopa(prakriya)
     vacisvapiyajadinam_kiti(prakriya)
     srujidrusor_jhaly_amakiti(prakriya)
+    che_ca(prakriya)
 
     # 3.5 Remove empty terms (luk, Slu, lopa) to allow proper adjacent Sandhi
     prakriya.terms = [t for t in prakriya.terms if t.text]
