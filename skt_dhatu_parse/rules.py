@@ -106,6 +106,14 @@ def insert_vikarana(prakriya: Prakriya) -> None:
         return # cli is handled natively as a lakara-specific augment
 
     if 'ardhadhatuka' in suffix.tags: return
+
+    clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
+    if clean_dhatu == 'Sru':
+        vik = Term('Snu', 'vikaraRa')
+        dhatu.text = 'Sf'
+        prakriya.terms.insert(idx, vik)
+        prakriya.log("Rule 3.1.74: śruvaḥ śṛ ca (Sru takes Snu and becomes Sf)")
+        return
         
     if 'gana_1' in dhatu.tags: vik = Term('Sap', 'vikaraRa')
     elif 'gana_2' in dhatu.tags:
@@ -1140,12 +1148,28 @@ def cli_agama(prakriya: Prakriya) -> None:
         clean_dhatu = ''
         for tag in dhatu.tags:
             if tag.startswith('clean_'): clean_dhatu = tag.split('_')[1]
+            
+        SAL_CONSONANTS = ['S', 'z', 's', 'h']
+        IK_VOWELS =['i', 'I', 'u', 'U', 'f', 'F', 'x', 'X']
+        upadha = dhatu.text[-2] if len(dhatu.text) > 1 else ''
+        ends_in_sal = dhatu.text[-1] in SAL_CONSONANTS if dhatu.text else False
         
-        if clean_dhatu in ['gam']:
+        ANIT_ROOTS =[
+            'ji', 'dA', 'Sru', 'pA', 'han', 'dfS', 'buD', 'ram', 'gam', 'nam', 'vac', 
+            'Cid', 'muc', 'svap', 'yaj', 'Bid', 'sfj', 'sTA', 'jJA', 'snA', 'kf', 'kF',
+            'vraSc', 'praC'
+        ]
+        is_anit = clean_dhatu in ANIT_ROOTS or (clean_dhatu == 'duh' and 'gana_2' in dhatu.tags) or clean_dhatu in ['ruh', 'lih', 'kfiS']
+        
+        if clean_dhatu in['gam']:
             cli.text = 'a'
             cli.tags.add('Nit')
             cli.tags.add('aN') # Mark explicitly as the aN augment!
             prakriya.log("Rule 3.1.55: puSAdi... cli -> aN")
+        elif ends_in_sal and upadha in IK_VOWELS and is_anit:
+            cli.text = 'sa'
+            cli.tags.add('ksa')
+            prakriya.log("Rule 3.1.45: śala igupadhādaṇiṭaḥ ksaḥ (cli -> ksa)")
         else:
             cli.text = 's'
             prakriya.log("Rule 3.1.44: cleH sic (cli -> siC)")
@@ -1220,10 +1244,19 @@ def usy_apadantat(prakriya: Prakriya) -> None:
 def jher_jus(prakriya: Prakriya) -> None:
     suffix = prakriya.terms[-1]
     if suffix.upadeza == 'Ji':
-        if 'liN' in suffix.tags or 'luN' in suffix.tags:
+        if 'liN' in suffix.tags:
             suffix.text = 'us'
             suffix.upadeza = 'us' 
             prakriya.log("Rule 3.4.108: jher jus (Ji -> us)")
+        elif 'luN' in suffix.tags:
+            has_sic = any(t.upadeza == 'cli' and t.text == 's' for t in prakriya.terms)
+            dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+            is_abhyasta = dhatu and 'gana_3' in dhatu.tags
+            is_vid = dhatu and dhatu.text == 'vid'
+            if has_sic or is_abhyasta or is_vid:
+                suffix.text = 'us'
+                suffix.upadeza = 'us' 
+                prakriya.log("Rule 3.4.109: sicabhyastavidibhyaś ca (Ji -> us)")
 
 def jhasya_ran(prakriya: Prakriya) -> None:
     suffix = prakriya.terms[-1]

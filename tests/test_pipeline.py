@@ -310,5 +310,43 @@ class TestPipeline(unittest.TestCase):
         p2 = derive('gam', 'liW', purusha='uttama', vacana=1, gana=1) 
         self.assertEqual(p2.get_current_string(), 'jaganva')
 
+    def test_gana_2_si_atmanepada(self) -> None:
+        p1 = derive('SI', 'laW', purusha='prathama', vacana=0, gana=2, voice='atmanepada')
+        self.assertEqual(p1.get_current_string(), 'Sete')
+        p2 = derive('SI', 'laW', purusha='prathama', vacana=1, gana=2, voice='atmanepada')
+        self.assertEqual(p2.get_current_string(), 'SayAte')
+        p3 = derive('SI', 'laW', purusha='prathama', vacana=2, gana=2, voice='atmanepada')
+        self.assertEqual(p3.get_current_string(), 'Serate')
+        p4 = derive('SI', 'laW', purusha='madhyama', vacana=2, gana=2, voice='atmanepada')
+        self.assertEqual(p4.get_current_string(), 'SeDve')
+
+    def test_sru_lat(self) -> None:
+        p1 = derive('Sru', 'laW', purusha='prathama', vacana=0, gana=1)
+        self.assertEqual(p1.get_current_string(), 'SfRoti')
+        p2 = derive('Sru', 'laW', purusha='prathama', vacana=1, gana=1)
+        self.assertEqual(p2.get_current_string(), 'SfRutaH')
+        p3 = derive('Sru', 'laW', purusha='prathama', vacana=2, gana=1)
+        self.assertEqual(p3.get_current_string(), 'SfRvanti')
+
+    def test_duh_lun(self) -> None:
+        p1 = derive('duh', 'luN', purusha='prathama', vacana=0, gana=2)
+        self.assertEqual(p1.get_current_string(), 'aDukzat')
+        p2 = derive('duh', 'luN', purusha='prathama', vacana=1, gana=2)
+        self.assertEqual(p2.get_current_string(), 'aDukzatAm')
+        p3 = derive('duh', 'luN', purusha='prathama', vacana=2, gana=2)
+        self.assertEqual(p3.get_current_string(), 'aDukzan')
+
+    def test_han_lin(self) -> None:
+        p1 = derive('han', 'liN', purusha='prathama', vacana=0, gana=2)
+        self.assertEqual(p1.get_current_string(), 'hanyAt')
+        p2 = derive('han', 'liN', purusha='uttama', vacana=0, gana=2)
+        self.assertEqual(p2.get_current_string(), 'hanyAm')
+        p3 = derive('han', 'liN', purusha='uttama', vacana=1, gana=2)
+        self.assertEqual(p3.get_current_string(), 'hanyAva')
+
+    def test_bhu_lun_plural(self) -> None:
+        p1 = derive('BU', 'luN', purusha='prathama', vacana=2, gana=1)
+        self.assertEqual(p1.get_current_string(), 'aBUvan')
+
 if __name__ == '__main__':
     unittest.main()

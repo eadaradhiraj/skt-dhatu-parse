@@ -57,6 +57,10 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     
     # 5. Substitute Lakara
     rules.substitute_lakara(prakriya, purusha=purusha, vacana=vacana)
+
+    # 5.5 Insert luN cli augment early
+    rules.cli_agama(prakriya)
+    rules.gatistha_sic_lopa(prakriya)
     
     # 6. Early Suffix Replacements
     rules.mer_nih(prakriya)
@@ -79,7 +83,6 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
 
     # 8. Insert Vikarana & Special Lakara Agamas
     rules.insert_vikarana(prakriya)
-    rules.cli_agama(prakriya)
     rules.lin_agamas(prakriya)
     
     vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa' and t.upadeza != 'cli'), None)
@@ -88,7 +91,6 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
 
     # 8.5 Early Elisions
     rules.bruva_it(prakriya)
-    rules.gatistha_sic_lopa(prakriya)
     rules.sici_vrddhih(prakriya)
     rules.asti_sico_aprkte(prakriya)
 

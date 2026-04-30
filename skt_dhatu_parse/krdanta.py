@@ -44,6 +44,9 @@ def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_
         rules.kr_u_morphing(prakriya)
         rules.snasor_allopah(prakriya)
 
+    # 2.5 Remove empty terms
+    prakriya.terms =[t for t in prakriya.terms if t.text]
+
     # 3. Augments & Internal Morphing
     rules.id_yati(prakriya)
     rules.ato_yuk(prakriya)
@@ -58,9 +61,6 @@ def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_
     rules.vacisvapiyajadinam_kiti(prakriya)
     rules.srujidrusor_jhaly_amakiti(prakriya)  
     rules.che_ca(prakriya)                           
-    
-    # 3.5 Remove empty terms
-    prakriya.terms =[t for t in prakriya.terms if t.text]
     
     # 4. Phonetic Vowel Rules
     rules.sarvadhatuka_ardhadhatukayoh(prakriya)  

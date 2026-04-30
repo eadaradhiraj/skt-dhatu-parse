@@ -135,5 +135,33 @@ class TestKrdanta(unittest.TestCase):
         p2 = derive_krdanta('yaj', 'tavya', gana=1)
         self.assertEqual(p2.get_current_string(), 'yazwavya')
 
+    def test_han_satr(self) -> None:
+        prakriya = derive_krdanta('han', 'Satf', gana=2)
+        self.assertEqual(prakriya.get_current_string(), 'Gnat')
+        
+    def test_han_all_krt(self) -> None:
+        expected_forms = {
+            'kta': 'hata', 'ktavatu': 'hatavat', 'ktvA': 'hatvA',
+            'tumun': 'hantum', 'tavya': 'hantavya', 'anIyar': 'hananIya',
+            'yat': 'hanya', 'Ryat': 'GAtya', 'Satf': 'Gnat',
+            'lyuW': 'hanana', 'Rvul': 'GAtaka', 'tfc': 'hantf', 'GaY': 'GAta'
+        }
+        for affix, expected in expected_forms.items():
+            with self.subTest(affix=affix):
+                prakriya = derive_krdanta('han', affix, gana=2)
+                self.assertEqual(prakriya.get_current_string(), expected)
+
+    def test_duh_all_krt(self) -> None:
+        expected_forms = {
+            'kta': 'dugDa', 'ktavatu': 'dugDavat', 'ktvA': 'dugDvA',
+            'tumun': 'dogDum', 'tavya': 'dogDavya', 'anIyar': 'dohanIya',
+            'yat': 'dohya', 'Ryat': 'dohya', 'Satf': 'duhat',
+            'lyuW': 'dohana', 'Rvul': 'dohaka', 'tfc': 'dogDf', 'GaY': 'doha'
+        }
+        for affix, expected in expected_forms.items():
+            with self.subTest(affix=affix):
+                prakriya = derive_krdanta('duh', affix, gana=2)
+                self.assertEqual(prakriya.get_current_string(), expected)
+
 if __name__ == '__main__':
     unittest.main()
