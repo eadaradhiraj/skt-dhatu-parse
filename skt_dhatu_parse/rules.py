@@ -769,7 +769,10 @@ def vacisvapiyajadinam_kiti(prakriya: Prakriya) -> None:
     
     clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
     
-    if 'kit' in next_term.tags or 'Nit' in next_term.tags:
+    is_kit = 'kit' in next_term.tags
+    is_nit = 'Nit' in next_term.tags
+    
+    if is_kit:
         if clean_dhatu == 'vac': 
             dhatu.text = 'uc'
             prakriya.log("Rule 6.1.15: Samprasarana (vac -> uc)")
@@ -779,7 +782,9 @@ def vacisvapiyajadinam_kiti(prakriya: Prakriya) -> None:
         elif clean_dhatu == 'yaj': 
             dhatu.text = 'ij'
             prakriya.log("Rule 6.1.15: Samprasarana (yaj -> ij)")
-        elif clean_dhatu == 'vraSc':
+
+    if is_kit or is_nit:
+        if clean_dhatu == 'vraSc':
             dhatu.text = 'vfSc'
             prakriya.log("Rule 6.1.16: Samprasarana (vraSc -> vfSc)")
         elif clean_dhatu == 'praC':
@@ -890,6 +895,9 @@ def upasarga_satva(prakriya: Prakriya) -> None:
             if dhatu.text.startswith('sT'):
                 dhatu.text = 'zW' + dhatu.text[2:]
                 prakriya.log("Rule 8.3.65: Upasarga Satva (sT -> zW)")
+            elif dhatu.text.startswith('s') and any(dhatu.text.startswith(stem) for stem in['sId', 'su', 'stu', 'sic', 'saYj']):
+                dhatu.text = 'z' + dhatu.text[1:]
+                prakriya.log("Rule 8.3.65/66: Upasarga Satva (s -> z)")
 
 def upasarga_sandhi(prakriya: Prakriya) -> None:
     upasarga_indices =[i for i, t in enumerate(prakriya.terms) if t.term_type == 'upasarga']

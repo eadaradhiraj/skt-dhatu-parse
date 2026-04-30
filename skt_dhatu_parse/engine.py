@@ -99,6 +99,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.sna_sandhi(prakriya)
     rules.se_mucadinam(prakriya)
     rules.paghra_sthadi_adesha(prakriya)
+    rules.vacisvapiyajadinam_kiti(prakriya)
     rules.sino_gunah(prakriya)
     rules.han_ghatva_tatva(prakriya)
     rules.vikarana_guna(prakriya)

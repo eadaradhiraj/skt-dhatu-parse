@@ -163,5 +163,21 @@ class TestKrdanta(unittest.TestCase):
                 prakriya = derive_krdanta('duh', affix, gana=2)
                 self.assertEqual(prakriya.get_current_string(), expected)
 
+    def test_pa_all_krt(self) -> None:
+        expected_forms = {
+            'kta': 'pIta', 'ktavatu': 'pItavat', 'ktvA': 'pItvA',
+            'tumun': 'pAtum', 'tavya': 'pAtavya', 'anIyar': 'pAnIya',
+            'yat': 'peya', 'Ryat': 'pAyya', 'Satf': 'pibat',
+            'lyuW': 'pAna', 'Rvul': 'pAyaka', 'tfc': 'pAtf', 'GaY': 'pAya'
+        }
+        for affix, expected in expected_forms.items():
+            with self.subTest(affix=affix):
+                prakriya = derive_krdanta('pA', affix, gana=1)
+                self.assertEqual(prakriya.get_current_string(), expected)
+
+    def test_drs_tumun(self) -> None:
+        prakriya = derive_krdanta('dfS', 'tumun', gana=1)
+        self.assertEqual(prakriya.get_current_string(), 'drazwum')
+
 if __name__ == '__main__':
     unittest.main()

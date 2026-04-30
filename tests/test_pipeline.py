@@ -348,5 +348,59 @@ class TestPipeline(unittest.TestCase):
         p1 = derive('BU', 'luN', purusha='prathama', vacana=2, gana=1)
         self.assertEqual(p1.get_current_string(), 'aBUvan')
 
+    def test_drs_causative_lat(self) -> None:
+        from skt_dhatu_parse.sanadi import derive_secondary_root
+        sanadi_prakriya = derive_secondary_root('dfS', 'Ric', gana=1)
+        p1 = derive(custom_dhatu=sanadi_prakriya.terms[0], lakara_name='laW', purusha='prathama', vacana=0, gana=1)
+        self.assertEqual(p1.get_current_string(), 'darSayati')
+
+    def test_prach_lat_samprasarana(self) -> None:
+        p1 = derive('praC', 'laW', purusha='prathama', vacana=0, gana=6)
+        self.assertEqual(p1.get_current_string(), 'pfcCati')
+
+    def test_pranam_lat_natva(self) -> None:
+        p1 = derive('nam', 'laW', purusha='prathama', vacana=0, gana=1, upasargas=['pra'])
+        self.assertEqual(p1.get_current_string(), 'praRamati')
+
+    def test_muc_lat_num(self) -> None:
+        p1 = derive('muc', 'laW', purusha='prathama', vacana=0, gana=6)
+        self.assertEqual(p1.get_current_string(), 'muYcati')
+
+    def test_han_lat_full(self) -> None:
+        p1 = derive('han', 'laW', purusha='prathama', vacana=0, gana=2)
+        self.assertEqual(p1.get_current_string(), 'hanti')
+        p2 = derive('han', 'laW', purusha='prathama', vacana=2, gana=2)
+        self.assertEqual(p2.get_current_string(), 'Gnanti')
+        p3 = derive('han', 'laW', purusha='madhyama', vacana=0, gana=2)
+        self.assertEqual(p3.get_current_string(), 'haMsi')
+
+    def test_kr_lan_full(self) -> None:
+        p1 = derive('kf', 'laN', purusha='prathama', vacana=0, gana=8)
+        self.assertEqual(p1.get_current_string(), 'akarot')
+        p2 = derive('kf', 'laN', purusha='prathama', vacana=1, gana=8)
+        self.assertEqual(p2.get_current_string(), 'akurutAm')
+        p3 = derive('kf', 'laN', purusha='prathama', vacana=2, gana=8)
+        self.assertEqual(p3.get_current_string(), 'akurvan')
+
+    def test_kr_lot_full(self) -> None:
+        p1 = derive('kf', 'loW', purusha='prathama', vacana=0, gana=8)
+        self.assertEqual(p1.get_current_string(), 'karotu')
+        p2 = derive('kf', 'loW', purusha='madhyama', vacana=0, gana=8)
+        self.assertEqual(p1.get_current_string(), 'kuru')  # hi drops after u
+        p3 = derive('kf', 'loW', purusha='uttama', vacana=0, gana=8)
+        self.assertEqual(p3.get_current_string(), 'karavARi') # Natva
+
+    def test_da_lat_full(self) -> None:
+        p1 = derive('dA', 'laW', purusha='prathama', vacana=0, gana=3)
+        self.assertEqual(p1.get_current_string(), 'dadAti')
+        p2 = derive('dA', 'laW', purusha='prathama', vacana=1, gana=3)
+        self.assertEqual(p2.get_current_string(), 'dattaH')
+        p3 = derive('dA', 'laW', purusha='prathama', vacana=2, gana=3)
+        self.assertEqual(p3.get_current_string(), 'dadati')
+
+    def test_nisad_lat(self) -> None:
+        p1 = derive('sad', 'laW', purusha='prathama', vacana=0, gana=1, upasargas=['ni'])
+        self.assertEqual(p1.get_current_string(), 'nizIdati')
+
 if __name__ == '__main__':
     unittest.main()
