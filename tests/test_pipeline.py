@@ -514,5 +514,26 @@ class TestPipeline(unittest.TestCase):
         p3 = derive('BU', 'lfN', purusha='madhyama', vacana=0, gana=1)
         self.assertEqual(p3.get_current_string(), 'aBavizyaH')
 
+    def test_asirlin_bhu_table(self) -> None:
+        """Tests BU + ASIrliN -> BUyAt, BUyAstAm, BUyAsuH."""
+        p1 = derive('BU', 'ASIrliN', purusha='prathama', vacana=0, gana=1)
+        self.assertEqual(p1.get_current_string(), 'BUyAt')
+
+        p2 = derive('BU', 'ASIrliN', purusha='prathama', vacana=1, gana=1)
+        self.assertEqual(p2.get_current_string(), 'BUyAstAm')
+
+        p3 = derive('BU', 'ASIrliN', purusha='prathama', vacana=2, gana=1)
+        self.assertEqual(p3.get_current_string(), 'BUyAsuH')
+
+    def test_asirlin_kr(self) -> None:
+        """Tests kf + ASIrliN -> kriyAt (riṅ śayaglinkṣu)."""
+        p1 = derive('kf', 'ASIrliN', purusha='prathama', vacana=0, gana=8)
+        self.assertEqual(p1.get_current_string(), 'kriyAt')
+
+    def test_asirlin_glai(self) -> None:
+        """Tests glE + ASIrliN -> glAyAt (ādeca upadeśe'śiti)."""
+        p1 = derive('glE', 'ASIrliN', purusha='prathama', vacana=0, gana=1)
+        self.assertEqual(p1.get_current_string(), 'glAyAt')
+
 if __name__ == '__main__':
     unittest.main()

@@ -953,5 +953,20 @@ class TestRules(unittest.TestCase):
         rules.atmanepada_tere(p)
         self.assertEqual(p.terms[1].text, 'A') # Ensure 'A' doesn't become 'e'
 
+    def test_adeca_upadese_asiti_fallback(self) -> None:
+        """Hits the if not dhatu fallback."""
+        p_empty = Prakriya()
+        p_empty.add_term(Term('ta', 'pratyaya'))
+        rules.adeca_upadese_asiti(p_empty)
+        self.assertEqual(p_empty.terms[0].text, 'ta')
+
+    def test_skoh_samyogadyor_ante_ca_fallback(self) -> None:
+        """Hits the fallback where the final cluster doesn't belong to yAsuW."""
+        p = Prakriya()
+        p.add_term(Term('test', 'dhatu'))
+        p.add_term(Term('sk', 'pratyaya'))
+        rules.skoh_samyogadyor_ante_ca(p)
+        self.assertEqual(p.terms[1].text, 'sk') # Remains unchanged
+
 if __name__ == '__main__':
     unittest.main()
