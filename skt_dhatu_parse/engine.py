@@ -64,6 +64,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     
     # 6. Early Suffix Replacements
     rules.mer_nih(prakriya)
+    rules.lut_prathamasya_daraurasah(prakriya)
     rules.jher_jus(prakriya)
     rules.ata_au_nalah(prakriya)
     rules.jhasya_ran(prakriya)
@@ -141,7 +142,9 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.hujhalbhyo_her_dhih(prakriya)
     rules.ghvasor_ed_hau(prakriya)
     rules.tasyasti_lopa(prakriya)
-
+    rules.ri_ca(prakriya)
+    rules.h_eti(prakriya)
+    rules.diti_teh_lopa(prakriya)
     rules.hali_ca(prakriya)
     rules.srujidrusor_jhaly_amakiti(prakriya)
     rules.aco_nniti(prakriya)

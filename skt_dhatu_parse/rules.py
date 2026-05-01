@@ -120,16 +120,21 @@ def insert_vikarana(prakriya: Prakriya) -> None:
     if not dhatu: return
     idx = prakriya.terms.index(dhatu) + 1 
     
-    if 'lfW' in suffix.tags:
+    if 'lfW' in suffix.tags or 'lfN' in suffix.tags:
         vik = Term('sya', 'vikaraRa')
         vik.tags.add('ardhadhatuka')
         prakriya.terms.insert(idx, vik)
-        prakriya.log("Rule 3.1.33: Inserted 'sya' for Future Tense")
+        prakriya.log("Rule 3.1.33: Inserted 'sya' for Future/Conditional")
+        return
+    elif 'luW' in suffix.tags:
+        vik = Term('tAsi', 'vikaraRa')
+        vik.text = 'tAs'
+        vik.tags.add('ardhadhatuka')
+        prakriya.terms.insert(idx, vik)
+        prakriya.log("Rule 3.1.33: Inserted 'tAsi' for Periphrastic Future")
         return
         
-    if 'luN' in suffix.tags:
-        return # cli is handled natively as a lakara-specific augment
-
+    if 'luN' in suffix.tags: return
     if 'ardhadhatuka' in suffix.tags: return
 
     clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
@@ -211,6 +216,7 @@ def bruva_it(prakriya: Prakriya) -> None:
 def atmanepada_tere(prakriya: Prakriya) -> None:
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     suffix = prakriya.terms[-1]
+    if suffix.upadeza in['qA', 'rO', 'ras']: return   # <-- ADDED to protect luW replacements
     if dhatu and 'atmanepada' in dhatu.tags and 'Wit' in suffix.tags:
         text = suffix.text
         for i in range(len(text)-1, -1, -1):
@@ -269,7 +275,7 @@ def jhonta(prakriya: Prakriya) -> None:
 def at_agama(prakriya: Prakriya) -> None:
     suffix = prakriya.terms[-1]
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
-    if dhatu and set(['laN', 'luN']).intersection(suffix.tags):
+    if dhatu and set(['laN', 'luN', 'lfN']).intersection(suffix.tags):   # <-- Added lfN
         agama = Term('aw', 'Agama')
         idx = prakriya.terms.index(dhatu)
         prakriya.terms.insert(idx, agama)
@@ -277,7 +283,7 @@ def at_agama(prakriya: Prakriya) -> None:
 
 def itasca(prakriya: Prakriya) -> None:
     suffix = prakriya.terms[-1]
-    if set(['laN', 'liN', 'luN']).intersection(suffix.tags):
+    if set(['laN', 'liN', 'luN', 'lfN']).intersection(suffix.tags):       # <-- Added lfN
         if suffix.text.endswith('i') and suffix.upadeza in['tip', 'sip', 'mip', 'Ji']:
             suffix.text = suffix.text[:-1]
             prakriya.log("Rule 3.4.100: itaśca (Dropped terminal 'i')")
@@ -1205,12 +1211,14 @@ def snasor_allopah(prakriya: Prakriya) -> None:
                     prakriya.log("Rule 6.4.111: śnasor allopaḥ -> 'na' (śnam) becomes 'n'")
 
 def tasyasti_lopa(prakriya: Prakriya) -> None:
-    """Rule 7.4.50: tāsyastilopaḥ. Elides the 's' of 'as' before 's'."""
-    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
-    suffix = prakriya.terms[-1]
-    if dhatu and dhatu.text == 'as' and suffix.text.startswith('s'):
-        dhatu.text = 'a'
-        prakriya.log("Rule 7.4.50: tāsyastilopaḥ -> 'as' becomes 'a' before 's'")
+    """Rule 7.4.50: tāsyastilopaḥ. Elides the 's' of 'tās' and 'as' before 's'."""
+    for i in range(len(prakriya.terms)-1):
+        t1 = prakriya.terms[i]
+        t2 = prakriya.terms[i+1]
+        if t1.text.endswith('s') and t1.upadeza in ['as', 'tAsi']:
+            if t2.text.startswith('s'):
+                t1.text = t1.text[:-1]
+                prakriya.log("Rule 7.4.50: tāsyastilopaḥ ('s' deleted before 's')")
 
 def lin_agamas(prakriya: Prakriya) -> None:
     suffix = prakriya.terms[-1]
@@ -1387,19 +1395,19 @@ def at_uttasya(prakriya: Prakriya) -> None:
 
 def nityam_nitah(prakriya: Prakriya) -> None:
     suffix = prakriya.terms[-1]
-    if set(['laN', 'liN', 'luN', 'loW']).intersection(suffix.tags) and suffix.text.endswith('s') and suffix.upadeza in ['vas', 'mas']:
+    if set(['laN', 'liN', 'luN', 'loW', 'lfN']).intersection(suffix.tags) and suffix.text.endswith('s') and suffix.upadeza in ['vas', 'mas']: # <-- Added lfN
         suffix.text = suffix.text[:-1]
         prakriya.log("Rule 3.4.99: nityaM NitaH (dropped final 's')")
 
 def tasthasthamipam(prakriya: Prakriya) -> None:
     suffix = prakriya.terms[-1]
-    if set(['laN', 'liN', 'luN', 'loW']).intersection(suffix.tags):
+    if set(['laN', 'liN', 'luN', 'loW', 'lfN']).intersection(suffix.tags): # <-- Added lfN
         if suffix.text == 'tas': suffix.text = 'tAm'
         elif suffix.text == 'Tas': suffix.text = 'tam'
         elif suffix.text == 'Ta': suffix.text = 'ta'
         elif suffix.text == 'mip' and 'loW' not in suffix.tags: 
             suffix.text = 'am'
-        prakriya.log(f"Rule 3.4.101: Past/Opt/Aorist replacement -> '{suffix.text}'")
+        prakriya.log(f"Rule 3.4.101: Past/Opt/Aorist/Cond replacement -> '{suffix.text}'")
 
 def er_uh(prakriya: Prakriya) -> None:
     suffix = prakriya.terms[-1]
@@ -1689,3 +1697,57 @@ def lity_abhyasasya(prakriya: Prakriya) -> None:
         elif clean_dhatu == 'yaj':
             abhyasa.text = 'i'
             prakriya.log("Rule 6.1.17: liṭy abhyāsasyobhayeṣām (yaj -> i)")
+
+def lut_prathamasya_daraurasah(prakriya: Prakriya) -> None:
+    """Rule 2.4.85: luṭaḥ prathamasya ḍārauraśaḥ. Replaces 3rd person luṬ affixes."""
+    suffix = prakriya.terms[-1]
+    if 'luW' in suffix.tags:
+        if suffix.upadeza in ['tip', 'ta']:
+            suffix.text = 'A'
+            suffix.upadeza = 'qA'
+            suffix.tags.add('qit')
+            prakriya.log("Rule 2.4.85: luṭaḥ prathamasya (tip/ta -> ḍā)")
+        elif suffix.upadeza in ['tas', 'AtAm']:
+            suffix.text = 'rO'
+            suffix.upadeza = 'rO'
+            prakriya.log("Rule 2.4.85: luṭaḥ prathamasya (tas/ātām -> rau)")
+        elif suffix.upadeza in ['Ji', 'Ja']:
+            suffix.text = 'ras'
+            suffix.upadeza = 'ras'
+            prakriya.log("Rule 2.4.85: luṭaḥ prathamasya (jhi/jha -> ras)")
+
+def diti_teh_lopa(prakriya: Prakriya) -> None:
+    """Rule 6.4.143: ṭeḥ. Deletes the ṭi portion (last vowel to end) of the stem before ḍit."""
+    for i in range(len(prakriya.terms)-1):
+        t1 = prakriya.terms[i]
+        t2 = prakriya.terms[i+1]
+        if 'qit' in t2.tags and t1.text:
+            text = t1.text
+            ti_index = -1
+            for j in range(len(text)-1, -1, -1):
+                if is_vowel(text[j]):
+                    ti_index = j
+                    break
+            if ti_index != -1:
+                t1.text = text[:ti_index]
+                prakriya.log(f"Rule 6.4.143: ṭeḥ lopa (Deleted '{text[ti_index:]}')")
+
+def ri_ca(prakriya: Prakriya) -> None:
+    """Rule 7.4.51: ri ca. The 's' of 'tAs' (and 'as') drops before 'r'."""
+    for i in range(len(prakriya.terms)-1):
+        t1 = prakriya.terms[i]
+        t2 = prakriya.terms[i+1]
+        if t1.text.endswith('s') and t1.upadeza in ['as', 'tAsi']:
+            if t2.text.startswith('r'):
+                t1.text = t1.text[:-1]
+                prakriya.log("Rule 7.4.51: ri ca ('s' deleted before 'r')")
+
+def h_eti(prakriya: Prakriya) -> None:
+    """Rule 7.4.52: h eṭi. 's' of tās becomes 'h' before 'e'."""
+    for i in range(len(prakriya.terms)-1):
+        t1 = prakriya.terms[i]
+        t2 = prakriya.terms[i+1]
+        if t1.text.endswith('s') and t1.upadeza == 'tAsi':
+            if t2.text.startswith('e'):
+                t1.text = t1.text[:-1] + 'h'
+                prakriya.log("Rule 7.4.52: h eṭi (s -> h before e)")

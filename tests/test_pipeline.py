@@ -489,5 +489,30 @@ class TestPipeline(unittest.TestCase):
         prakriya = derive('Sru', 'liW', purusha='prathama', vacana=1, gana=1)
         self.assertEqual(prakriya.get_current_string(), 'SuSruvatuH')
 
+    def test_luW_periphrastic_future(self) -> None:
+        """Tests BU + luW -> BavitA, BavitArO, BavitAsi, BavitAsmi."""
+        p1 = derive('BU', 'luW', purusha='prathama', vacana=0, gana=1)
+        self.assertEqual(p1.get_current_string(), 'BavitA')
+        
+        p2 = derive('BU', 'luW', purusha='prathama', vacana=1, gana=1)
+        self.assertEqual(p2.get_current_string(), 'BavitArO')
+        
+        p3 = derive('BU', 'luW', purusha='madhyama', vacana=0, gana=1)
+        self.assertEqual(p3.get_current_string(), 'BavitAsi')
+
+        p4 = derive('BU', 'luW', purusha='uttama', vacana=0, gana=1)
+        self.assertEqual(p4.get_current_string(), 'BavitAsmi')
+
+    def test_lfN_conditional(self) -> None:
+        """Tests BU + lfN -> aBavizyat, aBavizyan, aBavizyaH."""
+        p1 = derive('BU', 'lfN', purusha='prathama', vacana=0, gana=1)
+        self.assertEqual(p1.get_current_string(), 'aBavizyat')
+        
+        p2 = derive('BU', 'lfN', purusha='prathama', vacana=2, gana=1)
+        self.assertEqual(p2.get_current_string(), 'aBavizyan')
+        
+        p3 = derive('BU', 'lfN', purusha='madhyama', vacana=0, gana=1)
+        self.assertEqual(p3.get_current_string(), 'aBavizyaH')
+
 if __name__ == '__main__':
     unittest.main()

@@ -894,5 +894,64 @@ class TestRules(unittest.TestCase):
         rules.vacisvapiyajadinam_kiti(p)
         self.assertEqual(p.terms[0].text, 'gfh')
 
+    def test_lut_prathamasya_daraurasah(self) -> None:
+        mappings =[('tip', 'A', 'qA'), ('tas', 'rO', 'rO'), ('Ji', 'ras', 'ras')]
+        for orig, rep_text, rep_up in mappings:
+            p = Prakriya()
+            suf = Term(orig, 'pratyaya')
+            suf.tags.add('luW')
+            p.add_term(suf)
+            rules.lut_prathamasya_daraurasah(p)
+            self.assertEqual(p.terms[-1].text, rep_text)
+            self.assertEqual(p.terms[-1].upadeza, rep_up)
+
+    def test_diti_teh_lopa(self) -> None:
+        p = Prakriya()
+        p.add_term(Term('tAs', 'vikaraRa'))
+        suf = Term('A', 'pratyaya')
+        suf.tags.add('qit')
+        p.add_term(suf)
+        rules.diti_teh_lopa(p)
+        self.assertEqual(p.terms[0].text, 't')
+
+    def test_ri_ca(self) -> None:
+        p = Prakriya()
+        vik = Term('tAsi', 'vikaraRa')
+        vik.text = 'tAs'
+        p.add_term(vik)
+        p.add_term(Term('rO', 'pratyaya'))
+        rules.ri_ca(p)
+        self.assertEqual(p.terms[0].text, 'tA')
+        
+    def test_tasyasti_lopa_tasi(self) -> None:
+        p = Prakriya()
+        vik = Term('tAsi', 'vikaraRa')
+        vik.text = 'tAs'
+        p.add_term(vik)
+        p.add_term(Term('si', 'pratyaya'))
+        rules.tasyasti_lopa(p)
+        self.assertEqual(p.terms[0].text, 'tA')
+
+    def test_h_eti(self) -> None:
+        p = Prakriya()
+        vik = Term('tAsi', 'vikaraRa')
+        vik.text = 'tAs'
+        p.add_term(vik)
+        p.add_term(Term('e', 'pratyaya'))
+        rules.h_eti(p)
+        self.assertEqual(p.terms[0].text, 'tAh')
+
+    def test_atmanepada_tere_luw_skip(self) -> None:
+        p = Prakriya()
+        d = Term('BU', 'dhatu')
+        d.tags.add('atmanepada')
+        p.add_term(d)
+        suf = Term('A', 'pratyaya')
+        suf.upadeza = 'qA'
+        suf.tags.add('Wit')
+        p.add_term(suf)
+        rules.atmanepada_tere(p)
+        self.assertEqual(p.terms[1].text, 'A') # Ensure 'A' doesn't become 'e'
+
 if __name__ == '__main__':
     unittest.main()
