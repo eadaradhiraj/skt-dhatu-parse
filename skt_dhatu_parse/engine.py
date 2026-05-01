@@ -169,8 +169,12 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.dadhas_tathor_ca(prakriya)
 
     rules.jhasas_tathor_dho_dhah(prakriya)        
-    rules.jhalam_jas_jhasi(prakriya)              
+    
+    # --- REORDERED BLOCK ---
     rules.stuna_stuh(prakriya)
+    rules.dho_dhe_lopah(prakriya)                 
+    rules.jhalam_jas_jhasi(prakriya)              
+    # -----------------------
     
     rules.khari_ca(prakriya)                      
     rules.samyogantasya_lopah(prakriya)

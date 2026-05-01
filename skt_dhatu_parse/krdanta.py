@@ -76,12 +76,16 @@ def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_
     rules.choh_kuh(prakriya)                
     rules.ho_dhah_dader_ghah(prakriya)      
     rules.jhasas_tathor_dho_dhah(prakriya)  
-    rules.jhalam_jas_jhasi(prakriya)
-    rules.khari_ca(prakriya)  
+    
+    # --- REORDERED BLOCK ---
     rules.stuna_stuh(prakriya)    
+    rules.dho_dhe_lopah(prakriya)                  
+    rules.jhalam_jas_jhasi(prakriya)
+    # -----------------------
+    
+    rules.khari_ca(prakriya)  
     rules.nascapadantasya_jhali(prakriya)          
     rules.anusvarasya_yayi_parasavarnah(prakriya)  
-    rules.anusvarasya_yayi_parasavarnah(prakriya)
     rules.rashabhyam_no_nah(prakriya)       
     
     # 6. Upasarga Final Application

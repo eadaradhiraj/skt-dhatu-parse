@@ -41,10 +41,10 @@ TIN_PARASMAIPADA_LIT = {
     'uttama':   ['Ral', 'va', 'ma']
 }
 
-ANIT_ROOTS =[
+ANIT_ROOTS = [
     'ji', 'dA', 'Sru', 'pA', 'han', 'dfS', 'buD', 'ram', 'gam', 'nam', 'vac', 
     'Cid', 'muc', 'svap', 'yaj', 'Bid', 'sfj', 'sTA', 'jJA', 'snA', 'kf', 'kF',
-    'vraSc', 'praC', 'dah', 'yuj', 'laB'
+    'vraSc', 'praC', 'dah', 'yuj', 'laB', 'ruh', 'lih', 'guh'
 ]
 
 def apply_guna(char: str) -> str:
@@ -623,16 +623,19 @@ def rashabhyam_no_nah(prakriya: Prakriya) -> None:
             term.text = new_text
 
 def stuna_stuh(prakriya: Prakriya) -> None:
+    """Rule 8.4.41: ṣṭunā ṣṭuḥ. Dentals become retroflexes after ṣ or ṭ-varga."""
     for i in range(len(prakriya.terms)-1):
         t1 = prakriya.terms[i]
         t2 = prakriya.terms[i+1]
-        if t1.text and t1.text[-1] == 'z':
-            if t2.text.startswith('t'): 
-                t2.text = 'w' + t2.text[1:]
-                prakriya.log("Rule 8.4.41: 't' -> 'w' (zwunA zwuH)")
-            elif t2.text.startswith('T'): 
-                t2.text = 'W' + t2.text[1:]
-                prakriya.log("Rule 8.4.41: 'T' -> 'W' (zwunA zwuH)")
+        if t1.text and t2.text:
+            last_char = t1.text[-1]
+            first_char = t2.text[0]
+            # If the preceding character is retroflex (ṣ or ṭ-varga)
+            if last_char in ['z', 'w', 'W', 'q', 'Q', 'R']:
+                stu_map = {'s': 'z', 't': 'w', 'T': 'W', 'd': 'q', 'D': 'Q', 'n': 'R'}
+                if first_char in stu_map:
+                    t2.text = stu_map[first_char] + t2.text[1:]
+                    prakriya.log(f"Rule 8.4.41: '{first_char}' -> '{stu_map[first_char]}' (zwunA zwuH)")
 
 def vrasca_bhrasja_sruja_mruja(prakriya: Prakriya) -> None:
     """Rule 8.2.36: ...cCaSAM zaH. Final palatals/cCh/S become 'z' before jhal."""
@@ -1504,3 +1507,19 @@ def han_ghatva_tatva(prakriya: Prakriya) -> None:
         if dhatu.text.endswith('n'):
             dhatu.text = dhatu.text[:-1] + 't'
             prakriya.log("Rule 7.3.32: hanato ṇinnali (n -> t)")
+
+def dho_dhe_lopah(prakriya: Prakriya) -> None:
+    """Rule 8.3.13: ḍho ḍhe lopaḥ & Rule 6.3.111: ḍhralope pūrvasya dīrgho'ṇaḥ"""
+    for i in range(len(prakriya.terms)-1):
+        t1 = prakriya.terms[i]
+        t2 = prakriya.terms[i+1]
+        if t1.text.endswith('Q') and t2.text.startswith('Q'):
+            t1.text = t1.text[:-1]
+            prakriya.log("Rule 8.3.13: dho dhe lopah (dropped 'Q' before 'Q')")
+            
+            # Lengthen preceding 'a/i/u' if the ḍh was dropped
+            if t1.text and t1.text[-1] in ['a', 'i', 'u']:
+                dirgha_map = {'a': 'A', 'i': 'I', 'u': 'U'}
+                old_vowel = t1.text[-1]
+                t1.text = t1.text[:-1] + dirgha_map[old_vowel]
+                prakriya.log(f"Rule 6.3.111: dhralope purvasya dirgho'nah ({old_vowel} -> {dirgha_map[old_vowel]})")

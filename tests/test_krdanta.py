@@ -212,5 +212,21 @@ class TestKrdanta(unittest.TestCase):
                 else:
                     self.assertEqual(prakriya.get_current_string(), expected)
 
+    def test_ruh_kta_dhalopa(self) -> None:
+        """
+        Tests ruh + kta -> rUQa
+        Rule Chain: Aniṭ -> ho dhah -> jhasastathor dho dhah -> stuna stuh -> dho dhe lopah -> dhralope purvasya dirgho nah
+        """
+        prakriya = derive_krdanta('ruh', 'kta', gana=1)
+        self.assertEqual(prakriya.get_current_string(), 'rUQa')
+
+    def test_lih_kta_dhalopa(self) -> None:
+        """
+        Tests lih + kta -> lIQa
+        Rule Chain: Identical to ruh, but tests lengthening of 'i' to 'I'
+        """
+        prakriya = derive_krdanta('lih', 'kta', gana=2)
+        self.assertEqual(prakriya.get_current_string(), 'lIQa')
+
 if __name__ == '__main__':
     unittest.main()
