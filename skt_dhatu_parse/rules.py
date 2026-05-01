@@ -318,10 +318,13 @@ def it_agama(prakriya: Prakriya) -> None:
                 continue
                 
             if not is_anit: 
-                term.text = 'i' + term.text
-                prakriya.log(f"Rule 7.2.35: Added 'iw' augment to '{term.upadeza}'")
-            else:
-                prakriya.log(f"Rule 7.2.10: AniW blocked 'iw' for '{term.upadeza}'")
+            # Rule 7.2.37: graho'liṭi dīrghaḥ (Long īṭ augment for grah, except in liṬ)
+                if clean_dhatu == 'grah' and 'liW' not in term.tags:
+                    term.text = 'I' + term.text
+                    prakriya.log(f"Rule 7.2.37: graho'liṭi dīrghaḥ (Added 'Iw' augment to '{term.upadeza}')")
+                else:
+                    term.text = 'i' + term.text
+                    prakriya.log(f"Rule 7.2.35: Added 'iw' augment to '{term.upadeza}')")
 
 def idito_num_dhatoh(prakriya: Prakriya) -> None:
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
@@ -821,6 +824,9 @@ def vacisvapiyajadinam_kiti(prakriya: Prakriya) -> None:
         elif clean_dhatu == 'yaj': 
             dhatu.text = 'ij'
             prakriya.log("Rule 6.1.15: Samprasarana (yaj -> ij)")
+        elif clean_dhatu == 'grah':
+            dhatu.text = 'gfh'
+            prakriya.log("Rule 6.1.16: Samprasarana (grah -> gfh)")
 
     if is_kit or is_nit:
         if clean_dhatu == 'vraSc':
@@ -1537,15 +1543,18 @@ def snabhyastayor_atah(prakriya: Prakriya) -> None:
         prakriya.log("Rule 6.4.112: śnābhyastayor ātaḥ (Dropped A)")
 
 def aci_snu_dhatu_bhruvam(prakriya: Prakriya) -> None:
-    """Rule 6.4.77: aci śnudhātubhruvāṃ... Root 'U' becomes 'uv' before vowels."""
+    """Rule 6.4.77: aci śnudhātubhruvāṃ... Root 'u/U' becomes 'uv' before vowels."""
     for i in range(len(prakriya.terms)-1):
         t1 = prakriya.terms[i]
         t2 = prakriya.terms[i+1]
-        if t1.term_type == 'dhatu' and t1.text.endswith('U') and t2.text and is_vowel(t2.text[0]):
-            # Pāṇini 6.4.87 (huśnuvoḥ) forces yaṇ for Snu, but brU gets normal uvaṅ
-            if t1.text == 'brU':
+        if t1.term_type == 'dhatu' and t1.text and t1.text[-1] in['u', 'U'] and t2.text and is_vowel(t2.text[0]):
+            clean_dhatu = next((tag.split('_')[1] for tag in t1.tags if tag.startswith('clean_')), t1.text)
+            is_lit = any('liW' in t.tags for t in prakriya.terms)
+            
+            # Applies to brU, or to reduplicated u-roots in the Perfect Tense (liW)
+            if clean_dhatu == 'brU' or (is_lit and clean_dhatu in['Sru', 'stu', 'su', 'hu']):
                 t1.text = t1.text[:-1] + 'uv'
-                prakriya.log("Rule 6.4.77: aci śnudhātubhruvāṃ (U -> uv before vowel)")
+                prakriya.log("Rule 6.4.77: aci śnudhātubhruvāṃ (u/U -> uv before vowel)")
 
 def sino_gunah(prakriya: Prakriya) -> None:
     """Rule 7.4.22: śiṅo guṇaḥ. śī gets guṇa before all Sārvadhātuka affixes."""
@@ -1640,3 +1649,13 @@ def vrddhir_eci(prakriya: Prakriya) -> None:
                 t1.text = t1.text[:-1] + rep
                 t2.text = t2.text[1:]
                 prakriya.log(f"Rule 6.1.88: vrddhir eci (a/A + {old_t2_start} -> {rep})")
+
+def jna_janor_ja(prakriya: Prakriya) -> None:
+    """Rule 7.3.79: jñājanor jā. jñā and jan become jā before śit affixes."""
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa'), None)
+    if dhatu and vikarana and 'Sit' in vikarana.tags:
+        clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
+        if clean_dhatu in ['jYA', 'jan']:
+            dhatu.text = 'jA'
+            prakriya.log(f"Rule 7.3.79: jñājanor jā ({clean_dhatu} -> jA)")

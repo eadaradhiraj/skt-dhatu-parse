@@ -101,6 +101,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.sna_sandhi(prakriya)
     rules.se_mucadinam(prakriya)
     rules.paghra_sthadi_adesha(prakriya)
+    rules.jna_janor_ja(prakriya)
     rules.kramah_parasmaipadesu(prakriya)
     rules.vacisvapiyajadinam_kiti(prakriya)
     rules.sino_gunah(prakriya)
@@ -153,7 +154,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.ato_nitah(prakriya) 
     rules.usy_apadantat(prakriya)               
     rules.ad_gunah(prakriya)
-    rules.ato_gune(prakriya)               #
+    rules.ato_gune(prakriya)
     rules.vrddhir_eci(prakriya)
     rules.ato_gune(prakriya)
     rules.akah_savarne_dirghah(prakriya)

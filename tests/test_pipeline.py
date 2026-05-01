@@ -479,5 +479,15 @@ class TestPipeline(unittest.TestCase):
         prakriya = derive('diS', 'luN', purusha='prathama', vacana=0, gana=6)
         self.assertEqual(prakriya.get_current_string(), 'adikzat')
 
+    def test_jna_janor_ja_substitution(self) -> None:
+        """Tests jñā + laW -> jAnAti (Rule 7.3.79: jñājanor jā)"""
+        prakriya = derive('jYA', 'laW', purusha='prathama', vacana=0, gana=9)
+        self.assertEqual(prakriya.get_current_string(), 'jAnAti')
+
+    def test_sru_lit_uvan_sandhi(self) -> None:
+        """Tests Sru + liW (Dual) -> SuSruvatuH (Rule 6.4.77: uvaṅ substitute)"""
+        prakriya = derive('Sru', 'liW', purusha='prathama', vacana=1, gana=1)
+        self.assertEqual(prakriya.get_current_string(), 'SuSruvatuH')
+
 if __name__ == '__main__':
     unittest.main()
