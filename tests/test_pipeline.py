@@ -535,5 +535,14 @@ class TestPipeline(unittest.TestCase):
         p1 = derive('glE', 'ASIrliN', purusha='prathama', vacana=0, gana=1)
         self.assertEqual(p1.get_current_string(), 'glAyAt')
 
+    def test_gai_lit_prathama(self) -> None:
+        """Tests gE + liW -> jagO (ādeca upadeśe'śiti -> āta au ṇalaḥ)."""
+        prakriya = derive('gE', 'liW', purusha='prathama', vacana=0, gana=1)
+        self.assertEqual(prakriya.get_current_string(), 'jagO')
+
+    def test_dams_lat_prathama(self) -> None:
+        """Tests daMS + laW -> daSati."""
+        prakriya = derive('daMS', 'laW', purusha='prathama', vacana=0, gana=1)
+        self.assertEqual(prakriya.get_current_string(), 'daSati')
 if __name__ == '__main__':
     unittest.main()

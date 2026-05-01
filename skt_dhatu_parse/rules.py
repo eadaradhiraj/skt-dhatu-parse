@@ -1797,3 +1797,13 @@ def skoh_samyogadyor_ante_ca(prakriya: Prakriya) -> None:
                     prakriya.terms[i].text = prakriya.terms[i].text[:-1]
                     prakriya.log("Rule 8.2.29: skoḥ saṃyogādyor ante ca (Dropped 's')")
                     break
+
+def damsa_sanja_svanjam_sapi(prakriya: Prakriya) -> None:
+    """Rule 6.4.25: daṃśa-sañja-svañjāṃ śapi. Drops nasal before śap."""
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa'), None)
+    if dhatu and vikarana and vikarana.upadeza == 'Sap':
+        clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
+        if clean_dhatu in ['daMS', 'saYj', 'svaYj']:
+            dhatu.text = dhatu.text.replace('M', '').replace('Y', '')
+            prakriya.log(f"Rule 6.4.25: daṃśa-sañja-svañjāṃ śapi (Dropped nasal in {clean_dhatu})")

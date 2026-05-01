@@ -966,7 +966,20 @@ class TestRules(unittest.TestCase):
         p.add_term(Term('test', 'dhatu'))
         p.add_term(Term('sk', 'pratyaya'))
         rules.skoh_samyogadyor_ante_ca(p)
-        self.assertEqual(p.terms[1].text, 'sk') # Remains unchanged
+        self.assertEqual(p.terms[1].text, 'sk')
+
+    def test_damsa_sanja_svanjam_sapi(self) -> None:
+        """Hits the nasal drop rule for daMS, saYj, svaYj."""
+        for orig in['daMS', 'saYj', 'svaYj']:
+            p = Prakriya()
+            d = Term(orig, 'dhatu')
+            d.tags.add(f'clean_{orig}')
+            p.add_term(d)
+            vik = Term('a', 'vikaraRa')
+            vik.upadeza = 'Sap'
+            p.add_term(vik)
+            rules.damsa_sanja_svanjam_sapi(p)
+            self.assertTrue('M' not in p.terms[0].text and 'Y' not in p.terms[0].text)
 
 if __name__ == '__main__':
     unittest.main()
