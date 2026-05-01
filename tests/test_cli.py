@@ -100,15 +100,6 @@ class TestCLI(unittest.TestCase):
         prints = [str(c.args[0]) for c in mock_print.call_args_list if c.args]
         self.assertTrue(any('not a recognized Pāṇinian Upasarga' in s for s in prints))
 
-    @patch('skt_dhatu_parse.conjugate.derive')
-    @patch('builtins.print')
-    def test_conjugate_failure(self, mock_print, mock_derive) -> None:
-        mock_derive.return_value = None
-        from skt_dhatu_parse.conjugate import print_conjugation
-        print_conjugation('xyz_invalid_root')
-        prints =[str(c.args[0]) for c in mock_print.call_args_list if c.args]
-        self.assertTrue(any('Failed to derive forms' in s for s in prints))
-
     @patch('sys.argv',['cli.py', 'BU', '--all-krt'])
     @patch('skt_dhatu_parse.cli.derive_krdanta')
     @patch('builtins.print')

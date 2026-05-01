@@ -1029,9 +1029,6 @@ def haladi_seshah(prakriya: Prakriya) -> None:
             elif surviving_cons and char == surviving_cons and not cons_seen:
                 new_text += char
                 cons_seen = True
-            elif not surviving_cons and not cons_seen:
-                new_text += char
-                cons_seen = True
                 
         if new_text != text:
             abhyasa.text = new_text

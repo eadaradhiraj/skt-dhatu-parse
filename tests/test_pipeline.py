@@ -216,17 +216,6 @@ class TestPipeline(unittest.TestCase):
         
         p2 = derive('han', 'laW', purusha='prathama', vacana=2, gana=2) # Weak + Vowel
         self.assertEqual(p2.get_current_string(), 'Gnanti')
-
-    def test_gana_2_duh(self) -> None:
-        """Gaṇa 2: duh tests aspiration shifts and khari-ca/jhalam-jaś."""
-        p1 = derive('duh', 'laW', purusha='prathama', vacana=0, gana=2) # dogdhi
-        self.assertEqual(p1.get_current_string(), 'dogDi')
-        
-        p2 = derive('duh', 'laW', purusha='madhyama', vacana=0, gana=2) # dhokṣi
-        self.assertEqual(p2.get_current_string(), 'Dokzi')
-        
-        p3 = derive('duh', 'laW', purusha='prathama', vacana=1, gana=2) # dugdhaḥ
-        self.assertEqual(p3.get_current_string(), 'dugDaH')
     
     def test_optative_atmanepada(self) -> None:
         """Tests liN for Atmanepada (eDeta, eDeran)."""

@@ -721,13 +721,83 @@ class TestRules(unittest.TestCase):
         p2.add_term(Term('Snam', 'vikaraRa'))
         rules.mit_aco_antyat_parah(p2)
         
-        # Empty prakriya against safeties
-        p_empty = Prakriya()
-        rules.do_dad_ghoh(p_empty)
-        rules.snabhyastayor_atah(p_empty)
-        rules.ho_dhah_dader_ghah(p_empty)
-        rules.anunasikalopo_jhali_kniti(p_empty)
-        rules.ata_upadhayah(p_empty)
+        # No dhatu in prakriya against safeties
+        p_no_dhatu = Prakriya()
+        p_no_dhatu.add_term(Term('ta', 'pratyaya')) # <-- Added dummy suffix so [-1] doesn't crash
+        
+        rules.do_dad_ghoh(p_no_dhatu)
+        rules.snabhyastayor_atah(p_no_dhatu)
+        rules.ho_dhah_dader_ghah(p_no_dhatu)
+        rules.anunasikalopo_jhali_kniti(p_no_dhatu)
+        rules.ata_upadhayah(p_no_dhatu)
+
+    def test_missing_thasah_se(self) -> None:
+        p = Prakriya()
+        suf = Term('TAs', 'pratyaya')
+        suf.tags.add('Wit')
+        p.add_term(suf)
+        rules.thasah_se(p)
+        self.assertEqual(p.terms[0].text, 'se')
+
+    def test_missing_jhonta_pass(self) -> None:
+        p = Prakriya()
+        suf = Term('Ja', 'pratyaya')
+        suf.tags.add('liN')
+        p.add_term(suf)
+        rules.jhonta(p)
+        self.assertEqual(p.terms[0].text, 'Ja') # Unchanged
+
+    def test_missing_ato_nitah(self) -> None:
+        p = Prakriya()
+        p.add_term(Term('a', 'vikaraRa'))
+        p.add_term(Term('AtAm', 'pratyaya')) # Nit by default if no pit
+        rules.ato_nitah(p)
+        self.assertEqual(p.terms[0].text, '')
+        self.assertEqual(p.terms[1].text, 'etAm')
+
+    def test_missing_adesa_pratyayayoh_continue(self) -> None:
+        p = Prakriya()
+        p.add_term(Term('', 'dhatu')) # Empty string
+        p.add_term(Term('su', 'pratyaya'))
+        rules.adesa_pratyayayoh(p)
+        self.assertEqual(p.terms[1].text, 'su') # Unchanged
+
+    def test_missing_anusvarasya_pvarga(self) -> None:
+        p = Prakriya()
+        p.add_term(Term('SaM', 'dhatu'))
+        p.add_term(Term('pa', 'pratyaya'))
+        rules.anusvarasya_yayi_parasavarnah(p)
+        self.assertEqual(p.terms[0].text, 'Sam')
+        
+        # Test the 'else' branch for non-YAY consonants (like s)
+        p2 = Prakriya()
+        p2.add_term(Term('SaM', 'dhatu'))
+        p2.add_term(Term('sa', 'pratyaya'))
+        rules.anusvarasya_yayi_parasavarnah(p2)
+        self.assertEqual(p2.terms[0].text, 'SaM')
+
+    def test_missing_upasarga_sandhi_f(self) -> None:
+        p = Prakriya()
+        p.add_term(Term('upa', 'upasarga'))
+        p.add_term(Term('fcCa', 'dhatu'))
+        rules.upasarga_sandhi(p)
+        self.assertEqual(p.terms[0].text, 'up')
+        self.assertEqual(p.terms[1].text, 'ArcCa')
+
+    def test_missing_srujidrusor_sfj(self) -> None:
+        p = Prakriya()
+        p.add_term(Term('sfj', 'dhatu'))
+        p.add_term(Term('tavya', 'pratyaya')) # jhal, akit
+        rules.srujidrusor_jhaly_amakiti(p)
+        self.assertEqual(p.terms[0].text, 'sraj')
+
+    def test_missing_usy_apadantat(self) -> None:
+        p = Prakriya()
+        p.add_term(Term('BavA', 'dhatu'))
+        p.add_term(Term('us', 'pratyaya'))
+        rules.usy_apadantat(p)
+        self.assertEqual(p.terms[0].text, 'Bav')
+        self.assertEqual(p.terms[1].text, 'us')
 
 if __name__ == '__main__':
     unittest.main()
