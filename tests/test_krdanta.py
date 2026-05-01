@@ -179,5 +179,13 @@ class TestKrdanta(unittest.TestCase):
         prakriya = derive_krdanta('dfS', 'tumun', gana=1)
         self.assertEqual(prakriya.get_current_string(), 'drazwum')
 
+    def test_budh_tumun(self) -> None:
+        """
+        Tests buD + tumun -> bodDum
+        Rule Chain: Aniṭ -> Guna -> jhasastathor dho dhah (t -> D) -> jhalam jas jhasi (D -> d)
+        """
+        prakriya = derive_krdanta('buD', 'tumun', gana=1)
+        self.assertEqual(prakriya.get_current_string(), 'bodDum')
+
 if __name__ == '__main__':
     unittest.main()

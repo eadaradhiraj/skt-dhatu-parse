@@ -37,6 +37,12 @@ class TestAnubandha(unittest.TestCase):
         self.assertIn('Sit', t.tags)  # Sit tags trigger 'SArvadhAtuka' operations
         self.assertIn('pit', t.tags)
 
+    def test_nasal_marker_at_start(self):
+        """Covers the failsafe where the nasal marker is the first character."""
+        t = Term('!akz', 'dhatu')
+        resolve_it_markers(t)
+        self.assertEqual(t.text, 'akz')
+
 
 if __name__ == '__main__':
     unittest.main()

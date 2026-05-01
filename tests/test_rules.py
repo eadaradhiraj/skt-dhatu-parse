@@ -1,35 +1,25 @@
 import unittest
 from skt_dhatu_parse.models import Term, Prakriya
-from skt_dhatu_parse.rules import (
-    apply_guna, apply_vrddhi, paghra_sthadi_adesha, upasarga_sandhi, 
-    jhalam_jas_jhasi, jhasas_tathor_dho_dhah, tasthasthamipam, yuvor_anakau,
-    dhatvadeh_sah_sah_no_nah, rashabhyam_no_nah, sna_sandhi, upasarga_satva,
-    anunasikalopo_jhali_kniti, vacisvapiyajadinam_kiti, choh_kuh, radabhyam_nishthato_nah,
-    vrasca_bhrasja_sruja_mruja, stuna_stuh, nascapadantasya_jhali,
-    ho_dhah_dader_ghah, ur_at, srujidrusor_jhaly_amakiti, kr_u_morphing, vikarana_guna,
-    sarvadhatuka_ardhadhatukayoh, kuhos_cuh, stha_adi_ita, ato_yuk, id_yati,
-    akah_savarne_dirghah, gam_hana_jana_lopa, che_ca, ekaco_baso_bhas, sadhoh_kas_si,
-    jhasya_ran, ito_at, utasca_pratyayad
-)
+from skt_dhatu_parse import rules
 
 class TestRules(unittest.TestCase):
 
     def test_vowel_helpers(self) -> None:
-        self.assertEqual(apply_guna('i'), 'e')
-        self.assertEqual(apply_guna('u'), 'o')
-        self.assertEqual(apply_guna('f'), 'ar')
-        self.assertEqual(apply_guna('x'), 'al')
-        self.assertEqual(apply_guna('a'), 'a') 
+        self.assertEqual(rules.apply_guna('i'), 'e')
+        self.assertEqual(rules.apply_guna('u'), 'o')
+        self.assertEqual(rules.apply_guna('f'), 'ar')
+        self.assertEqual(rules.apply_guna('x'), 'al')
+        self.assertEqual(rules.apply_guna('a'), 'a') 
 
-        self.assertEqual(apply_vrddhi('a'), 'A')
-        self.assertEqual(apply_vrddhi('i'), 'E')
-        self.assertEqual(apply_vrddhi('u'), 'O')
-        self.assertEqual(apply_vrddhi('f'), 'Ar')
-        self.assertEqual(apply_vrddhi('x'), 'Al')
-        self.assertEqual(apply_vrddhi('k'), 'k') 
+        self.assertEqual(rules.apply_vrddhi('a'), 'A')
+        self.assertEqual(rules.apply_vrddhi('i'), 'E')
+        self.assertEqual(rules.apply_vrddhi('u'), 'O')
+        self.assertEqual(rules.apply_vrddhi('f'), 'Ar')
+        self.assertEqual(rules.apply_vrddhi('x'), 'Al')
+        self.assertEqual(rules.apply_vrddhi('k'), 'k') 
 
     def test_paghra_sthadi_adesha(self) -> None:
-        mappings = [
+        mappings =[
             ('pA', 'piba'), ('GrA', 'jiGra'), ('DmA', 'Dama'), 
             ('mnA', 'mana'), ('dfS', 'pazya'), ('f', 'fcCa'), 
             ('sf', 'DAva'), ('Sad', 'zIya'), ('sad', 'sIda'),
@@ -41,7 +31,7 @@ class TestRules(unittest.TestCase):
             vik = Term('Sap', 'vikaraRa')
             vik.tags.add('Sit')
             p.add_term(vik)
-            paghra_sthadi_adesha(p)
+            rules.paghra_sthadi_adesha(p)
             self.assertEqual(p.terms[0].text, adesha)
 
     def test_upasarga_sandhi_branches(self) -> None:
@@ -56,7 +46,7 @@ class TestRules(unittest.TestCase):
             p = Prakriya()
             p.add_term(Term(upa, 'upasarga'))
             p.add_term(Term(aug, 'Agama'))
-            upasarga_sandhi(p)
+            rules.upasarga_sandhi(p)
             self.assertEqual(p.terms[0].text, exp_upa)
             self.assertEqual(p.terms[1].text, exp_aug)
 
@@ -64,7 +54,7 @@ class TestRules(unittest.TestCase):
         p = Prakriya()
         p.add_term(Term('buD', 'dhatu'))
         p.add_term(Term('Ta', 'pratyaya')) 
-        jhasas_tathor_dho_dhah(p)
+        rules.jhasas_tathor_dho_dhah(p)
         self.assertEqual(p.terms[1].text, 'Da') 
 
         mappings =[('vak', 'g'), ('vac', 'j'), ('vaw', 'q'), ('vap', 'b')]
@@ -72,23 +62,23 @@ class TestRules(unittest.TestCase):
             p = Prakriya()
             p.add_term(Term(orig_jhal, 'dhatu'))
             p.add_term(Term('Da', 'pratyaya'))
-            jhalam_jas_jhasi(p)
+            rules.jhalam_jas_jhasi(p)
             self.assertEqual(p.terms[0].text, orig_jhal[:-1] + expected_jas)
 
     def test_tasthasthamipam_branches(self) -> None:
-        for orig, expected in [('tas', 'tAm'), ('Ta', 'ta'), ('mip', 'am')]:
+        for orig, expected in[('tas', 'tAm'), ('Ta', 'ta'), ('mip', 'am')]:
             p = Prakriya()
             # The engine fuses the lakara and suffix into one term
             suf = Term(orig, 'pratyaya')
             suf.tags.add('laN') 
             p.add_term(suf)
-            tasthasthamipam(p)
+            rules.tasthasthamipam(p)
             self.assertEqual(p.terms[0].text, expected)
 
     def test_yuvor_anakau_vu(self) -> None:
         p = Prakriya()
         p.add_term(Term('vu', 'pratyaya'))
-        yuvor_anakau(p)
+        rules.yuvor_anakau(p)
         self.assertEqual(p.terms[0].text, 'aka')
 
     def test_dhatvadeh_sah_sah_branches(self) -> None:
@@ -96,18 +86,18 @@ class TestRules(unittest.TestCase):
         for orig, expected in mappings:
             p = Prakriya()
             p.add_term(Term(orig, 'dhatu'))
-            dhatvadeh_sah_sah_no_nah(p)
+            rules.dhatvadeh_sah_sah_no_nah(p)
             self.assertEqual(p.terms[0].text, expected)
 
     def test_rashabhyam_blocking(self) -> None:
         p1 = Prakriya()
         p1.add_term(Term('ramana', 'pratyaya'))
-        rashabhyam_no_nah(p1)
+        rules.rashabhyam_no_nah(p1)
         self.assertEqual(p1.terms[0].text, 'ramaRa')
         
         p2 = Prakriya()
         p2.add_term(Term('racana', 'pratyaya'))
-        rashabhyam_no_nah(p2)
+        rules.rashabhyam_no_nah(p2)
         self.assertEqual(p2.terms[0].text, 'racana')
 
     def test_sna_sandhi_branches(self) -> None:
@@ -116,26 +106,26 @@ class TestRules(unittest.TestCase):
         suf1 = Term('ti', 'pratyaya')
         suf1.tags.add('pit')
         p1.add_term(suf1)
-        sna_sandhi(p1)
+        rules.sna_sandhi(p1)
         self.assertEqual(p1.terms[0].text, 'nA')
 
         p2 = Prakriya()
         p2.add_term(Term('nA', 'vikaraRa'))
         p2.add_term(Term('anti', 'pratyaya'))
-        sna_sandhi(p2)
+        rules.sna_sandhi(p2)
         self.assertEqual(p2.terms[0].text, 'n')
 
         p3 = Prakriya()
         p3.add_term(Term('nA', 'vikaraRa'))
         p3.add_term(Term('tas', 'pratyaya'))
-        sna_sandhi(p3)
+        rules.sna_sandhi(p3)
         self.assertEqual(p3.terms[0].text, 'nI')
 
     def test_upasarga_satva_stutva(self) -> None:
         p = Prakriya()
         p.add_term(Term('prati', 'upasarga'))
         p.add_term(Term('sTA', 'dhatu'))
-        upasarga_satva(p)
+        rules.upasarga_satva(p)
         self.assertEqual(p.terms[1].text, 'zWA')
 
     # ==========================================
@@ -149,7 +139,7 @@ class TestRules(unittest.TestCase):
         suf = Term('tvA', 'pratyaya')
         suf.tags.add('kit')
         p.add_term(suf)
-        anunasikalopo_jhali_kniti(p)
+        rules.anunasikalopo_jhali_kniti(p)
         self.assertEqual(p.terms[0].text, 'ra')
 
     def test_vacisvapiyajadinam_kiti(self) -> None:
@@ -161,7 +151,7 @@ class TestRules(unittest.TestCase):
             suf = Term('ta', 'pratyaya')
             suf.tags.add('kit')
             p.add_term(suf)
-            vacisvapiyajadinam_kiti(p)
+            rules.vacisvapiyajadinam_kiti(p)
             self.assertEqual(p.terms[0].text, sampras)
 
     def test_choh_kuh(self) -> None:
@@ -171,7 +161,7 @@ class TestRules(unittest.TestCase):
             p = Prakriya()
             p.add_term(Term(orig, 'dhatu'))
             p.add_term(Term('ta', 'pratyaya'))
-            choh_kuh(p)
+            rules.choh_kuh(p)
             self.assertEqual(p.terms[0].text, kuvarga)
 
     def test_radabhyam_nishthato_nah(self) -> None:
@@ -185,24 +175,23 @@ class TestRules(unittest.TestCase):
         suf.text = 'ta'
         p.add_term(suf)
         
-        radabhyam_nishthato_nah(p)
+        rules.radabhyam_nishthato_nah(p)
         self.assertEqual(p.terms[0].text, 'Cin')
         self.assertEqual(p.terms[1].text, 'na')
 
-    # In tests/test_rules.py:
     def test_ho_dhah_dader_ghah(self) -> None:
         # Test 1: d-initial (duh -> duG)
         p1 = Prakriya()
         p1.add_term(Term('duh', 'dhatu'))
         p1.add_term(Term('ta', 'pratyaya'))
-        ho_dhah_dader_ghah(p1)
+        rules.ho_dhah_dader_ghah(p1)
         self.assertEqual(p1.terms[0].text, 'duG')
         
         # Test 2: non-d-initial (lih -> liQ)
         p2 = Prakriya()
         p2.add_term(Term('lih', 'dhatu'))
         p2.add_term(Term('ta', 'pratyaya'))
-        ho_dhah_dader_ghah(p2)
+        rules.ho_dhah_dader_ghah(p2)
         self.assertEqual(p2.terms[0].text, 'liQ')
 
     def test_vrasca_bhrasja_sruja_mruja(self) -> None:
@@ -211,7 +200,7 @@ class TestRules(unittest.TestCase):
             p = Prakriya()
             p.add_term(Term('sfj', 'dhatu'))
             p.add_term(Term('ta', 'pratyaya'))
-            vrasca_bhrasja_sruja_mruja(p)
+            rules.vrasca_bhrasja_sruja_mruja(p)
             self.assertEqual(p.terms[0].text, 'sfz')
 
     def test_stuna_stuh(self) -> None:
@@ -219,19 +208,19 @@ class TestRules(unittest.TestCase):
         p1 = Prakriya()
         p1.add_term(Term('sfz', 'dhatu'))
         p1.add_term(Term('ta', 'pratyaya'))
-        stuna_stuh(p1)
+        rules.stuna_stuh(p1)
         self.assertEqual(p1.terms[1].text, 'wa')
 
         p2 = Prakriya()
         p2.add_term(Term('sfz', 'dhatu'))
         p2.add_term(Term('Ta', 'pratyaya')) # 'Ta' is SLP1 for 'tha'
-        stuna_stuh(p2)
+        rules.stuna_stuh(p2)
         self.assertEqual(p2.terms[1].text, 'Wa')
 
     def test_ur_at(self) -> None:
         p = Prakriya()
         p.add_term(Term('kf', 'abhyasa'))
-        ur_at(p)
+        rules.ur_at(p)
         self.assertEqual(p.terms[0].text, 'ka')
 
     def test_kuhos_cuh(self) -> None:
@@ -239,7 +228,7 @@ class TestRules(unittest.TestCase):
         for orig, expected in mappings:
             p = Prakriya()
             p.add_term(Term(orig, 'abhyasa'))
-            kuhos_cuh(p)
+            rules.kuhos_cuh(p)
             self.assertEqual(p.terms[0].text, expected)
 
     def test_sarvadhatuka_ardhadhatukayoh_laghupadha(self) -> None:
@@ -248,7 +237,7 @@ class TestRules(unittest.TestCase):
         suf = Term('Ric', 'pratyaya')
         suf.tags.add('ardhadhatuka')
         p.add_term(suf)
-        sarvadhatuka_ardhadhatukayoh(p)
+        rules.sarvadhatuka_ardhadhatukayoh(p)
         self.assertEqual(p.terms[0].text, 'boD')
 
     def test_vikarana_guna(self) -> None:
@@ -258,7 +247,7 @@ class TestRules(unittest.TestCase):
         suf = Term('ti', 'pratyaya')
         suf.tags.add('pit')
         p.add_term(suf)
-        vikarana_guna(p)
+        rules.vikarana_guna(p)
         self.assertEqual(vik.text, 'o')
 
     def test_kr_u_morphing(self) -> None:
@@ -268,7 +257,7 @@ class TestRules(unittest.TestCase):
         p.add_term(t1)
         p.add_term(Term('u', 'vikaraRa'))
         p.add_term(Term('tas', 'pratyaya')) # No pit tag
-        kr_u_morphing(p)
+        rules.kr_u_morphing(p)
         self.assertEqual(p.terms[0].text, 'kur')
         
         p2 = Prakriya()
@@ -277,14 +266,14 @@ class TestRules(unittest.TestCase):
         p2.add_term(t2)
         p2.add_term(Term('u', 'vikaraRa'))
         p2.add_term(Term('vas', 'pratyaya'))
-        kr_u_morphing(p2)
+        rules.kr_u_morphing(p2)
         self.assertEqual(p2.terms[1].text, '') # u is dropped before v
 
     def test_srujidrusor_jhaly_amakiti(self) -> None:
         p = Prakriya()
         p.add_term(Term('dfS', 'dhatu'))
         p.add_term(Term('tavya', 'pratyaya')) # non-kit jhal affix
-        srujidrusor_jhaly_amakiti(p)
+        rules.srujidrusor_jhaly_amakiti(p)
         self.assertEqual(p.terms[0].text, 'draS')
         
         # Should be blocked by a 'kit' affix (like kta)
@@ -293,14 +282,14 @@ class TestRules(unittest.TestCase):
         suf = Term('ta', 'pratyaya')
         suf.tags.add('kit')
         p2.add_term(suf)
-        srujidrusor_jhaly_amakiti(p2)
+        rules.srujidrusor_jhaly_amakiti(p2)
         self.assertEqual(p2.terms[0].text, 'dfS')
 
     def test_nascapadantasya_jhali(self) -> None:
         p = Prakriya()
         p.add_term(Term('gam', 'dhatu'))
         p.add_term(Term('tavya', 'pratyaya')) # 't' is jhal
-        nascapadantasya_jhali(p)
+        rules.nascapadantasya_jhali(p)
         self.assertEqual(p.terms[0].text, 'gaM')
 
     def test_stha_adi_ita(self) -> None:
@@ -312,7 +301,7 @@ class TestRules(unittest.TestCase):
             suf = Term('ta', 'pratyaya')
             suf.tags.add('kit')
             p.add_term(suf)
-            stha_adi_ita(p)
+            rules.stha_adi_ita(p)
             self.assertEqual(p.terms[0].text, expected)
 
     def test_ato_yuk(self) -> None:
@@ -322,7 +311,7 @@ class TestRules(unittest.TestCase):
         suf = Term('aka', 'pratyaya')
         suf.tags.add('Rit')
         p.add_term(suf)
-        ato_yuk(p)
+        rules.ato_yuk(p)
         self.assertEqual(p.terms[0].text, 'dAy')
 
     def test_id_yati(self) -> None:
@@ -331,7 +320,7 @@ class TestRules(unittest.TestCase):
         p.add_term(Term('dA', 'dhatu'))
         suf = Term('yat', 'pratyaya')
         p.add_term(suf)
-        id_yati(p)
+        rules.id_yati(p)
         self.assertEqual(p.terms[0].text, 'de')
 
     def test_akah_savarne_dirghah(self) -> None:
@@ -345,7 +334,7 @@ class TestRules(unittest.TestCase):
             p = Prakriya()
             p.add_term(Term(t1_text, 'dhatu'))
             p.add_term(Term(t2_text, 'pratyaya'))
-            akah_savarne_dirghah(p)
+            rules.akah_savarne_dirghah(p)
             self.assertEqual(p.terms[0].text, e1)
             self.assertEqual(p.terms[1].text, e2)
 
@@ -359,20 +348,20 @@ class TestRules(unittest.TestCase):
         suf.tags.add('Nit')
         p.add_term(suf)
         
-        gam_hana_jana_lopa(p)
+        rules.gam_hana_jana_lopa(p)
         self.assertEqual(p.terms[0].text, 'Gn') # 'a' dropped, 'hn' became 'Gn'
 
     def test_che_ca(self) -> None:
         """Covers inserting 'c' before 'C' after a short vowel."""
         p = Prakriya()
         p.add_term(Term('pfC', 'dhatu')) # Intra-term test
-        che_ca(p)
+        rules.che_ca(p)
         self.assertEqual(p.terms[0].text, 'pfcC')
         
         p2 = Prakriya()
         p2.add_term(Term('a', 'Agama')) # Cross-term test
         p2.add_term(Term('CAdana', 'pratyaya'))
-        che_ca(p2)
+        rules.che_ca(p2)
         self.assertEqual(p2.terms[1].text, 'cCAdana')
 
     def test_ekaco_baso_bhas(self) -> None:
@@ -380,7 +369,7 @@ class TestRules(unittest.TestCase):
         p = Prakriya()
         p.add_term(Term('duG', 'dhatu')) # ho_dhah converts h -> G first
         p.add_term(Term('si', 'pratyaya'))
-        ekaco_baso_bhas(p)
+        rules.ekaco_baso_bhas(p)
         self.assertEqual(p.terms[0].text, 'DuG')
 
     def test_sadhoh_kas_si(self) -> None:
@@ -388,7 +377,7 @@ class TestRules(unittest.TestCase):
         p = Prakriya()
         p.add_term(Term('DuG', 'dhatu'))
         p.add_term(Term('si', 'pratyaya'))
-        sadhoh_kas_si(p)
+        rules.sadhoh_kas_si(p)
         self.assertEqual(p.terms[0].text, 'Duk')
 
     def test_liN_atmanepada_replacements(self) -> None:
@@ -397,14 +386,14 @@ class TestRules(unittest.TestCase):
         s1 = Term('Ja', 'pratyaya')
         s1.tags.add('liN')
         p1.add_term(s1)
-        jhasya_ran(p1)
+        rules.jhasya_ran(p1)
         self.assertEqual(p1.terms[0].text, 'ran')
         
         p2 = Prakriya()
         s2 = Term('iw', 'pratyaya')
         s2.tags.add('liN')
         p2.add_term(s2)
-        ito_at(p2)
+        rules.ito_at(p2)
         self.assertEqual(p2.terms[0].text, 'a')
 
     def test_utasca_pratyayad(self) -> None:
@@ -412,8 +401,44 @@ class TestRules(unittest.TestCase):
         p = Prakriya()
         p.add_term(Term('u', 'vikaraRa'))
         p.add_term(Term('hi', 'pratyaya'))
-        utasca_pratyayad(p)
+        rules.utasca_pratyayad(p)
         self.assertEqual(p.terms[1].text, '')
+
+    def test_eco_yayavayah_ay_av(self) -> None:
+        """Covers E -> Ay and O -> Av before a vowel."""
+        # E -> Ay
+        p1 = Prakriya()
+        p1.add_term(Term('nE', 'dhatu'))
+        p1.add_term(Term('aka', 'pratyaya'))
+        rules.eco_yayavayah(p1)
+        self.assertEqual(p1.terms[0].text, 'nAy')
+        
+        # O -> Av
+        p2 = Prakriya()
+        p2.add_term(Term('pO', 'dhatu'))
+        p2.add_term(Term('aka', 'pratyaya'))
+        rules.eco_yayavayah(p2)
+        self.assertEqual(p2.terms[0].text, 'pAv')
+
+    def test_khari_ca_branches(self) -> None:
+        """Covers the remaining character maps in khari ca."""
+        mappings =[('ad', 'at'), ('Cid', 'Cit'), ('yuB', 'yup')]
+        for orig, expected in mappings:
+            p = Prakriya()
+            p.add_term(Term(orig, 'dhatu'))
+            p.add_term(Term('ta', 'pratyaya')) # 't' is khar
+            rules.khari_ca(p)
+            self.assertEqual(p.terms[0].text, expected)
+
+    def test_jhalam_jas_jhasi_branches(self) -> None:
+        """Covers remaining character maps in jaś assimilation."""
+        mappings =[('laB', 'lab'), ('kruD', 'krud'), ('praC', 'praj')]
+        for orig, expected in mappings:
+            p = Prakriya()
+            p.add_term(Term(orig, 'dhatu'))
+            p.add_term(Term('Da', 'pratyaya')) # 'D' is jhaṣ
+            rules.jhalam_jas_jhasi(p)
+            self.assertEqual(p.terms[0].text, expected)
 
 if __name__ == '__main__':
     unittest.main()

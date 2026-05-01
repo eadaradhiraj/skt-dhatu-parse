@@ -41,6 +41,12 @@ TIN_PARASMAIPADA_LIT = {
     'uttama':   ['Ral', 'va', 'ma']
 }
 
+ANIT_ROOTS =[
+    'ji', 'dA', 'Sru', 'pA', 'han', 'dfS', 'buD', 'ram', 'gam', 'nam', 'vac', 
+    'Cid', 'muc', 'svap', 'yaj', 'Bid', 'sfj', 'sTA', 'jJA', 'snA', 'kf', 'kF',
+    'vraSc', 'praC', 'dah', 'yuj'
+]
+
 def apply_guna(char: str) -> str:
     if char in['i', 'I']: return 'e'
     if char in ['u', 'U']: return 'o'
@@ -257,13 +263,7 @@ def it_agama(prakriya: Prakriya) -> None:
         for tag in dhatu.tags:
             if tag.startswith('clean_'):
                 clean_dhatu = tag.split('_')[1]
-                
-        # Expanded Core AniW roots
-        ANIT_ROOTS =[
-            'ji', 'dA', 'Sru', 'pA', 'han', 'dfS', 'buD', 'ram', 'gam', 'nam', 'vac', 
-            'Cid', 'muc', 'svap', 'yaj', 'Bid', 'sfj', 'sTA', 'jJA', 'snA', 'kf', 'kF',
-            'vraSc', 'praC'
-        ]
+
         if clean_dhatu in ANIT_ROOTS: is_anit = True
         elif clean_dhatu == 'duh' and 'gana_2' in dhatu.tags: is_anit = True
             
@@ -1162,11 +1162,6 @@ def cli_agama(prakriya: Prakriya) -> None:
         upadha = dhatu.text[-2] if len(dhatu.text) > 1 else ''
         ends_in_sal = dhatu.text[-1] in SAL_CONSONANTS if dhatu.text else False
         
-        ANIT_ROOTS =[
-            'ji', 'dA', 'Sru', 'pA', 'han', 'dfS', 'buD', 'ram', 'gam', 'nam', 'vac', 
-            'Cid', 'muc', 'svap', 'yaj', 'Bid', 'sfj', 'sTA', 'jJA', 'snA', 'kf', 'kF',
-            'vraSc', 'praC'
-        ]
         is_anit = clean_dhatu in ANIT_ROOTS or (clean_dhatu == 'duh' and 'gana_2' in dhatu.tags) or clean_dhatu in ['ruh', 'lih', 'kfiS']
         
         if clean_dhatu in['gam']:
@@ -1407,13 +1402,22 @@ def sadhoh_kas_si(prakriya: Prakriya) -> None:
                 prakriya.log("Rule 8.2.41: ṣaḍhoḥ kas si -> 'k' before 's'")
 
 def sici_vrddhih(prakriya: Prakriya) -> None:
-    """Rule 7.2.1: sici vṛddhiḥ parasmaipadeṣu. Vrddhi before sic."""
+    """Rule 7.2.1: sici vṛddhiḥ parasmaipadeṣu & 7.2.3: vadavrajahalantasyācaḥ."""
     sic = next((t for t in prakriya.terms if t.upadeza == 'cli' and t.text == 's'), None)
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     if sic and dhatu and 'parasmaipada' in dhatu.tags:
+        # Rule 7.2.1: iganta roots (vowel ending)
         if dhatu.text[-1] in IK_VOWELS:
             dhatu.text = dhatu.text[:-1] + apply_vrddhi(dhatu.text[-1])
             prakriya.log("Rule 7.2.1: sici vṛddhiḥ -> Vṛddhi before sic")
+        # Rule 7.2.3: halanta roots (consonant ending)
+        elif dhatu.text[-1] not in SLP1_VOWELS:
+            text = dhatu.text
+            for i in range(len(text)-1, -1, -1):
+                if is_vowel(text[i]):
+                    dhatu.text = text[:i] + apply_vrddhi(text[i]) + text[i+1:]
+                    prakriya.log("Rule 7.2.3: vadavrajahalantasyācaḥ -> Vṛddhi before sic")
+                    break
 
 def asti_sico_aprkte(prakriya: Prakriya) -> None:
     """Rule 7.3.96: astisico'pṛkte. Adds 'I' augment before apṛkta (single letter) t/s after sic."""

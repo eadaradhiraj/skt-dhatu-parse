@@ -109,5 +109,32 @@ class TestCLI(unittest.TestCase):
         prints =[str(c.args[0]) for c in mock_print.call_args_list if c.args]
         self.assertTrue(any('Failed to derive forms' in s for s in prints))
 
+    @patch('sys.argv',['cli.py', 'BU', '--all-krt'])
+    @patch('skt_dhatu_parse.cli.derive_krdanta')
+    @patch('builtins.print')
+    def test_main_all_krt(self, mock_print, mock_derive_krt) -> None:
+        mock_prakriya = MagicMock()
+        mock_prakriya.get_current_string.return_value = 'BUta'
+        mock_derive_krt.return_value = mock_prakriya
+        main()
+        prints = [str(c.args[0]) for c in mock_print.call_args_list if c.args]
+        self.assertTrue(any('BUta' in s for s in prints))
+
+    @patch('sys.argv', ['cli.py', 'BU', '--all-krt'])
+    @patch('skt_dhatu_parse.cli.derive_krdanta')
+    @patch('builtins.print')
+    def test_main_all_krt_failure(self, mock_print, mock_derive_krt) -> None:
+        mock_derive_krt.return_value = None
+        main()
+        prints =[str(c.args[0]) for c in mock_print.call_args_list if c.args]
+        self.assertTrue(any('Failed' in s for s in prints))
+
+    @patch('sys.argv', ['cli.py', 'xyz_invalid', '--causative'])
+    @patch('skt_dhatu_parse.cli.derive_secondary_root')
+    @patch('builtins.print')
+    def test_main_causative_failure(self, mock_print, mock_derive_sec) -> None:
+        mock_derive_sec.return_value = None
+        with self.assertRaises(SystemExit):
+            main()
 if __name__ == '__main__':
     unittest.main()

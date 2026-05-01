@@ -402,5 +402,37 @@ class TestPipeline(unittest.TestCase):
         p1 = derive('sad', 'laW', purusha='prathama', vacana=0, gana=1, upasargas=['ni'])
         self.assertEqual(p1.get_current_string(), 'nizIdati')
 
+    def test_dah_future_anit_consonant_sandhi(self) -> None:
+        """
+        Tests dah + lfW -> Dakzyati
+        Rule Chain: Aniṭ -> ho dhah -> ekaco baso bhas -> sadhoh kas si -> satva
+        """
+        prakriya = derive('dah', 'lfW', purusha='prathama', vacana=0, gana=1)
+        self.assertEqual(prakriya.get_current_string(), 'Dakzyati')
+
+    def test_yuj_future_anit_consonant_sandhi(self) -> None:
+        """
+        Tests yuj + lfW -> yokzyati
+        Rule Chain: Aniṭ -> Guna -> choh kuh -> khari ca -> satva
+        """
+        prakriya = derive('yuj', 'lfW', purusha='prathama', vacana=0, gana=7)
+        self.assertEqual(prakriya.get_current_string(), 'yokzyati')
+
+    def test_sam_ci_lat(self) -> None:
+        """
+        Tests sam + ci + laW -> saYcinoti
+        Rule Chain: Snu Vikarana -> Guna -> anusvarasya yayi parasavarnah (m -> M -> Y)
+        """
+        prakriya = derive('ci', 'laW', purusha='prathama', vacana=0, gana=5, upasargas=['sam'])
+        self.assertEqual(prakriya.get_current_string(), 'saYcinoti')
+
+    def test_chid_lun_vrddhi(self) -> None:
+        """
+        Tests Cid + luN -> acCEtsIt 
+        Rule Chain: cli -> sic -> vadavrajahalantasyacah (halanta vrddhi before sic) -> astisico'prkte (I augment)
+        """
+        prakriya = derive('Cid', 'luN', purusha='prathama', vacana=0, gana=7)
+        self.assertEqual(prakriya.get_current_string(), 'acCEtsIt')
+
 if __name__ == '__main__':
     unittest.main()
