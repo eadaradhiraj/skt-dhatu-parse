@@ -434,5 +434,22 @@ class TestPipeline(unittest.TestCase):
         prakriya = derive('Cid', 'luN', purusha='prathama', vacana=0, gana=7)
         self.assertEqual(prakriya.get_current_string(), 'acCEtsIt')
 
+    def test_chid_lot_madhyama(self) -> None:
+        """
+        Tests Cid + loW (madhyama ekavacana) -> CindDi
+        Rule Chain: Śnam infix -> snasor allopah (Cinad -> Cind) -> hujhalbhyo her dhih (hi -> Di)
+        """
+        prakriya = derive('Cid', 'loW', purusha='madhyama', vacana=0, gana=7)
+        self.assertEqual(prakriya.get_current_string(), 'CindDi')
+
+    def test_stha_lit_prathama(self) -> None:
+        """
+        Tests sTA + liW -> tasTO
+        Rule Chain: Reduplication -> haladi seshah (sarpuvah khayah: T survives) -> 
+        abhyase car ca (T -> t) -> ata au nalah (a -> O) -> vrddhir eci (A + O -> O)
+        """
+        prakriya = derive('sTA', 'liW', purusha='prathama', vacana=0, gana=1)
+        self.assertEqual(prakriya.get_current_string(), 'tasTO')
+
 if __name__ == '__main__':
     unittest.main()

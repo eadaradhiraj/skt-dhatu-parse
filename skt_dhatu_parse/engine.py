@@ -65,6 +65,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     # 6. Early Suffix Replacements
     rules.mer_nih(prakriya)
     rules.jher_jus(prakriya)
+    rules.ata_au_nalah(prakriya)
     rules.jhasya_ran(prakriya)
     rules.ito_at(prakriya)
     rules.jhonta(prakriya)            
@@ -80,6 +81,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.itasca(prakriya)            
     rules.nityam_nitah(prakriya)
     rules.er_uh(prakriya)
+    rules.ata_au_nalah(prakriya)
 
     # 8. Insert Vikarana & Special Lakara Agamas
     rules.insert_vikarana(prakriya)
@@ -99,6 +101,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.sna_sandhi(prakriya)
     rules.se_mucadinam(prakriya)
     rules.paghra_sthadi_adesha(prakriya)
+    rules.kramah_parasmaipadesu(prakriya)
     rules.vacisvapiyajadinam_kiti(prakriya)
     rules.sino_gunah(prakriya)
     rules.han_ghatva_tatva(prakriya)
@@ -133,8 +136,9 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.lin_salopo_anantyasya(prakriya)
     rules.ato_heh(prakriya)
     rules.utasca_pratyayad(prakriya)
+    rules.hujhalbhyo_her_dhih(prakriya)
+    rules.ghvasor_ed_hau(prakriya)
     rules.tasyasti_lopa(prakriya)
-
     rules.hali_ca(prakriya)
     rules.srujidrusor_jhaly_amakiti(prakriya)
     rules.aco_nniti(prakriya)
@@ -149,6 +153,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.ato_nitah(prakriya) 
     rules.usy_apadantat(prakriya)                 
     rules.ad_gunah(prakriya)
+    rules.vrddhir_eci(prakriya)
     rules.ato_gune(prakriya)
     rules.akah_savarne_dirghah(prakriya)
     rules.lopo_vyorvali(prakriya)

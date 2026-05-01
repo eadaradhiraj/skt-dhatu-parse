@@ -143,11 +143,12 @@ class TestRules(unittest.TestCase):
         self.assertEqual(p.terms[0].text, 'ra')
 
     def test_vacisvapiyajadinam_kiti(self) -> None:
-        """Covers samprasarana for vac, svap, yaj."""
-        mappings =[('vac', 'uc'), ('svap', 'sup'), ('yaj', 'ij')]
+        mappings =[('vac', 'uc'), ('svap', 'sup'), ('yaj', 'ij'), ('vraSc', 'vfSc'), ('praC', 'pfC'), ('Brajj', 'Bfjj')]
         for orig, sampras in mappings:
             p = Prakriya()
-            p.add_term(Term(orig, 'dhatu'))
+            d = Term(orig, 'dhatu')
+            d.tags.add(f'clean_{orig}')
+            p.add_term(d)
             suf = Term('ta', 'pratyaya')
             suf.tags.add('kit')
             p.add_term(suf)
@@ -439,6 +440,54 @@ class TestRules(unittest.TestCase):
             p.add_term(Term('Da', 'pratyaya')) # 'D' is jhaṣ
             rules.jhalam_jas_jhasi(p)
             self.assertEqual(p.terms[0].text, expected)
+
+    def test_kramah_parasmaipadesu(self) -> None:
+        p = Prakriya()
+        d = Term('kram', 'dhatu')
+        d.tags.add('clean_kram')
+        d.tags.add('parasmaipada')
+        p.add_term(d)
+        vik = Term('Sap', 'vikaraRa')
+        vik.tags.add('Sit')
+        p.add_term(vik)
+        rules.kramah_parasmaipadesu(p)
+        self.assertEqual(p.terms[0].text, 'krAm')
+
+    def test_haladi_seshah_sarpuvah(self) -> None:
+        p = Prakriya()
+        p.add_term(Term('sTA', 'abhyasa'))
+        rules.haladi_seshah(p)
+        self.assertEqual(p.terms[0].text, 'TA')
+
+    def test_ata_au_nalah(self) -> None:
+        p = Prakriya()
+        p.add_term(Term('tasTA', 'dhatu'))
+        suf = Term('a', 'pratyaya')
+        suf.upadeza = 'Ral'
+        p.add_term(suf)
+        rules.ata_au_nalah(p)
+        self.assertEqual(p.terms[1].text, 'O')
+
+    def test_ghvasor_ed_hau(self) -> None:
+        p = Prakriya()
+        p.add_term(Term('da', 'abhyasa'))
+        d = Term('d', 'dhatu') 
+        d.tags.add('clean_dA')
+        p.add_term(d)
+        p.add_term(Term('hi', 'pratyaya'))
+        rules.ghvasor_ed_hau(p)
+        self.assertEqual(p.terms[1].text, 'de')
+        self.assertEqual(p.terms[0].text, '')
+
+    def test_vrddhir_eci(self) -> None:
+        mappings =[('tava', 'eva', 'tav', 'Eva'), ('sa', 'oDi', 's', 'ODi')]
+        for t1, t2, e1, e2 in mappings:
+            p = Prakriya()
+            p.add_term(Term(t1, 'dhatu'))
+            p.add_term(Term(t2, 'pratyaya'))
+            rules.vrddhir_eci(p)
+            self.assertEqual(p.terms[0].text, e1)
+            self.assertEqual(p.terms[1].text, e2)
 
 if __name__ == '__main__':
     unittest.main()
