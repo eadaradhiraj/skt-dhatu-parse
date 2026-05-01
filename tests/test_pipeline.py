@@ -451,5 +451,26 @@ class TestPipeline(unittest.TestCase):
         prakriya = derive('sTA', 'liW', purusha='prathama', vacana=0, gana=1)
         self.assertEqual(prakriya.get_current_string(), 'tasTO')
 
+    def test_kram_parasmaipada_lengthening(self) -> None:
+        """Tests kram + laW -> krAmati (kramah parasmaipadesu)"""
+        prakriya = derive('kram', 'laW', purusha='prathama', vacana=0, gana=1)
+        self.assertEqual(prakriya.get_current_string(), 'krAmati')
+
+    def test_stha_lit_reduplication_and_au(self) -> None:
+        """
+        Tests sTA + liW -> tasTO
+        Rule Chain: śarpūrvāḥ khayaḥ (T survives) -> abhyāse car ca (T -> t) -> āta au ṇalaḥ (a -> O) -> vṛddhir eci
+        """
+        prakriya = derive('sTA', 'liW', purusha='prathama', vacana=0, gana=1)
+        self.assertEqual(prakriya.get_current_string(), 'tasTO')
+
+    def test_dha_lot_madhyama_eka(self) -> None:
+        """
+        Tests DA + loW (Madhyama Ekavacana) -> Dehi
+        Rule Chain: ghvāsor eddhāv abhyāsalopaśca (reduplication drops, root becomes e)
+        """
+        prakriya = derive('DA', 'loW', purusha='madhyama', vacana=0, gana=3)
+        self.assertEqual(prakriya.get_current_string(), 'Dehi')
+
 if __name__ == '__main__':
     unittest.main()

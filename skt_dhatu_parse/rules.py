@@ -1624,8 +1624,9 @@ def vrddhir_eci(prakriya: Prakriya) -> None:
         t1 = prakriya.terms[i]
         t2 = prakriya.terms[i+1]
         if t1.text and t2.text:
-            if t1.text[-1] in['a', 'A'] and t2.text[0] in['e', 'o', 'E', 'O']:
-                rep = apply_vrddhi(t2.text[0])
+            if t1.text[-1] in ['a', 'A'] and t2.text[0] in['e', 'o', 'E', 'O']:
+                old_t2_start = t2.text[0]           # <--- Save the character first!
+                rep = apply_vrddhi(old_t2_start)
                 t1.text = t1.text[:-1] + rep
                 t2.text = t2.text[1:]
-                prakriya.log(f"Rule 6.1.88: vrddhir eci (a/A + {t2.text[0]} -> {rep})")
+                prakriya.log(f"Rule 6.1.88: vrddhir eci (a/A + {old_t2_start} -> {rep})")

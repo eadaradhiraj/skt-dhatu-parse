@@ -228,5 +228,13 @@ class TestKrdanta(unittest.TestCase):
         prakriya = derive_krdanta('lih', 'kta', gana=2)
         self.assertEqual(prakriya.get_current_string(), 'lIQa')
 
+    def test_bhrasj_kta_samprasarana(self) -> None:
+        """
+        Tests Brajj + kta -> Bfzwa
+        Rule Chain: Samprasāraṇa (ra -> f) -> vrasca-bhrasja... (jj -> z) -> ṣṭunā ṣṭuḥ (t -> w)
+        """
+        prakriya = derive_krdanta('Brajj', 'kta', gana=6)
+        self.assertEqual(prakriya.get_current_string(), 'Bfzwa')
+
 if __name__ == '__main__':
     unittest.main()

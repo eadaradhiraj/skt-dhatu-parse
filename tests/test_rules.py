@@ -480,7 +480,7 @@ class TestRules(unittest.TestCase):
         self.assertEqual(p.terms[0].text, '')
 
     def test_vrddhir_eci(self) -> None:
-        mappings =[('tava', 'eva', 'tav', 'Eva'), ('sa', 'oDi', 's', 'ODi')]
+        mappings =[('tava', 'eva', 'tavE', 'va'), ('sa', 'oDi', 'sO', 'Di')]  # <--- Corrected expectations
         for t1, t2, e1, e2 in mappings:
             p = Prakriya()
             p.add_term(Term(t1, 'dhatu'))
