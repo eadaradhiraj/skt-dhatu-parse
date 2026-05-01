@@ -28,7 +28,8 @@ def derive_secondary_root(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = No
     resolve_it_markers(pratyaya)       # Strips 'Ric' to 'i' + Rit
 
     # 5. Apply Vrddhi & Augment Rules
-    rules.pug_nau(prakriya)        
+    rules.pug_nau(prakriya)
+    rules.han_ghatva_tatva(prakriya)
     rules.ata_upadhayah(prakriya)  
     rules.aco_nniti(prakriya)
     rules.sarvadhatuka_ardhadhatukayoh(prakriya)   

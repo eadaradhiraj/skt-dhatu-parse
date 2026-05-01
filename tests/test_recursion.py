@@ -29,5 +29,15 @@ class TestRecursion(unittest.TestCase):
         final_prakriya = derive(custom_dhatu=new_root_term, lakara_name='laW')
         self.assertEqual(final_prakriya.get_current_string(), 'kArayati')
 
+    def test_causative_han_conjugation(self) -> None:
+        """
+        Tests that han + Ric -> GAti successfully conjugates as GAtayati.
+        """
+        sanadi_prakriya = derive_secondary_root('han', 'Ric', gana=2)
+        new_root_term = sanadi_prakriya.terms[0]
+        
+        final_prakriya = derive(custom_dhatu=new_root_term, lakara_name='laW')
+        self.assertEqual(final_prakriya.get_current_string(), 'GAtayati')
+
 if __name__ == '__main__':
     unittest.main()

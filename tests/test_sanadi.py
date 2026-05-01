@@ -22,5 +22,11 @@ class TestSanadi(unittest.TestCase):
         self.assertIsNotNone(prakriya)
         self.assertEqual(prakriya.get_current_string(), 'boDi')
 
+    def test_causative_han(self) -> None:
+        """Tests Causative: han + Ric -> GAti (ho hanter & hanato ṇinnali)."""
+        prakriya = derive_secondary_root('han', 'Ric', gana=2)
+        self.assertIsNotNone(prakriya)
+        self.assertEqual(prakriya.get_current_string(), 'GAti')
+
 if __name__ == '__main__':
     unittest.main()
