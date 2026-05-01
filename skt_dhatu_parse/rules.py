@@ -41,11 +41,30 @@ TIN_PARASMAIPADA_LIT = {
     'uttama':   ['Ral', 'va', 'ma']
 }
 
-ANIT_ROOTS = [
-    'ji', 'dA', 'Sru', 'pA', 'han', 'dfS', 'buD', 'ram', 'gam', 'nam', 'vac', 
-    'Cid', 'muc', 'svap', 'yaj', 'Bid', 'sfj', 'sTA', 'jJA', 'snA', 'kf', 'kF',
-    'vraSc', 'praC', 'dah', 'yuj', 'laB', 'ruh', 'lih', 'guh'
-]
+# THE EXHAUSTIVE PANINIAN ANIT ROOT MASTER LIST
+ANIT_ROOTS = {
+    # Vowel-Ending (Ajanta)
+    'ji', 'nI', 'ci', 'Sru', 'stu', 'su', 'hu', 'dA', 'DA', 'sTA', 'pA', 'GrA', 
+    'DmA', 'gA', 'yA', 'vA', 'snA', 'kf', 'hf', 'Df', 'sf', 'smf', 'stf', 'kF', 'jJA',
+    
+    # K-Varga
+    'Sak',
+    # C-Varga
+    'pac', 'muc', 'ric', 'vac', 'vic', 'sic', 'praC', 'tyaj', 'nij', 'BaYj', 
+    'Baj', 'Brajj', 'yaj', 'yuj', 'raYj', 'vij', 'svaYj', 'saYj', 'sfj', 'vraSc',
+    # T-Varga
+    'ad', 'kzuD', 'Kid', 'Cid', 'tud', 'nud', 'pad', 'Bid', 'vid', 'sad', 
+    'svid', 'skand', 'kruD', 'buD', 'banD', 'yuD', 'ruD', 'rAD', 'vyaD', 
+    'SuD', 'sAD', 'siD', 'man', 'han',
+    # P-Varga
+    'Ap', 'kzip', 'Cup', 'tap', 'tip', 'tfp', 'dfp', 'lip', 'lup', 'vap', 
+    'Sap', 'svap', 'sfp', 'yaB', 'raB', 'laB', 'gam', 'nam', 'yam', 'ram',
+    # Sibilants & H
+    'kruS', 'daMS', 'diS', 'dfS', 'mfS', 'riS', 'ruS', 'viS', 'spfS',
+    'kfz', 'tviz', 'tuz', 'dviz', 'puz', 'piz', 'viz', 'Siz', 'Suz', 'Sliz',
+    'Gas', 'vas', 'dah', 'dih', 'nah', 'mih', 'ruh', 'lih', 'vah', 'guh'
+    # Note: 'duh' is intentionally excluded here to allow the gana_2 conditional to handle it!
+}
 
 def apply_guna(char: str) -> str:
     if char in['i', 'I']: return 'e'
@@ -263,7 +282,8 @@ def it_agama(prakriya: Prakriya) -> None:
         for tag in dhatu.tags:
             if tag.startswith('clean_'):
                 clean_dhatu = tag.split('_')[1]
-
+                
+        # Check against global master list
         if clean_dhatu in ANIT_ROOTS: is_anit = True
         elif clean_dhatu == 'duh' and 'gana_2' in dhatu.tags: is_anit = True
             
@@ -1160,12 +1180,13 @@ def cli_agama(prakriya: Prakriya) -> None:
         for tag in dhatu.tags:
             if tag.startswith('clean_'): clean_dhatu = tag.split('_')[1]
             
-        SAL_CONSONANTS = ['S', 'z', 's', 'h']
+        SAL_CONSONANTS =['S', 'z', 's', 'h']
         IK_VOWELS =['i', 'I', 'u', 'U', 'f', 'F', 'x', 'X']
         upadha = dhatu.text[-2] if len(dhatu.text) > 1 else ''
         ends_in_sal = dhatu.text[-1] in SAL_CONSONANTS if dhatu.text else False
         
-        is_anit = clean_dhatu in ANIT_ROOTS or (clean_dhatu == 'duh' and 'gana_2' in dhatu.tags) or clean_dhatu in ['ruh', 'lih', 'kfiS']
+        # Check against global master list
+        is_anit = clean_dhatu in ANIT_ROOTS or (clean_dhatu == 'duh' and 'gana_2' in dhatu.tags) or clean_dhatu in['ruh', 'lih', 'kfS']
         
         if clean_dhatu in['gam']:
             cli.text = 'a'
