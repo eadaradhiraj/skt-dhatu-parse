@@ -141,6 +141,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.hujhalbhyo_her_dhih(prakriya)
     rules.ghvasor_ed_hau(prakriya)
     rules.tasyasti_lopa(prakriya)
+
     rules.hali_ca(prakriya)
     rules.srujidrusor_jhaly_amakiti(prakriya)
     rules.aco_nniti(prakriya)
@@ -148,19 +149,17 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.sarvadhatuka_ardhadhatukayoh(prakriya)  
     rules.eco_yayavayah(prakriya)                 
     rules.aci_snu_dhatu_bhruvam(prakriya)
+    
+    # 12. Vowel Sandhi (Strictly Ordered: Exceptions -> General)
+    rules.ato_dirgho_yayi(prakriya)               
+    rules.ato_nitah(prakriya) 
+    rules.usy_apadantat(prakriya)                 
+    rules.ato_gune(prakriya)
+    rules.ad_gunah(prakriya)
+    rules.vrddhir_eci(prakriya)
     rules.akah_savarne_dirghah(prakriya)
     rules.iko_yanaci(prakriya)
     
-    # 12. Sandhi and Final Consonants
-    rules.ato_dirgho_yayi(prakriya)               
-    rules.ato_nitah(prakriya) 
-    rules.usy_apadantat(prakriya)               
-    rules.ad_gunah(prakriya)
-    rules.ato_gune(prakriya)
-    rules.vrddhir_eci(prakriya)
-    rules.lopo_vyorvali(prakriya)
-    rules.ato_gune(prakriya)
-    rules.akah_savarne_dirghah(prakriya)
     rules.lopo_vyorvali(prakriya)
     
     rules.anunasikalopo_jhali_kniti(prakriya)

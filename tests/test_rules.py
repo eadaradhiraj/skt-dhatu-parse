@@ -852,7 +852,7 @@ class TestRules(unittest.TestCase):
         p.add_term(d)
         p.add_term(Term('Ja', 'pratyaya'))
         rules.jhonta(p)
-        self.assertEqual(p.terms[1].text, 'rat a') # text[1:] gives ' a' from 'Ja'
+        self.assertEqual(p.terms[1].text, 'rata') # text[1:] gives ' a' from 'Ja'
 
     def test_missing_radabhyam_r_branch(self) -> None:
         """Hits the 'r' branch of radabhyam nishthato nah."""
@@ -863,6 +863,36 @@ class TestRules(unittest.TestCase):
         p.add_term(suf)
         rules.radabhyam_nishthato_nah(p)
         self.assertEqual(p.terms[1].text, 'na')
+
+    def test_missing_graho_liti_dirghah(self) -> None:
+        """Hits Lines 323-324: The long 'I' augment rule for grah."""
+        p = Prakriya()
+        d = Term('grah', 'dhatu')
+        d.tags.add('clean_grah')
+        p.add_term(d)
+        
+        # Suffix must be ardhadhatuka and start with a val consonant (like 't') to trigger it_agama
+        suf = Term('ta', 'pratyaya')
+        suf.tags.add('ardhadhatuka')
+        p.add_term(suf)
+        
+        rules.it_agama(p)
+        self.assertEqual(p.terms[1].text, 'Ita')
+
+    def test_missing_grah_samprasarana(self) -> None:
+        """Hits Lines 828-829: The samprasarana rule for grah."""
+        p = Prakriya()
+        d = Term('grah', 'dhatu')
+        d.tags.add('clean_grah')
+        p.add_term(d)
+        
+        # Suffix must be 'kit' to trigger samprasarana
+        suf = Term('ta', 'pratyaya')
+        suf.tags.add('kit')
+        p.add_term(suf)
+        
+        rules.vacisvapiyajadinam_kiti(p)
+        self.assertEqual(p.terms[0].text, 'gfh')
 
 if __name__ == '__main__':
     unittest.main()

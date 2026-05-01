@@ -64,11 +64,13 @@ def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_
     
     # 4. Phonetic Vowel Rules
     rules.sarvadhatuka_ardhadhatukayoh(prakriya)  
-    rules.eco_yayavayah(prakriya)
-    rules.akah_savarne_dirghah(prakriya)               
-    rules.iko_yanaci(prakriya)
-    rules.ato_gune(prakriya)                 
+    rules.eco_yayavayah(prakriya)                 
+    rules.usy_apadantat(prakriya)                 
+    rules.ato_gune(prakriya)
+    rules.ad_gunah(prakriya)
+    rules.vrddhir_eci(prakriya)
     rules.akah_savarne_dirghah(prakriya)
+    rules.iko_yanaci(prakriya)
     
     # 5. Consonant Sandhi
     rules.anunasikalopo_jhali_kniti(prakriya)  
