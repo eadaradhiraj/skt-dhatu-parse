@@ -44,7 +44,7 @@ TIN_PARASMAIPADA_LIT = {
 ANIT_ROOTS =[
     'ji', 'dA', 'Sru', 'pA', 'han', 'dfS', 'buD', 'ram', 'gam', 'nam', 'vac', 
     'Cid', 'muc', 'svap', 'yaj', 'Bid', 'sfj', 'sTA', 'jJA', 'snA', 'kf', 'kF',
-    'vraSc', 'praC', 'dah', 'yuj'
+    'vraSc', 'praC', 'dah', 'yuj', 'laB'
 ]
 
 def apply_guna(char: str) -> str:

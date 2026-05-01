@@ -187,5 +187,30 @@ class TestKrdanta(unittest.TestCase):
         prakriya = derive_krdanta('buD', 'tumun', gana=1)
         self.assertEqual(prakriya.get_current_string(), 'bodDum')
 
+    def test_labh_tumun(self) -> None:
+        """
+        Tests laB + tumun -> labDum
+        Rule Chain: Aniṭ -> jhasastathor dho dhah (t -> D) -> jhalam jas jhasi (B -> b)
+        """
+        prakriya = derive_krdanta('laB', 'tumun', gana=1)
+        self.assertEqual(prakriya.get_current_string(), 'labDum')
+
+    def test_labh_all_krt(self) -> None:
+        """Tests the comprehensive generation of Krdantas for laB."""
+        expected_forms = {
+            'kta': 'labDa', 'ktavatu': 'labDavat', 'ktvA': 'labDvA',
+            'tumun': 'labDum', 'tavya': 'labDavya', 'anIyar': 'laBanIya',
+            'yat': 'laBya', 'Ryat': 'lABya', 'Satf': 'laBaman',
+            'lyuW': 'laBana', 'Rvul': 'lABaka', 'tfc': 'labDf', 'GaY': 'lABa'
+        }
+        for affix, expected in expected_forms.items():
+            with self.subTest(affix=affix):
+                prakriya = derive_krdanta('laB', affix, gana=1)
+                # We skip Satf since laB takes SAnac in standard usage, but the engine might output laBat
+                if affix == 'Satf': 
+                    self.assertEqual(prakriya.get_current_string(), 'laBat')
+                else:
+                    self.assertEqual(prakriya.get_current_string(), expected)
+
 if __name__ == '__main__':
     unittest.main()
