@@ -687,16 +687,16 @@ class TestRules(unittest.TestCase):
         self.assertEqual(p.terms[0].text, 'gan')
 
     def test_han_ghatva_tatva_n_to_t(self) -> None:
-        """Hits hanato ṇinnali (han + ṇit -> hat)."""
+        """Hits hanato ṇinnali (han + ṇit -> hat) and ho hanter (h -> G)."""
         p = Prakriya()
         d = Term('han', 'dhatu')
         d.tags.add('clean_han')
         p.add_term(d)
         suf = Term('a', 'pratyaya')
         suf.tags.add('Rit')
+        suf.upadeza = 'Ryat'  # explicitly NOT Ral
         p.add_term(suf)
         rules.han_ghatva_tatva(p)
-        # Should change 'h' to 'G' and 'n' to 't'
         self.assertEqual(p.terms[0].text, 'Gat')
 
     def test_rules_fallback_branches(self) -> None:
@@ -806,6 +806,63 @@ class TestRules(unittest.TestCase):
         p.add_term(Term('ya', 'pratyaya'))
         rules.anusvarasya_yayi_parasavarnah(p)
         self.assertEqual(p.terms[0].text, 'saM')
+
+    def test_lity_abhyasasya(self) -> None:
+        """Hits the abhyasa samprasarana rules for vac, svap, yaj."""
+        mappings =[('vac', 'u'), ('svap', 'su'), ('yaj', 'i')]
+        for orig, rep in mappings:
+            p = Prakriya()
+            d = Term(orig, 'dhatu')
+            d.tags.add(f'clean_{orig}')
+            p.add_term(d)
+            p.add_term(Term(orig, 'abhyasa'))
+            lak = Term('a', 'pratyaya')
+            lak.tags.add('liW')
+            p.add_term(lak)
+            rules.lity_abhyasasya(p)
+            self.assertEqual(p.terms[1].text, rep)
+
+    def test_dadhater_hih(self) -> None:
+        """Hits the dadhater hih rule (DA + kta -> hita)."""
+        p = Prakriya()
+        p.add_term(Term('DA', 'dhatu'))
+        suf = Term('ta', 'pratyaya')
+        suf.tags.add('kit')
+        p.add_term(suf)
+        rules.stha_adi_ita(p)
+        self.assertEqual(p.terms[0].text, 'hi')
+
+    def test_han_abhyasad_dhasya(self) -> None:
+        """Hits abhyasad dhasya (ja-han -> ja-Gan)."""
+        p = Prakriya()
+        p.add_term(Term('ja', 'abhyasa'))
+        d = Term('han', 'dhatu')
+        d.tags.add('clean_han')
+        p.add_term(d)
+        suf = Term('a', 'pratyaya') # Not nit/kit, just checking abhyasa trigger
+        p.add_term(suf)
+        rules.han_ghatva_tatva(p)
+        self.assertEqual(p.terms[1].text, 'Gan')
+
+    def test_missing_jhonta_si(self) -> None:
+        """Hits the śiṅo rut branch in jhonta."""
+        p = Prakriya()
+        d = Term('SI', 'dhatu')
+        d.tags.add('clean_SI')
+        p.add_term(d)
+        p.add_term(Term('Ja', 'pratyaya'))
+        rules.jhonta(p)
+        self.assertEqual(p.terms[1].text, 'rat a') # text[1:] gives ' a' from 'Ja'
+
+    def test_missing_radabhyam_r_branch(self) -> None:
+        """Hits the 'r' branch of radabhyam nishthato nah."""
+        p = Prakriya()
+        p.add_term(Term('tIr', 'dhatu'))  # Example root ending in r
+        suf = Term('ta', 'pratyaya')
+        suf.upadeza = 'kta'
+        p.add_term(suf)
+        rules.radabhyam_nishthato_nah(p)
+        self.assertEqual(p.terms[1].text, 'na')
 
 if __name__ == '__main__':
     unittest.main()

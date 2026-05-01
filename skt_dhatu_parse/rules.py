@@ -1124,6 +1124,9 @@ def stha_adi_ita(prakriya: Prakriya) -> None:
             elif dhatu.text == 'mA':
                 dhatu.text = 'mi'
                 prakriya.log("Rule 7.4.40: mA -> mi before kit")
+            elif dhatu.text == 'DA':
+                dhatu.text = 'hi'  # <--- ADDED THIS CLAUSE
+                prakriya.log("Rule 7.4.42: dadhāter hiḥ (DA -> hi before ta)")
 
 def ato_yuk(prakriya: Prakriya) -> None:
     """Rule 7.3.33: āto yuk ciṇkṛtoḥ (adds 'yuk' augment to A-ending roots before ṇit/ñit)"""
@@ -1567,7 +1570,7 @@ def sino_gunah(prakriya: Prakriya) -> None:
             prakriya.log("Rule 7.4.22: śiṅo guṇaḥ (SI -> Se)")
 
 def han_ghatva_tatva(prakriya: Prakriya) -> None:
-    """Rule 7.3.54 & 7.3.32: han -> ghāt before ṇit/ñit."""
+    """Rules for 'han': ṇinnali, ho hanter, abhyāsād dhasya."""
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     if not dhatu: return
     idx = prakriya.terms.index(dhatu)
@@ -1576,13 +1579,24 @@ def han_ghatva_tatva(prakriya: Prakriya) -> None:
     
     clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
     
-    if clean_dhatu == 'han' and ('Rit' in next_term.tags or 'Yit' in next_term.tags):
-        if dhatu.text.startswith('h'):
-            dhatu.text = 'G' + dhatu.text[1:]
-            prakriya.log("Rule 7.3.54: ho hanter ñṇinneṣu (h -> G)")
-        if dhatu.text.endswith('n'):
-            dhatu.text = dhatu.text[:-1] + 't'
-            prakriya.log("Rule 7.3.32: hanato ṇinnali (n -> t)")
+    if clean_dhatu == 'han':
+        # 7.3.32: n -> t before ṇit/ñit EXCEPT ṇal
+        if ('Rit' in next_term.tags or 'Yit' in next_term.tags) and next_term.upadeza != 'Ral':
+            if dhatu.text.endswith('n'):
+                dhatu.text = dhatu.text[:-1] + 't'
+                prakriya.log("Rule 7.3.32: hanato ṇinnali (n -> t)")
+                
+        # 7.3.54: h -> gh before ṇit/ñit/n
+        if ('Rit' in next_term.tags or 'Yit' in next_term.tags or (next_term.text and next_term.text.startswith('n'))):
+            if dhatu.text.startswith('h'):
+                dhatu.text = 'G' + dhatu.text[1:]
+                prakriya.log("Rule 7.3.54: ho hanter ñṇinneṣu (h -> G)")
+                
+        # 7.3.55: abhyāsād dhasya. h -> gh after abhyasa
+        if any(t.term_type == 'abhyasa' for t in prakriya.terms):
+            if dhatu.text.startswith('h'):
+                dhatu.text = 'G' + dhatu.text[1:]
+                prakriya.log("Rule 7.3.55: abhyāsād dhasya (h -> G after abhyasa)")
 
 def dho_dhe_lopah(prakriya: Prakriya) -> None:
     """Rule 8.3.13: ḍho ḍhe lopaḥ & Rule 6.3.111: ḍhralope pūrvasya dīrgho'ṇaḥ"""
@@ -1659,3 +1673,19 @@ def jna_janor_ja(prakriya: Prakriya) -> None:
         if clean_dhatu in ['jYA', 'jan']:
             dhatu.text = 'jA'
             prakriya.log(f"Rule 7.3.79: jñājanor jā ({clean_dhatu} -> jA)")
+
+def lity_abhyasasya(prakriya: Prakriya) -> None:
+    """Rule 6.1.17: liṭy abhyāsasyobhayeṣām. Samprasāraṇa in abhyāsa."""
+    abhyasa = next((t for t in prakriya.terms if t.term_type == 'abhyasa'), None)
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    if abhyasa and dhatu and any('liW' in t.tags for t in prakriya.terms):
+        clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
+        if clean_dhatu == 'vac':
+            abhyasa.text = 'u'
+            prakriya.log("Rule 6.1.17: liṭy abhyāsasyobhayeṣām (vac -> u)")
+        elif clean_dhatu == 'svap':
+            abhyasa.text = 'su'
+            prakriya.log("Rule 6.1.17: liṭy abhyāsasyobhayeṣām (svap -> su)")
+        elif clean_dhatu == 'yaj':
+            abhyasa.text = 'i'
+            prakriya.log("Rule 6.1.17: liṭy abhyāsasyobhayeṣām (yaj -> i)")

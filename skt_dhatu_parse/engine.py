@@ -113,6 +113,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     
     # 10. Abhyasa (Reduplication)
     rules.liti_dhator_anabhyasasya(prakriya)
+    rules.lity_abhyasasya(prakriya)
     rules.slau_reduplication(prakriya)
 
     # 10.1 Remove empty terms (luk, Slu) to allow boundary checks for Abhyasa rules
@@ -147,6 +148,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.sarvadhatuka_ardhadhatukayoh(prakriya)  
     rules.eco_yayavayah(prakriya)                 
     rules.aci_snu_dhatu_bhruvam(prakriya)
+    rules.akah_savarne_dirghah(prakriya)
     rules.iko_yanaci(prakriya)
     
     # 12. Sandhi and Final Consonants
@@ -156,6 +158,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.ad_gunah(prakriya)
     rules.ato_gune(prakriya)
     rules.vrddhir_eci(prakriya)
+    rules.lopo_vyorvali(prakriya)
     rules.ato_gune(prakriya)
     rules.akah_savarne_dirghah(prakriya)
     rules.lopo_vyorvali(prakriya)
