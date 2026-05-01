@@ -482,5 +482,13 @@ class TestPipeline(unittest.TestCase):
         prakriya = derive('BU', 'laW', purusha='prathama', vacana=0, gana=1, voice='atmanepada')
         self.assertEqual(prakriya.get_current_string(), 'Bavate')
 
+    def test_lun_ksa_augment(self) -> None:
+        """
+        Tests diS + luN -> adikzat
+        Rule Chain: cli -> ksa (sa) -> vrasc-bhrasj... (S -> z) -> sadhoh kas si (z -> k) -> satva (s -> z)
+        """
+        prakriya = derive('diS', 'luN', purusha='prathama', vacana=0, gana=6)
+        self.assertEqual(prakriya.get_current_string(), 'adikzat')
+
 if __name__ == '__main__':
     unittest.main()

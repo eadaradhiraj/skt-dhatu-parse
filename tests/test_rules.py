@@ -581,5 +581,153 @@ class TestRules(unittest.TestCase):
             rules.vrasca_bhrasja_sruja_mruja(p4)
             self.assertEqual(p4.terms[0].text, rep)
 
+    def test_carpet_bomb_khari_ca(self) -> None:
+        """Hits every single character mapping in khari_ca."""
+        char_map = {'g':'k', 'G':'k', 'k':'k', 'K':'k', 'j':'c', 'J':'c', 'c':'c', 'C':'c', 'q':'w', 'Q':'w', 'w':'w', 'W':'w', 'd':'t', 'D':'t', 't':'t', 'T':'t', 'b':'p', 'B':'p', 'p':'p', 'P':'p'}
+        for orig, rep in char_map.items():
+            p = Prakriya()
+            p.add_term(Term(f'a{orig}', 'dhatu'))
+            p.add_term(Term('ta', 'pratyaya'))  # 't' is khar
+            rules.khari_ca(p)
+            self.assertEqual(p.terms[0].text, f'a{rep}')
+
+    def test_carpet_bomb_jhalam_jas_jhasi(self) -> None:
+        """Hits every single character mapping in jhalam_jas_jhasi."""
+        mappings = [
+            (['k', 'K', 'g', 'G', 'h'], 'g'),
+            (['c', 'C', 'j', 'J', 'S'], 'j'),
+            (['w', 'W', 'q', 'Q', 'z'], 'q'),
+            (['t', 'T', 'd', 'D', 's'], 'd'),
+            (['p', 'P', 'b', 'B'], 'b')
+        ]
+        for sources, rep in mappings:
+            for orig in sources:
+                p = Prakriya()
+                p.add_term(Term(f'a{orig}', 'dhatu'))
+                p.add_term(Term('Da', 'pratyaya'))  # 'D' is jhaṣ
+                rules.jhalam_jas_jhasi(p)
+                self.assertEqual(p.terms[0].text, f'a{rep}')
+
+    def test_carpet_bomb_kuhos_cuh(self) -> None:
+        """Hits every single character mapping in kuhos_cuh."""
+        char_map = {'k':'c', 'K':'C', 'g':'j', 'G':'J', 'N':'Y', 'h':'j'}
+        for orig, rep in char_map.items():
+            p = Prakriya()
+            p.add_term(Term(orig, 'abhyasa'))
+            rules.kuhos_cuh(p)
+            self.assertEqual(p.terms[0].text, rep)
+
+    def test_vowel_helpers_fallback(self) -> None:
+        """Ensures apply_guna and apply_vrddhi return consonants unchanged."""
+        self.assertEqual(rules.apply_guna('k'), 'k')
+        self.assertEqual(rules.apply_vrddhi('k'), 'k')
+
+    def test_hujhalbhyo_her_dhih_hu(self) -> None:
+        """Covers the specific 'hu' exception for 'hi' -> 'dhi'."""
+        p = Prakriya()
+        d = Term('hu', 'dhatu')
+        d.tags.add('clean_hu')
+        p.add_term(d)
+        p.add_term(Term('hi', 'pratyaya'))
+        rules.hujhalbhyo_her_dhih(p)
+        self.assertEqual(p.terms[1].text, 'Di')
+
+    def test_ghvasor_ed_hau_as(self) -> None:
+        """Covers the 'as' exception where root becomes 'e' and suffix becomes 'dhi'."""
+        p = Prakriya()
+        d = Term('as', 'dhatu')
+        d.tags.add('clean_as')
+        p.add_term(d)
+        p.add_term(Term('hi', 'pratyaya'))
+        rules.ghvasor_ed_hau(p)
+        self.assertEqual(p.terms[0].text, 'e')
+        self.assertEqual(p.terms[1].text, 'Di')
+
+    def test_aci_snu_dhatu_bhruvam(self) -> None:
+        """Covers brU -> bruv before vowels."""
+        p = Prakriya()
+        p.add_term(Term('brU', 'dhatu'))
+        p.add_term(Term('anti', 'pratyaya'))
+        rules.aci_snu_dhatu_bhruvam(p)
+        self.assertEqual(p.terms[0].text, 'bruv')
+
+    def test_vrasca_bhrasja_remaining(self) -> None:
+        """Covers remaining palatal/ś substitutions to ṣ."""
+        for orig in['viS', 'mfcC']:
+            p = Prakriya()
+            p.add_term(Term(orig, 'dhatu'))
+            p.add_term(Term('ta', 'pratyaya'))
+            rules.vrasca_bhrasja_sruja_mruja(p)
+            self.assertEqual(p.terms[0].text[-1], 'z')
+
+    def test_snabhyastayor_atah(self) -> None:
+        """Covers dropping 'A' before weak vowel affixes."""
+        p = Prakriya()
+        p.add_term(Term('da', 'abhyasa'))
+        p.add_term(Term('dA', 'dhatu'))
+        suf = Term('anti', 'pratyaya')
+        suf.tags.add('kit')
+        p.add_term(suf)
+        rules.snabhyastayor_atah(p)
+        self.assertEqual(p.terms[1].text, 'd')
+    def test_pug_nau_augment(self) -> None:
+        """Hits the missing lines for pug_nau (dA + Ric -> dAp)."""
+        p = Prakriya()
+        p.add_term(Term('dA', 'dhatu'))
+        p.add_term(Term('Ric', 'pratyaya'))
+        rules.pug_nau(p)
+        self.assertEqual(p.terms[0].text, 'dAp')
+
+    def test_mo_no_dhatoh_m_v(self) -> None:
+        """Hits the missing mo_no_dhatoh branch (m -> n before m/v)."""
+        p = Prakriya()
+        p.add_term(Term('gam', 'dhatu'))
+        p.add_term(Term('m', 'pratyaya'))
+        rules.mo_no_dhatoh(p)
+        self.assertEqual(p.terms[0].text, 'gan')
+
+    def test_han_ghatva_tatva_n_to_t(self) -> None:
+        """Hits hanato ṇinnali (han + ṇit -> hat)."""
+        p = Prakriya()
+        d = Term('han', 'dhatu')
+        d.tags.add('clean_han')
+        p.add_term(d)
+        suf = Term('a', 'pratyaya')
+        suf.tags.add('Rit')
+        p.add_term(suf)
+        rules.han_ghatva_tatva(p)
+        # Should change 'h' to 'G' and 'n' to 't'
+        self.assertEqual(p.terms[0].text, 'Gat')
+
+    def test_rules_fallback_branches(self) -> None:
+        """Feeds garbage data to hit all the 'if not dhatu: return' and 'else' safeties."""
+        p = Prakriya()
+        
+        # substitute_lakara without voice tags
+        d = Term('test', 'dhatu')
+        p.add_term(d)
+        lak = Term('laW', 'lakara')
+        lak.tags.add('laW')
+        p.add_term(lak)
+        rules.substitute_lakara(p, purusha='prathama', vacana=0)
+        self.assertEqual(lak.text, 'tip') # defaults to parasmaipada
+
+        # insert_vikarana without gana tag
+        rules.insert_vikarana(p)
+        
+        # mit_aco_antyat_parah without vowels
+        p2 = Prakriya()
+        p2.add_term(Term('k', 'dhatu'))
+        p2.add_term(Term('Snam', 'vikaraRa'))
+        rules.mit_aco_antyat_parah(p2)
+        
+        # Empty prakriya against safeties
+        p_empty = Prakriya()
+        rules.do_dad_ghoh(p_empty)
+        rules.snabhyastayor_atah(p_empty)
+        rules.ho_dhah_dader_ghah(p_empty)
+        rules.anunasikalopo_jhali_kniti(p_empty)
+        rules.ata_upadhayah(p_empty)
+
 if __name__ == '__main__':
     unittest.main()

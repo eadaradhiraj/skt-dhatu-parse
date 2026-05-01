@@ -137,11 +137,15 @@ class TestCLI(unittest.TestCase):
         with self.assertRaises(SystemExit):
             main()
 
-    @patch('sys.argv', ['cli.py', 'xyz_invalid_123', '--causative'])
+    @patch('sys.argv',['cli.py', 'BU', '--causative'])
+    @patch('skt_dhatu_parse.cli.derive_secondary_root', return_value=None)
     @patch('builtins.print')
-    def test_cli_causative_failure(self, mock_print) -> None:
+    def test_cli_causative_failure(self, mock_print, mock_derive_sec) -> None:
+        """Forces the causative generator to fail after passing the DB check."""
         with self.assertRaises(SystemExit):
             main()
+        prints = [str(c.args[0]) for c in mock_print.call_args_list if c.args]
+        self.assertTrue(any('Failed to generate causative' in s for s in prints))
 
     @patch('sys.argv', ['cli.py', 'BU', '-g', '99'])
     @patch('builtins.print')
@@ -172,10 +176,19 @@ class TestCLI(unittest.TestCase):
     @patch('sys.argv',['cli.py', 'BU', '--all-krt'])
     @patch('skt_dhatu_parse.cli.derive_krdanta', return_value=None)
     @patch('builtins.print')
-    def test_cli_all_krt_failure(self, mock_derive, mock_print) -> None:
+    def test_cli_all_krt_failure(self, mock_print, mock_derive) -> None:
         main()
         prints = [str(c.args[0]) for c in mock_print.call_args_list if c.args]
         self.assertTrue(any('Failed' in s for s in prints))
+
+    @patch('skt_dhatu_parse.conjugate.derive', return_value=None)
+    @patch('builtins.print')
+    def test_conjugate_failure(self, mock_print, mock_derive) -> None:
+        """Hits line 52 in conjugate.py where the 3x3 table fails to build."""
+        from skt_dhatu_parse.conjugate import print_conjugation
+        print_conjugation('BU', lakara_name='laW', gana=1)
+        prints = [str(c.args[0]) for c in mock_print.call_args_list if c.args]
+        self.assertTrue(any('Failed to derive forms' in s for s in prints))
 
 if __name__ == '__main__':
     unittest.main()
