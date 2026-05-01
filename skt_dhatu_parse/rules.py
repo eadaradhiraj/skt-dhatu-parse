@@ -834,11 +834,24 @@ def vacisvapiyajadinam_kiti(prakriya: Prakriya) -> None:
             prakriya.log("Rule 6.1.16: Samprasarana (Brajj -> Bfjj)")
 
 def sanadyanta_dhatavah(prakriya: Prakriya) -> None:
+    """Rule 3.1.32: sanādyantā dhātavaḥ. Derived bases become completely new roots."""
     if len(prakriya.terms) >= 2:
         dhatu = prakriya.terms[0]
         suffix = prakriya.terms[1]
+        
+        # Merge the text
         dhatu.text = dhatu.text + suffix.text
+        dhatu.upadeza = dhatu.text  # The new root becomes its own upadeśa!
+        
+        # Scrub its past life (remove old Gana and specific clean_root tags)
+        tags_to_remove =[t for t in dhatu.tags if t.startswith('gana_') or t.startswith('clean_')]
+        for t in tags_to_remove:
+            dhatu.tags.remove(t)
+            
+        # Give it its new identity (All secondary roots behave like Gaṇa 1)
+        dhatu.tags.add('gana_1')
         dhatu.tags.add('sanadi')
+        
         prakriya.terms = [dhatu]
         prakriya.log(f"Rule 3.1.32: Merged into Secondary Root -> '{dhatu.text}'")
 
