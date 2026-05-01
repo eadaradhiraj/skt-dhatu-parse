@@ -799,5 +799,13 @@ class TestRules(unittest.TestCase):
         self.assertEqual(p.terms[0].text, 'Bav')
         self.assertEqual(p.terms[1].text, 'us')
 
+    def test_missing_anusvarasya_yay_semivowel(self) -> None:
+        """Hits Line 918 in rules.py (M + y -> M)"""
+        p = Prakriya()
+        p.add_term(Term('saM', 'dhatu'))
+        p.add_term(Term('ya', 'pratyaya'))
+        rules.anusvarasya_yayi_parasavarnah(p)
+        self.assertEqual(p.terms[0].text, 'saM')
+
 if __name__ == '__main__':
     unittest.main()
