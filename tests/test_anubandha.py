@@ -39,10 +39,10 @@ class TestAnubandha(unittest.TestCase):
 
     def test_nasal_marker_at_start(self):
         """Covers the failsafe where the nasal marker is the first character."""
-        t = Term('!akz', 'dhatu')
+        # We end with a vowel 'A' so that hal antyam (Rule 1.3.3) does not strip the final character
+        t = Term('!akzA', 'dhatu')
         resolve_it_markers(t)
-        self.assertEqual(t.text, 'akz')
-
+        self.assertEqual(t.text, 'akzA')
 
 if __name__ == '__main__':
     unittest.main()
