@@ -472,5 +472,15 @@ class TestPipeline(unittest.TestCase):
         prakriya = derive('DA', 'loW', purusha='madhyama', vacana=0, gana=3)
         self.assertEqual(prakriya.get_current_string(), 'Dehi')
 
+    def test_kri_para_atmanepada_shift(self) -> None:
+        """Covers krI + parA forcing Atmanepada."""
+        prakriya = derive('krI', 'laW', purusha='prathama', vacana=0, gana=9, upasargas=['parA'])
+        self.assertEqual(prakriya.get_current_string(), 'parAkrIRIte')
+
+    def test_engine_voice_override(self) -> None:
+        """Covers explicit voice override inside the engine pipeline."""
+        prakriya = derive('BU', 'laW', purusha='prathama', vacana=0, gana=1, voice='atmanepada')
+        self.assertEqual(prakriya.get_current_string(), 'Bavate')
+
 if __name__ == '__main__':
     unittest.main()

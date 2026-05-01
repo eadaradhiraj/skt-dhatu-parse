@@ -136,5 +136,46 @@ class TestCLI(unittest.TestCase):
         mock_derive_sec.return_value = None
         with self.assertRaises(SystemExit):
             main()
+
+    @patch('sys.argv', ['cli.py', 'xyz_invalid_123', '--causative'])
+    @patch('builtins.print')
+    def test_cli_causative_failure(self, mock_print) -> None:
+        with self.assertRaises(SystemExit):
+            main()
+
+    @patch('sys.argv', ['cli.py', 'BU', '-g', '99'])
+    @patch('builtins.print')
+    def test_cli_invalid_user_gana(self, mock_print) -> None:
+        with self.assertRaises(SystemExit):
+            main()
+
+    def test_resolve_gana_multiple_no_gana_1(self) -> None:
+        """Covers when a root has multiple ganas but Gana 1 is NOT one of them."""
+        with patch('skt_dhatu_parse.cli.get_dhatu') as mock_get:
+            t1 = MagicMock()
+            t1.tags = ['gana_4']
+            t2 = MagicMock()
+            t2.tags =['gana_6']
+            mock_get.return_value = [t1, t2]
+            with patch('builtins.print'):
+                from skt_dhatu_parse.cli import resolve_gana
+                gana = resolve_gana('mock_root')
+                self.assertEqual(gana, 4) # Should default to the first available
+
+    @patch('sys.argv',['cli.py', 'BU', '--voice', 'atmanepada'])
+    @patch('builtins.print')
+    def test_cli_voice_override(self, mock_print) -> None:
+        main()
+        prints = [str(c.args[0]) for c in mock_print.call_args_list if c.args]
+        self.assertTrue(any('Bavate' in s for s in prints))
+
+    @patch('sys.argv',['cli.py', 'BU', '--all-krt'])
+    @patch('skt_dhatu_parse.cli.derive_krdanta', return_value=None)
+    @patch('builtins.print')
+    def test_cli_all_krt_failure(self, mock_derive, mock_print) -> None:
+        main()
+        prints = [str(c.args[0]) for c in mock_print.call_args_list if c.args]
+        self.assertTrue(any('Failed' in s for s in prints))
+
 if __name__ == '__main__':
     unittest.main()
