@@ -254,5 +254,12 @@ class TestCLI(unittest.TestCase):
         mock_derive.side_effect = side_effect
         print_conjugation('BU')
 
+    @patch('builtins.print')
+    def test_conjugate_with_upasarga_branch(self, mock_print) -> None:
+        """Hits the 'if upasargas' text formatting branch in conjugate.py."""
+        from skt_dhatu_parse.conjugate import print_conjugation
+        # We don't mock derive here, so it acts as a nice integration test too!
+        print_conjugation('ci', gana=5, upasargas=['sam'])
+
 if __name__ == '__main__':
     unittest.main()
