@@ -44,7 +44,7 @@ def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_
         rules.kr_u_morphing(prakriya)
         rules.snasor_allopah(prakriya)
 
-    # 2.5 Remove empty terms
+    # 2.5 Clean up ghost terms early so boundary rules touch the suffix!
     prakriya.terms =[t for t in prakriya.terms if t.text]
 
     # 3. Augments & Internal Morphing
@@ -57,6 +57,7 @@ def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_
     rules.han_ghatva_tatva(prakriya)
     rules.aco_nniti(prakriya)
     rules.ata_upadhayah(prakriya)
+    rules.rta_id_dhatoh(prakriya)
     rules.gam_hana_jana_lopa(prakriya)
     rules.vacisvapiyajadinam_kiti(prakriya)
     rules.srujidrusor_jhaly_amakiti(prakriya)  
@@ -67,12 +68,17 @@ def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_
     rules.eco_yayavayah(prakriya)                 
     rules.usy_apadantat(prakriya)                 
     rules.ato_gune(prakriya)
+    rules.atas_ca(prakriya)
     rules.ad_gunah(prakriya)
     rules.vrddhir_eci(prakriya)
     rules.akah_savarne_dirghah(prakriya)
     rules.iko_yanaci(prakriya)
     
+    # 4.5 Clean up ghost terms AGAIN just in case
+    prakriya.terms =[t for t in prakriya.terms if t.text]
+    
     # 5. Consonant Sandhi
+    rules.hali_ca(prakriya)
     rules.anunasikalopo_jhali_kniti(prakriya)  
     rules.radabhyam_nishthato_nah(prakriya)
     rules.vrasca_bhrasja_sruja_mruja(prakriya) 
@@ -80,11 +86,9 @@ def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_
     rules.ho_dhah_dader_ghah(prakriya)      
     rules.jhasas_tathor_dho_dhah(prakriya)  
     
-    # --- REORDERED BLOCK ---
     rules.stuna_stuh(prakriya)    
     rules.dho_dhe_lopah(prakriya)                  
     rules.jhalam_jas_jhasi(prakriya)
-    # -----------------------
     
     rules.khari_ca(prakriya)  
     rules.nascapadantasya_jhali(prakriya)          

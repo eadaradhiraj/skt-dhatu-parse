@@ -297,10 +297,27 @@ def itasca(prakriya: Prakriya) -> None:
             prakriya.log("Rule 3.4.100: itaśca (Dropped terminal 'i')")
 
 def hali_ca(prakriya: Prakriya) -> None:
-    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
-    if dhatu and dhatu.text == 'div':
-        dhatu.text = 'dIv'
-        prakriya.log("Rule 8.2.77: Lengthened 'div' to 'dIv'")
+    """Rule 8.2.77: hali ca. Lengthens i/u before r/v followed by a hal (consonant)."""
+    for i in range(len(prakriya.terms)-1):
+        t1 = prakriya.terms[i]
+        t2 = prakriya.terms[i+1]
+        if t1.term_type == 'dhatu' and t1.text and t2.text and t2.text[0] in SLP1_CONSONANTS:
+            # Prevent 'kur' (from kṛ) from falsely lengthening to 'kUr'
+            clean_dhatu = next((tag.split('_')[1] for tag in t1.tags if tag.startswith('clean_')), t1.text)
+            if clean_dhatu == 'kf': continue 
+
+            if t1.text == 'div':
+                t1.text = 'dIv'
+                prakriya.log("Rule 8.2.77: hali ca (div -> dIv)")
+            elif t1.text.endswith('ir') or t1.text.endswith('ur') or t1.text.endswith('iv') or t1.text.endswith('uv'):
+                vowel = t1.text[-2]
+                cons = t1.text[-1]
+                if vowel == 'i':
+                    t1.text = t1.text[:-2] + 'I' + cons
+                    prakriya.log(f"Rule 8.2.77: hali ca ({t1.text[-2:]} -> I{cons} before hal)")
+                elif vowel == 'u':
+                    t1.text = t1.text[:-2] + 'U' + cons
+                    prakriya.log(f"Rule 8.2.77: hali ca ({t1.text[-2:]} -> U{cons} before hal)")
 
 def it_agama(prakriya: Prakriya) -> None:
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
@@ -531,16 +548,22 @@ def ato_dirgho_yayi(prakriya: Prakriya) -> None:
         prakriya.log("Rule 7.3.101: Lengthened 'a' to 'A'")
 
 def ato_gune(prakriya: Prakriya) -> None:
+    """Rule 6.1.97: ato guṇe."""
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa'), None)
     suffix = prakriya.terms[-1]
     
-    if dhatu and vikarana and dhatu.text.endswith('a') and vikarana.text and vikarana.text[0] in ['a', 'A']:
+    # Safe check for dhatu + vikarana merge
+    if dhatu and vikarana and dhatu.text.endswith('a') and vikarana.text and vikarana.text.startswith(('a', 'A')):
         dhatu.text = dhatu.text[:-1]
         prakriya.log("Rule 6.1.97: Merged Dhatu 'a' + Vikarana")
-    if vikarana and vikarana.text.endswith('a') and suffix.text and suffix.text[0] in['a', 'e', 'o', 'A']:
-        vikarana.text = vikarana.text[:-1]
-        prakriya.log(f"Rule 6.1.97: Merged Vikarana 'a' + Suffix '{suffix.text[0]}'")
+        
+    # Safe check for vikarana + suffix merge
+    if vikarana and suffix and vikarana.text.endswith('a') and len(suffix.text) > 0:
+        first_char = suffix.text[0]
+        if first_char in ['a', 'e', 'o', 'A']:
+            vikarana.text = vikarana.text[:-1]
+            prakriya.log(f"Rule 6.1.97: Merged Vikarana 'a' + Suffix '{first_char}'")
 
 def ato_nitah(prakriya: Prakriya) -> None:
     """Rule 7.2.81: Ato NitaH. a + A -> e for Nit affixes."""
@@ -1916,3 +1939,30 @@ def rdriso_ngi_gunah(prakriya: Prakriya) -> None:
         elif dhatu.text.endswith('f') or dhatu.text.endswith('F'):
             dhatu.text = dhatu.text[:-1] + apply_guna(dhatu.text[-1])
             prakriya.log("Rule 7.4.16: ṛdṛśo'ṅi guṇaḥ (Guna before aN)")
+
+def rta_id_dhatoh(prakriya: Prakriya) -> None:
+    """Rule 7.1.100: ṝta id dhātoḥ & Rule 7.1.102: ud oṣṭhyapūrvasya."""
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    if dhatu and dhatu.text.endswith('F'):
+        text = dhatu.text
+        # If preceded by a labial (p, ph, b, bh, m, v), it becomes 'ur'
+        if len(text) >= 2 and text[-2] in['p', 'P', 'b', 'B', 'm', 'v']:
+            dhatu.text = text[:-1] + 'ur'
+            prakriya.log("Rule 7.1.102: ud oṣṭhyapūrvasya (F -> ur)")
+        else:
+            dhatu.text = text[:-1] + 'ir'
+            prakriya.log("Rule 7.1.100: ṝta id dhātoḥ (F -> ir)")
+
+def jhalo_jhali(prakriya: Prakriya) -> None:
+    """Rule 8.2.26: jhalo jhali. Drops 's' between two jhal consonants."""
+    for i in range(1, len(prakriya.terms)-1):
+        t_prev = prakriya.terms[i-1]
+        t_curr = prakriya.terms[i]
+        t_next = prakriya.terms[i+1]
+        
+        if t_curr.text == 's':
+            prev_char = t_prev.text[-1] if t_prev.text else ''
+            next_char = t_next.text[0] if t_next.text else ''
+            if prev_char in JHAL_CONSONANTS and next_char in JHAL_CONSONANTS:
+                t_curr.text = ''
+                prakriya.log("Rule 8.2.26: jhalo jhali (Dropped 's' between jhals)")

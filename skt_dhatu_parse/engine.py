@@ -9,7 +9,7 @@ from . import rules
 
 def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'prathama', vacana: int = 0,
            gana: int = None, db_path: str = DEFAULT_DB_PATH, custom_dhatu: Term = None,
-           upasargas: list[str] = None, voice: str = None, vikalpa: bool = False) -> Prakriya:  # <-- Added vikalpa
+           upasargas: list[str] = None, voice: str = None, vikalpa: bool = False) -> Prakriya:
            
     prakriya = Prakriya()
     prakriya.vikalpa = vikalpa
@@ -47,7 +47,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.dhatvadeh_sah_sah_no_nah(prakriya)  
     rules.idito_num_dhatoh(prakriya)  
     
-    # 3. Add Lakara and Past Tense Prefix (aW)
+    # 3. Add Lakara and Past Tense Prefix (aW/Aw)
     lakara = Term(lakara_name, 'lakara')
     lakara.tags.add(lakara_name) 
     prakriya.add_term(lakara)
@@ -68,7 +68,6 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.mer_nih(prakriya)
     rules.lut_prathamasya_daraurasah(prakriya)
     rules.jher_jus(prakriya)
-    rules.ata_au_nalah(prakriya)
     rules.jhasya_ran(prakriya)
     rules.ito_at(prakriya)
     rules.jhonta(prakriya)            
@@ -84,7 +83,6 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.itasca(prakriya)            
     rules.nityam_nitah(prakriya)
     rules.er_uh(prakriya)
-    rules.ata_au_nalah(prakriya)
 
     # 8. Insert Vikarana & Special Lakara Agamas
     rules.insert_vikarana(prakriya)
@@ -99,13 +97,14 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.sici_vrddhih(prakriya)
     rules.asti_sico_aprkte(prakriya)
     rules.hrasvad_angat(prakriya)
-    # 9. Gana 9 and Root Substitutions
+    
     # 9. Gana 9 and Root Substitutions
     rules.ardhadhatuke_mula_parivartanam(prakriya)
     rules.sarvadhatukam_apit(prakriya)
     rules.adeca_upadese_asiti(prakriya)
     rules.ata_au_nalah(prakriya)
     rules.rin_sayaglinksu(prakriya)
+    rules.rta_id_dhatoh(prakriya)
     rules.sna_sandhi(prakriya)
     rules.se_mucadinam(prakriya)
     rules.paghra_sthadi_adesha(prakriya)
@@ -155,6 +154,8 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.ri_ca(prakriya)
     rules.h_eti(prakriya)
     rules.diti_teh_lopa(prakriya)
+    rules.jhalo_jhali(prakriya)
+    prakriya.terms =[t for t in prakriya.terms if t.text]
     rules.hali_ca(prakriya)
     rules.srujidrusor_jhaly_amakiti(prakriya)
     rules.aco_nniti(prakriya)
@@ -176,21 +177,18 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.skoh_samyogadyor_ante_ca(prakriya)
     rules.lopo_vyorvali(prakriya)
     
+    # 13. Consonant Sandhi
     rules.anunasikalopo_jhali_kniti(prakriya)
     rules.vrasca_bhrasja_sruja_mruja(prakriya)
     rules.choh_kuh(prakriya)
     rules.che_ca(prakriya)
-    
     rules.ho_dhah_dader_ghah(prakriya)
     rules.ekaco_baso_bhas(prakriya)
     rules.sadhoh_kas_si(prakriya)
-    
     rules.mo_no_dhatoh(prakriya)
     rules.adesa_pratyayayoh(prakriya)             
     rules.rashabhyam_no_nah(prakriya)
-
     rules.dadhas_tathor_ca(prakriya)
-
     rules.jhasas_tathor_dho_dhah(prakriya)        
     
     # --- REORDERED BLOCK ---

@@ -1042,7 +1042,55 @@ class TestRules(unittest.TestCase):
         """Hits the fallback branches."""
         p_empty = Prakriya()
         p_empty.add_term(Term('a', 'vikaraRa'))
-        rules.rdriso_ngi_gunah(p_empty) # Should safely return
+        rules.rdriso_ngi_gunah(p_empty)
+
+    def test_rta_id_dhatoh(self) -> None:
+        """Hits F -> ir."""
+        p = Prakriya()
+        d = Term('kF', 'dhatu')
+        p.add_term(d)
+        rules.rta_id_dhatoh(p)
+        self.assertEqual(p.terms[0].text, 'kir')
+
+    def test_ud_osthyapurvasya(self) -> None:
+        """Hits F -> ur for labials."""
+        p = Prakriya()
+        d = Term('pF', 'dhatu')
+        p.add_term(d)
+        rules.rta_id_dhatoh(p)
+        self.assertEqual(p.terms[0].text, 'pur')
+
+    def test_jhalo_jhali(self) -> None:
+        """Hits s-drop between jhals."""
+        p = Prakriya()
+        p.add_term(Term('laB', 'dhatu'))
+        p.add_term(Term('s', 'vikaraRa'))
+        p.add_term(Term('ta', 'pratyaya'))
+        rules.jhalo_jhali(p)
+        self.assertEqual(p.terms[1].text, '')
+
+    def test_jhalo_jhali_fallback(self) -> None:
+        """Hits the fallback for non-jhal context."""
+        p = Prakriya()
+        p.add_term(Term('a', 'Agama'))
+        p.add_term(Term('s', 'vikaraRa'))
+        p.add_term(Term('a', 'pratyaya'))
+        rules.jhalo_jhali(p)
+        self.assertEqual(p.terms[1].text, 's')
+
+    def test_hali_ca_general(self) -> None:
+        """Hits ir/ur lengthening."""
+        p = Prakriya()
+        p.add_term(Term('gir', 'dhatu'))
+        p.add_term(Term('ta', 'pratyaya'))
+        rules.hali_ca(p)
+        self.assertEqual(p.terms[0].text, 'gIr')
+        
+        p2 = Prakriya()
+        p2.add_term(Term('pur', 'dhatu'))
+        p2.add_term(Term('ta', 'pratyaya'))
+        rules.hali_ca(p2)
+        self.assertEqual(p2.terms[0].text, 'pUr')
 
 if __name__ == '__main__':
     unittest.main()
