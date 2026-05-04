@@ -261,5 +261,16 @@ class TestCLI(unittest.TestCase):
         # We don't mock derive here, so it acts as a nice integration test too!
         print_conjugation('ci', gana=5, upasargas=['sam'])
 
+    @patch('builtins.print')
+    def test_conjugate_vikalpa_divergence_branch(self, mock_print) -> None:
+        """Hits the 'str_norm != str_vik' branch in conjugate.py by generating Cid in luN."""
+        from skt_dhatu_parse.conjugate import print_conjugation
+        # Cid + luN triggers irito vā, forcing the timelines to diverge!
+        print_conjugation('Cid', lakara_name='luN', gana=7)
+        
+        # Verify it generated the joined string
+        prints = [str(c.args[0]) for c in mock_print.call_args_list if c.args]
+        self.assertTrue(any('acCEtsIt/acCidat' in s for s in prints))
+
 if __name__ == '__main__':
     unittest.main()
