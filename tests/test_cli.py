@@ -238,5 +238,21 @@ class TestCLI(unittest.TestCase):
         with patch('builtins.print'):  # Suppress the terminal output
             print_conjugation('BU', lakara_name='laW', gana=1)
 
+    @patch('skt_dhatu_parse.conjugate.derive')
+    @patch('builtins.print')
+    def test_conjugate_vikalpa_fallback(self, mock_print, mock_derive) -> None:
+        """Hits the fallback in conjugate.py where the vikalpa timeline returns None."""
+        from skt_dhatu_parse.conjugate import print_conjugation
+        
+        mock_prakriya = MagicMock()
+        mock_prakriya.get_current_string.return_value = "norm"
+        
+        def side_effect(*args, **kwargs):
+            # Return None ONLY if vikalpa is True
+            return None if kwargs.get('vikalpa') else mock_prakriya
+            
+        mock_derive.side_effect = side_effect
+        print_conjugation('BU')
+
 if __name__ == '__main__':
     unittest.main()

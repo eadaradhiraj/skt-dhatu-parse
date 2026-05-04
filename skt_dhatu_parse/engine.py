@@ -9,9 +9,11 @@ from . import rules
 
 def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'prathama', vacana: int = 0,
            gana: int = None, db_path: str = DEFAULT_DB_PATH, custom_dhatu: Term = None,
-           upasargas: list[str] = None, voice: str = None) -> Prakriya:
+           upasargas: list[str] = None, voice: str = None, vikalpa: bool = False) -> Prakriya:  # <-- Added vikalpa
            
     prakriya = Prakriya()
+    prakriya.vikalpa = vikalpa
+    
     if upasargas:
         for u in upasargas: prakriya.add_term(Term(u, 'upasarga'))
         
@@ -98,6 +100,8 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.asti_sico_aprkte(prakriya)
     rules.hrasvad_angat(prakriya)
     # 9. Gana 9 and Root Substitutions
+    # 9. Gana 9 and Root Substitutions
+    rules.ardhadhatuke_mula_parivartanam(prakriya)
     rules.sarvadhatukam_apit(prakriya)
     rules.adeca_upadese_asiti(prakriya)
     rules.ata_au_nalah(prakriya)
@@ -139,6 +143,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
 
     # 11. Core Phonetics
     rules.gam_hana_jana_lopa(prakriya)
+    rules.rdriso_ngi_gunah(prakriya)
     rules.ato_yeyah(prakriya)
     rules.lin_salopo_anantyasya(prakriya)
     rules.ato_heh(prakriya)

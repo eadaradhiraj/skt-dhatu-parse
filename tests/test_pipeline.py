@@ -561,5 +561,27 @@ class TestPipeline(unittest.TestCase):
         p1 = derive('i', 'laN', purusha='prathama', vacana=0, gana=2, voice='parasmaipada')
         self.assertEqual(p1.get_current_string(), 'Et')
 
+    def test_as_lit(self) -> None:
+        """Tests as + liW -> baBUva."""
+        p = derive('as', 'liW', purusha='prathama', vacana=0, gana=2)
+        self.assertEqual(p.get_current_string(), 'baBUva')
+
+    def test_bru_lit(self) -> None:
+        """Tests brU + liW -> uvAca."""
+        p = derive('brU', 'liW', purusha='prathama', vacana=0, gana=2)
+        self.assertEqual(p.get_current_string(), 'uvAca')
+
+    def test_drs_lun(self) -> None:
+        """Tests dfS + luN -> adarSat."""
+        p = derive('dfS', 'luN', purusha='prathama', vacana=0, gana=1)
+        self.assertEqual(p.get_current_string(), 'adarSat')
+
+    def test_vikalpa_dual_output(self) -> None:
+        """Tests that the vikalpa logic outputs distinct strings for Cid in Aorist."""
+        p_norm = derive('Cid', 'luN', purusha='prathama', vacana=0, gana=7, vikalpa=False)
+        p_vik = derive('Cid', 'luN', purusha='prathama', vacana=0, gana=7, vikalpa=True)
+        self.assertEqual(p_norm.get_current_string(), 'acCEtsIt')
+        self.assertEqual(p_vik.get_current_string(), 'acCidat')
+
 if __name__ == '__main__':
     unittest.main()

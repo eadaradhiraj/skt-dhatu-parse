@@ -31,9 +31,10 @@ class Prakriya:
     Represents the derivation process. It acts as a State Machine.
     """
     def __init__(self):
-        # The sequence of terms. E.g.,[Term('BU'), Term('zap'), Term('tip')]
-        self.terms: List[Term] =[]
+        # The sequence of terms. E.g., [Term('BU'), Term('zap'), Term('tip')]
+        self.terms: List[Term] = []
         self.history: List[str] =[]
+        self.vikalpa: bool = False
 
     def add_term(self, term: Term) -> None:
         self.terms.append(term)

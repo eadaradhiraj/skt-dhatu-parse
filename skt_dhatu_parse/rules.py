@@ -1253,19 +1253,24 @@ def cli_agama(prakriya: Prakriya) -> None:
         for tag in dhatu.tags:
             if tag.startswith('clean_'): clean_dhatu = tag.split('_')[1]
             
-        SAL_CONSONANTS =['S', 'z', 's', 'h']
+        SAL_CONSONANTS = ['S', 'z', 's', 'h']
         IK_VOWELS =['i', 'I', 'u', 'U', 'f', 'F', 'x', 'X']
         upadha = dhatu.text[-2] if len(dhatu.text) > 1 else ''
         ends_in_sal = dhatu.text[-1] in SAL_CONSONANTS if dhatu.text else False
         
-        # Check against global master list
         is_anit = clean_dhatu in ANIT_ROOTS or (clean_dhatu == 'duh' and 'gana_2' in dhatu.tags) or clean_dhatu in['ruh', 'lih', 'kfS']
         
-        if clean_dhatu in['gam']:
+        # Rule 3.1.55 (puṣādi...) & Rule 3.1.57 (irito vā)
+        if clean_dhatu in ['gam', 'dfS'] or ('irit' in dhatu.tags and prakriya.vikalpa):
             cli.text = 'a'
             cli.tags.add('Nit')
             cli.tags.add('aN') # Mark explicitly as the aN augment!
-            prakriya.log("Rule 3.1.55: puSAdi... cli -> aN")
+            
+            if 'irit' in dhatu.tags and prakriya.vikalpa:
+                prakriya.log("Rule 3.1.57: irito vā (Optional cli -> aN triggered)")
+            else:
+                prakriya.log("Rule 3.1.55: puṣādi... cli -> aN")
+
         elif ends_in_sal and upadha in IK_VOWELS and is_anit:
             cli.text = 'sa'
             cli.tags.add('ksa')
@@ -1871,3 +1876,43 @@ def atas_ca(prakriya: Prakriya) -> None:
             t1.text = rep
             t2.text = t2.text[1:]
             prakriya.log(f"Rule 6.1.90: āṭaś ca (A + {old_vowel} -> {rep})")
+
+def ardhadhatuke_mula_parivartanam(prakriya: Prakriya) -> None:
+    """Rule 2.4.52: aster bhūḥ & Rule 2.4.53: bruvo vaciḥ."""
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    if not dhatu: return
+    
+    # Check if the environment is ardhadhatuka
+    is_ardha = any('ardhadhatuka' in t.tags for t in prakriya.terms) or any(t.upadeza == 'cli' for t in prakriya.terms)
+    
+    if is_ardha:
+        clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
+        if clean_dhatu == 'as':
+            dhatu.text = 'BU'
+            dhatu.upadeza = 'BU'
+            dhatu.tags = set([t for t in dhatu.tags if not t.startswith('clean_')])
+            dhatu.tags.add('clean_BU')
+            prakriya.log("Rule 2.4.52: aster bhūḥ (as -> BU before ārdhadhātuka)")
+        elif clean_dhatu == 'brU':
+            dhatu.text = 'vac'
+            dhatu.upadeza = 'vac'
+            dhatu.tags = set([t for t in dhatu.tags if not t.startswith('clean_')])
+            dhatu.tags.add('clean_vac')
+            prakriya.log("Rule 2.4.53: bruvo vaciḥ (brU -> vac before ārdhadhātuka)")
+
+def rdriso_ngi_gunah(prakriya: Prakriya) -> None:
+    """Rule 7.4.16: ṛdṛśo'ṅi guṇaḥ. Guṇa for ṛ-ending roots and dṛś before aṅ."""
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    if not dhatu: return
+    idx = prakriya.terms.index(dhatu)
+    if idx + 1 >= len(prakriya.terms): return
+    next_term = prakriya.terms[idx + 1]
+
+    if next_term.term_type == 'vikaraRa' and 'aN' in next_term.tags:
+        clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
+        if clean_dhatu == 'dfS':
+            dhatu.text = 'darS'
+            prakriya.log("Rule 7.4.16: ṛdṛśo'ṅi guṇaḥ (dfS -> darS)")
+        elif dhatu.text.endswith('f') or dhatu.text.endswith('F'):
+            dhatu.text = dhatu.text[:-1] + apply_guna(dhatu.text[-1])
+            prakriya.log("Rule 7.4.16: ṛdṛśo'ṅi guṇaḥ (Guna before aN)")

@@ -1010,5 +1010,39 @@ class TestRules(unittest.TestCase):
         rules.atas_ca(p)
         self.assertEqual(p.terms[0].text, 'A')
 
+    def test_ardhadhatuke_mula_parivartanam(self) -> None:
+        """Hits as -> BU and brU -> vac."""
+        mappings =[('as', 'BU'), ('brU', 'vac')]
+        for orig, rep in mappings:
+            p = Prakriya()
+            d = Term(orig, 'dhatu')
+            d.tags.add(f'clean_{orig}')
+            p.add_term(d)
+            suf = Term('ta', 'pratyaya')
+            suf.tags.add('ardhadhatuka')
+            p.add_term(suf)
+            rules.ardhadhatuke_mula_parivartanam(p)
+            self.assertEqual(p.terms[0].text, rep)
+
+    def test_rdriso_ngi_gunah(self) -> None:
+        """Hits the dfS and f-ending branches for aN augment Guna."""
+        mappings =[('dfS', 'darS'), ('sf', 'sar')]
+        for orig, rep in mappings:
+            p = Prakriya()
+            d = Term(orig, 'dhatu')
+            d.tags.add(f'clean_{orig}')
+            p.add_term(d)
+            vik = Term('a', 'vikaraRa')
+            vik.tags.add('aN')
+            p.add_term(vik)
+            rules.rdriso_ngi_gunah(p)
+            self.assertEqual(p.terms[0].text, rep)
+            
+    def test_rdriso_ngi_gunah_fallback(self) -> None:
+        """Hits the fallback branches."""
+        p_empty = Prakriya()
+        p_empty.add_term(Term('a', 'vikaraRa'))
+        rules.rdriso_ngi_gunah(p_empty) # Should safely return
+
 if __name__ == '__main__':
     unittest.main()
