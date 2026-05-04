@@ -541,29 +541,39 @@ def iko_yanaci(prakriya: Prakriya) -> None:
                 prakriya.log(f"Rule 6.1.77: iko yaRaci -> '{term1.text}'")
 
 def ato_dirgho_yayi(prakriya: Prakriya) -> None:
+    """Rule 7.3.101: ato dīrgho yañi. Lengthens 'a' to 'ā' before yañ."""
     vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa'), None)
-    suffix = prakriya.terms[-1]
-    if vikarana and vikarana.text.endswith('a') and suffix.text and suffix.text[0] in YAY_CONSONANTS:
-        vikarana.text = vikarana.text[:-1] + 'A'
-        prakriya.log("Rule 7.3.101: Lengthened 'a' to 'A'")
+    if not vikarana: return
+    
+    # Use strict adjacency instead of [-1]
+    idx = prakriya.terms.index(vikarana)
+    if idx + 1 < len(prakriya.terms):
+        next_term = prakriya.terms[idx + 1]
+        if vikarana.text.endswith('a') and next_term.text and next_term.text[0] in YAY_CONSONANTS:
+            vikarana.text = vikarana.text[:-1] + 'A'
+            prakriya.log("Rule 7.3.101: Lengthened 'a' to 'A'")
 
 def ato_gune(prakriya: Prakriya) -> None:
     """Rule 6.1.97: ato guṇe."""
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa'), None)
-    suffix = prakriya.terms[-1]
     
     # Safe check for dhatu + vikarana merge
     if dhatu and vikarana and dhatu.text.endswith('a') and vikarana.text and vikarana.text.startswith(('a', 'A')):
-        dhatu.text = dhatu.text[:-1]
-        prakriya.log("Rule 6.1.97: Merged Dhatu 'a' + Vikarana")
-        
-    # Safe check for vikarana + suffix merge
-    if vikarana and suffix and vikarana.text.endswith('a') and len(suffix.text) > 0:
-        first_char = suffix.text[0]
-        if first_char in ['a', 'e', 'o', 'A']:
-            vikarana.text = vikarana.text[:-1]
-            prakriya.log(f"Rule 6.1.97: Merged Vikarana 'a' + Suffix '{first_char}'")
+        if dhatu != vikarana:
+            dhatu.text = dhatu.text[:-1]
+            prakriya.log("Rule 6.1.97: Merged Dhatu 'a' + Vikarana")
+            
+    # Safe check for vikarana + suffix merge (using strict adjacency!)
+    if vikarana and vikarana.text.endswith('a'):
+        idx = prakriya.terms.index(vikarana)
+        if idx + 1 < len(prakriya.terms):
+            next_term = prakriya.terms[idx + 1]
+            if next_term.text:
+                first_char = next_term.text[0]
+                if first_char in['a', 'e', 'o', 'A']:
+                    vikarana.text = vikarana.text[:-1]
+                    prakriya.log(f"Rule 6.1.97: Merged Vikarana 'a' + Suffix '{first_char}'")
 
 def ato_nitah(prakriya: Prakriya) -> None:
     """Rule 7.2.81: Ato NitaH. a + A -> e for Nit affixes."""
