@@ -544,5 +544,22 @@ class TestPipeline(unittest.TestCase):
         """Tests daMS + laW -> daSati."""
         prakriya = derive('daMS', 'laW', purusha='prathama', vacana=0, gana=1)
         self.assertEqual(prakriya.get_current_string(), 'daSati')
+
+    def test_as_lan_full(self) -> None:
+        """Tests as + laN -> AsIt, AstAm, Asan (āḍ ajādīnām & astisico'pṛkte)."""
+        p1 = derive('as', 'laN', purusha='prathama', vacana=0, gana=2)
+        self.assertEqual(p1.get_current_string(), 'AsIt')
+        
+        p2 = derive('as', 'laN', purusha='prathama', vacana=1, gana=2)
+        self.assertEqual(p2.get_current_string(), 'AstAm')
+        
+        p3 = derive('as', 'laN', purusha='prathama', vacana=2, gana=2)
+        self.assertEqual(p3.get_current_string(), 'Asan')
+
+    def test_i_lan_full(self) -> None:
+        """Tests i + laN -> Et, EtAm, Ayan (āṭaś ca)."""
+        p1 = derive('i', 'laN', purusha='prathama', vacana=0, gana=2, voice='parasmaipada')
+        self.assertEqual(p1.get_current_string(), 'Et')
+
 if __name__ == '__main__':
     unittest.main()

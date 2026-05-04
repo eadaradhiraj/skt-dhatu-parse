@@ -981,5 +981,34 @@ class TestRules(unittest.TestCase):
             rules.damsa_sanja_svanjam_sapi(p)
             self.assertTrue('M' not in p.terms[0].text and 'Y' not in p.terms[0].text)
 
+    def test_hanter_jah(self) -> None:
+        p = Prakriya()
+        d = Term('han', 'dhatu')
+        d.tags.add('clean_han')
+        p.add_term(d)
+        p.add_term(Term('hi', 'pratyaya'))
+        rules.hanter_jah(p)
+        self.assertEqual(p.terms[0].text, 'ja')
+
+    def test_hrasvad_angat(self) -> None:
+        p = Prakriya()
+        p.add_term(Term('kf', 'dhatu')) # Short vowel
+        sic = Term('s', 'vikaraRa')
+        sic.upadeza = 'cli'
+        p.add_term(sic)
+        p.add_term(Term('ta', 'pratyaya')) # jhal
+        rules.hrasvad_angat(p)
+        self.assertEqual(p.terms[1].text, '')
+
+    def test_atas_ca_fallback(self) -> None:
+        """Hits the fallback where t2 is not found."""
+        p = Prakriya()
+        t = Term('A', 'Agama')
+        t.upadeza = 'Aw'
+        p.add_term(t)
+        p.add_term(Term('', 'dhatu')) # Empty string
+        rules.atas_ca(p)
+        self.assertEqual(p.terms[0].text, 'A')
+
 if __name__ == '__main__':
     unittest.main()

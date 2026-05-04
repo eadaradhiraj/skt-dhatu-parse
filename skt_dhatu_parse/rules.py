@@ -273,13 +273,21 @@ def jhonta(prakriya: Prakriya) -> None:
             prakriya.log("Rule 7.1.3: jho 'ntaḥ (Jh -> ant)")
 
 def at_agama(prakriya: Prakriya) -> None:
+    """Rule 6.4.71: aṭ and 6.4.72: āḍ ajādīnām."""
     suffix = prakriya.terms[-1]
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
-    if dhatu and set(['laN', 'luN', 'lfN']).intersection(suffix.tags):   # <-- Added lfN
-        agama = Term('aw', 'Agama')
+    if dhatu and set(['laN', 'luN', 'lfN']).intersection(suffix.tags):
+        clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
+        # Vowel-initial roots take Āṭ
+        if is_vowel(clean_dhatu[0]):
+            agama = Term('Aw', 'Agama')
+            prakriya.log("Rule 6.4.72: āḍ ajādīnām (Inserted 'Aw' augment)")
+        else:
+            agama = Term('aw', 'Agama')
+            prakriya.log("Rule 6.4.71: Inserted 'aw' past tense augment")
+        
         idx = prakriya.terms.index(dhatu)
         prakriya.terms.insert(idx, agama)
-        prakriya.log("Rule 6.4.71: Inserted 'aw' past tense augment")
 
 def itasca(prakriya: Prakriya) -> None:
     suffix = prakriya.terms[-1]
@@ -1193,22 +1201,22 @@ def slau_reduplication(prakriya: Prakriya) -> None:
             prakriya.log(f"Rule 6.1.10: Reduplicated root for Slu -> '{abhyasa.text}'")
 
 def snasor_allopah(prakriya: Prakriya) -> None:
-    """Rule 6.4.111: Drops 'a' of 'as' and 'śnam' before weak Sārvadhātuka affix."""
+    """Rule 6.4.111: śnasor allopaḥ. Drops 'a' of 'as' and 'śnam' before weak Sārvadhātuka."""
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     suffix = prakriya.terms[-1]
     
     if dhatu and ('sarvadhatuka' in suffix.tags or 'tin' in suffix.tags):
-        is_weak = 'kit' in suffix.tags or 'Nit' in suffix.tags
+        # Strict enforcement: pit overrides everything
+        is_weak = ('kit' in suffix.tags or 'Nit' in suffix.tags) and 'pit' not in suffix.tags
         if is_weak:
             if dhatu.text == 'as':
                 dhatu.text = 's'
-                prakriya.log("Rule 6.4.111: śnasor allopaḥ -> 'as' becomes 's'")
+                prakriya.log("Rule 6.4.111: śnasor allopaḥ ('as' -> 's')")
             elif 'gana_7' in dhatu.tags and 'na' in dhatu.text:
-                # Target the 'na' inserted by Snam
                 idx = dhatu.text.rfind('na')
                 if idx != -1:
                     dhatu.text = dhatu.text[:idx] + 'n' + dhatu.text[idx+2:]
-                    prakriya.log("Rule 6.4.111: śnasor allopaḥ -> 'na' (śnam) becomes 'n'")
+                    prakriya.log("Rule 6.4.111: śnasor allopaḥ ('na' -> 'n')")
 
 def tasyasti_lopa(prakriya: Prakriya) -> None:
     """Rule 7.4.50: tāsyastilopaḥ. Elides the 's' of 'tās' and 'as' before 's'."""
@@ -1514,14 +1522,28 @@ def sici_vrddhih(prakriya: Prakriya) -> None:
                     break
 
 def asti_sico_aprkte(prakriya: Prakriya) -> None:
-    """Rule 7.3.96: astisico'pṛkte. Adds 'I' augment before apṛkta (single letter) t/s after sic."""
-    sic_idx = next((i for i, t in enumerate(prakriya.terms) if t.upadeza == 'cli' and t.text == 's'), -1)
-    if sic_idx != -1 and sic_idx + 1 < len(prakriya.terms):
-        suffix = prakriya.terms[sic_idx + 1]
-        if suffix.text in ['t', 's']:
+    """Rule 7.3.96: astisico'pṛkte. Adds 'I' augment before apṛkta t/s after as and sic."""
+    for i in range(len(prakriya.terms)-1):
+        t1 = prakriya.terms[i]
+        
+        # Look ahead to find the next non-empty term
+        t2 = None
+        insert_idx = -1
+        for j in range(i+1, len(prakriya.terms)):
+            if prakriya.terms[j].text:
+                t2 = prakriya.terms[j]
+                insert_idx = j
+                break
+        if not t2: continue
+
+        clean_dhatu = next((tag.split('_')[1] for tag in t1.tags if tag.startswith('clean_')), t1.text)
+        is_as_or_sic = (t1.term_type == 'dhatu' and clean_dhatu == 'as') or (t1.upadeza == 'cli' and t1.text == 's')
+        
+        if is_as_or_sic and t2.text in ['t', 's']:
             agama = Term('I', 'Agama')
-            prakriya.terms.insert(sic_idx + 1, agama)
+            prakriya.terms.insert(insert_idx, agama)
             prakriya.log("Rule 7.3.96: astisico'pṛkte (Inserted 'I' augment)")
+            break
 
 def do_dad_ghoh(prakriya: Prakriya) -> None:
     """Rule 7.4.46: do dad ghoḥ. dA/DA -> dad/daD before weak affixes in abhyasta."""
@@ -1807,3 +1829,45 @@ def damsa_sanja_svanjam_sapi(prakriya: Prakriya) -> None:
         if clean_dhatu in ['daMS', 'saYj', 'svaYj']:
             dhatu.text = dhatu.text.replace('M', '').replace('Y', '')
             prakriya.log(f"Rule 6.4.25: daṃśa-sañja-svañjāṃ śapi (Dropped nasal in {clean_dhatu})")
+
+def hanter_jah(prakriya: Prakriya) -> None:
+    """Rule 6.4.36: hanter jaḥ. 'han' becomes 'ja' before 'hi'."""
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    suffix = prakriya.terms[-1]
+    if dhatu and suffix.text == 'hi':
+        clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
+        if clean_dhatu == 'han':
+            dhatu.text = 'ja'
+            prakriya.log("Rule 6.4.36: hanter jaḥ (han -> ja)")
+
+def hrasvad_angat(prakriya: Prakriya) -> None:
+    """Rule 8.2.27: hrasvād aṅgāt. Deletes sic (s) after a short vowel before a jhal consonant."""
+    for i in range(1, len(prakriya.terms)-1):
+        t_prev = prakriya.terms[i-1]
+        t_curr = prakriya.terms[i]
+        t_next = prakriya.terms[i+1]
+        
+        if t_curr.upadeza == 'cli' and t_curr.text == 's':
+            if t_prev.text and t_prev.text[-1] in ['a', 'i', 'u', 'f', 'x']:
+                if t_next.text and t_next.text[0] in JHAL_CONSONANTS:
+                    t_curr.text = ''
+                    prakriya.log("Rule 8.2.27: hrasvād aṅgāt (Dropped sic after short vowel before jhal)")
+
+def atas_ca(prakriya: Prakriya) -> None:
+    """Rule 6.1.90: āṭaś ca. āṭ + vowel = vṛddhi."""
+    for i in range(len(prakriya.terms)-1):
+        t1 = prakriya.terms[i]
+        
+        # Look ahead for the next non-empty term
+        t2 = None
+        for j in range(i+1, len(prakriya.terms)):
+            if prakriya.terms[j].text:
+                t2 = prakriya.terms[j]
+                break
+                
+        if t1.upadeza == 'Aw' and t1.text == 'A' and t2 and t2.text and is_vowel(t2.text[0]):
+            old_vowel = t2.text[0]
+            rep = apply_vrddhi(old_vowel)
+            t1.text = rep
+            t2.text = t2.text[1:]
+            prakriya.log(f"Rule 6.1.90: āṭaś ca (A + {old_vowel} -> {rep})")
