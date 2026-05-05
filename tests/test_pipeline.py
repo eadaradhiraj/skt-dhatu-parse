@@ -598,5 +598,23 @@ class TestPipeline(unittest.TestCase):
         prakriya = derive('han', 'luN', purusha='prathama', vacana=0, gana=2)
         self.assertEqual(prakriya.get_current_string(), 'avaDIt')
 
+    def test_sru_lit_uttama_dual_anit(self) -> None:
+        """Tests Sru + liW (Uttama Dual 'va') remains anit (7.2.13)."""
+        prakriya = derive('Sru', 'liW', purusha='uttama', vacana=1, gana=1)
+        self.assertEqual(prakriya.get_current_string(), 'SuSruva')
+
+    def test_sru_lit_madhyama_singular_anit(self) -> None:
+        """
+        Tests Sru + liW (Madhyama Ekavacana 'Tal' -> 'Ta') remains anit (7.2.13).
+        Since 'Ta' is pit, 7.2.11 (sryukah kiti) doesn't block it, forcing line 362 to execute!
+        """
+        prakriya = derive('Sru', 'liW', purusha='madhyama', vacana=0, gana=1)
+        self.assertEqual(prakriya.get_current_string(), 'SuSroTa')
+        
+    def test_stu_lit_madhyama_singular_anit(self) -> None:
+        """Tests stu + liW + Ta -> tuzwoTa"""
+        prakriya = derive('stu', 'liW', purusha='madhyama', vacana=0, gana=2)
+        self.assertEqual(prakriya.get_current_string(), 'tuzwoTa')
+
 if __name__ == '__main__':
     unittest.main()

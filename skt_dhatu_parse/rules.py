@@ -821,6 +821,7 @@ def dhatvadeh_sah_sah_no_nah(prakriya: Prakriya) -> None:
             dhatu.tags.add('original_sh')  # <--- ADD THIS LINE
             text = 's' + text[1:]
             if text.startswith('sW'): text = 'sT' + text[2:]
+            elif text.startswith('sw'): text = 'st' + text[2:]
             elif text.startswith('sR'): text = 'sn' + text[2:]
             dhatu.text = text
             prakriya.log("Rule 6.1.64: Initial 'z' -> 's'")
