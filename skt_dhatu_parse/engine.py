@@ -96,7 +96,6 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.bruva_it(prakriya)
     rules.sici_vrddhih(prakriya)
     rules.asti_sico_aprkte(prakriya)
-    rules.ita_iti(prakriya)
     rules.hrasvad_angat(prakriya)
     
     # 9. Gana 9 and Root Substitutions
@@ -119,7 +118,8 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.kr_u_morphing(prakriya)
     rules.snasor_allopah(prakriya)
     rules.it_agama(prakriya)          
-    
+    rules.ita_iti(prakriya)
+
     # 10. Abhyasa (Reduplication)
     rules.liti_dhator_anabhyasasya(prakriya)
     rules.lity_abhyasasya(prakriya)

@@ -297,7 +297,7 @@ class TestPipeline(unittest.TestCase):
         p1 = derive('gam', 'liW', purusha='prathama', vacana=0, gana=1) 
         self.assertEqual(p1.get_current_string(), 'jagAma')
         p2 = derive('gam', 'liW', purusha='uttama', vacana=1, gana=1) 
-        self.assertEqual(p2.get_current_string(), 'jaganva')
+        self.assertEqual(p2.get_current_string(), 'jagmiva')
 
     def test_gana_2_si_atmanepada(self) -> None:
         p1 = derive('SI', 'laW', purusha='prathama', vacana=0, gana=2, voice='atmanepada')

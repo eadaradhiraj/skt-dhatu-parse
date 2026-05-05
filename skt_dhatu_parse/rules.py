@@ -1955,7 +1955,9 @@ def ardhadhatuke_mula_parivartanam(prakriya: Prakriya) -> None:
         if clean_dhatu == 'han':
             dhatu.text = 'vaD'
             dhatu.upadeza = 'vaD'
-            dhatu.tags = set([t for t in dhatu.tags if not t.startswith('clean_')])
+            tags_to_remove = [t for t in dhatu.tags if t.startswith('clean_')]
+            for t in tags_to_remove: dhatu.tags.remove(t)
+            dhatu.tags.add('clean_vaD')
             dhatu.tags.add('clean_vaD')
             prakriya.log("Rule 2.4.43: luṅi ca (han -> vaD in Aorist)")
 
