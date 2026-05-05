@@ -58,3 +58,7 @@ class TestCoverageEdgeCases(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+    def test_lit_atmanepada_mud(self):
+        prakriya = derive('mud', 'liW', purusha='madhyama', vacana=0, gana=1)
+        self.assertEqual(prakriya.get_current_string(), 'mumudize')

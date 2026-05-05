@@ -41,6 +41,11 @@ TIN_PARASMAIPADA_LIT = {
     'madhyama':['Tal', 'aTus', 'a'],
     'uttama':   ['Ral', 'va', 'ma']
 }
+TIN_ATMANEPADA_LIT = {
+    'prathama': ['e', 'Ate', 'ire'],
+    'madhyama':['se', 'ATe', 'Dve'],
+    'uttama':   ['e', 'vahe', 'mahe']
+}
 
 ANIT_ROOTS = {
     'ji', 'nI', 'ci', 'Sru', 'stu', 'su', 'hu', 'dA', 'DA', 'sTA', 'pA', 'GrA', 
@@ -83,7 +88,7 @@ def substitute_lakara(prakriya: Prakriya, purusha: str = 'prathama', vacana: int
     if dhatu and 'parasmaipada' in dhatu.tags:
         new_suffix = TIN_PARASMAIPADA_LIT[purusha][vacana] if is_lit else TIN_PARASMAIPADA[purusha][vacana]
     elif dhatu and 'atmanepada' in dhatu.tags:
-        new_suffix = TIN_ATMANEPADA[purusha][vacana]
+        new_suffix = TIN_ATMANEPADA_LIT[purusha][vacana] if is_lit else TIN_ATMANEPADA[purusha][vacana]
     else:
         new_suffix = TIN_PARASMAIPADA_LIT[purusha][vacana] if is_lit else TIN_PARASMAIPADA[purusha][vacana]
         
