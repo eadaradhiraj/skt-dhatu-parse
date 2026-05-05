@@ -133,5 +133,37 @@ class TestCoverageEdgeCases(unittest.TestCase):
         prakriya = derive(custom_dhatu=sanadi.terms[0], lakara_name='luN', purusha='prathama', vacana=0, gana=1)
         self.assertEqual(prakriya.get_current_string(), 'acIkarat')
 
+
+    def test_vac_aorist(self):
+        from skt_dhatu_parse.engine import derive
+        prakriya = derive('vac', 'luN', purusha='prathama', vacana=0, gana=2)
+        self.assertEqual(prakriya.get_current_string(), 'avocat')
+        
+    def test_ji_lit_g(self):
+        from skt_dhatu_parse.engine import derive
+        prakriya = derive('ji', 'liW', purusha='prathama', vacana=0, gana=1)
+        self.assertEqual(prakriya.get_current_string(), 'jigAya')
+        
+    def test_sas_hi(self):
+        from skt_dhatu_parse.engine import derive
+        prakriya = derive('SAs', 'loW', purusha='madhyama', vacana=0, gana=2)
+        self.assertEqual(prakriya.get_current_string(), 'SADi')
+        
+    def test_gai_kta(self):
+        from skt_dhatu_parse.krdanta import derive_krdanta
+        prakriya = derive_krdanta('gE', 'kta', gana=1)
+        self.assertEqual(prakriya.get_current_string(), 'gIta')
+
+
+    def test_sas_hi_nameerror(self):
+        from skt_dhatu_parse.engine import derive
+        prakriya = derive('SAs', 'loW', purusha='madhyama', vacana=0, gana=2)
+        self.assertEqual(prakriya.get_current_string(), 'SADi')
+        
+    def test_gai_kta_ordering(self):
+        from skt_dhatu_parse.krdanta import derive_krdanta
+        prakriya = derive_krdanta('gE', 'kta', gana=1)
+        self.assertEqual(prakriya.get_current_string(), 'gIta')
+
 if __name__ == '__main__':
     unittest.main()

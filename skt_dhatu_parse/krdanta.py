@@ -60,6 +60,7 @@ def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_
     prakriya.terms =[t for t in prakriya.terms if t.text]
 
     # 3. Augments & Internal Morphing
+    rules.adeca_upadese_asiti(prakriya)
     rules.id_yati(prakriya)
     rules.ato_yuk(prakriya)
     rules.yuvor_anakau(prakriya)    
