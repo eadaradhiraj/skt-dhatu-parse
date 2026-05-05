@@ -72,5 +72,21 @@ class TestCoverageEdgeCases(unittest.TestCase):
         prakriya = derive('dA', 'ASIrliN', purusha='prathama', vacana=0, gana=3)
         self.assertEqual(prakriya.get_current_string(), 'deyAt')
 
+
+    def test_stha_lun_plural(self):
+        from skt_dhatu_parse.engine import derive
+        prakriya = derive('sTA', 'luN', purusha='prathama', vacana=2, gana=1)
+        self.assertEqual(prakriya.get_current_string(), 'asTuH')
+
+    def test_as_lun_identity_change(self):
+        from skt_dhatu_parse.engine import derive
+        prakriya = derive('as', 'luN', purusha='prathama', vacana=0, gana=2)
+        self.assertEqual(prakriya.get_current_string(), 'aBUt')
+
+    def test_jna_satr(self):
+        from skt_dhatu_parse.krdanta import derive_krdanta
+        prakriya = derive_krdanta('jYA', 'Satf', gana=9, upasargas=['vi'])
+        self.assertEqual(prakriya.get_current_string(), 'vijAnat')
+
 if __name__ == '__main__':
     unittest.main()

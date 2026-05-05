@@ -61,6 +61,8 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     lakara = Term(lakara_name, 'lakara')
     lakara.tags.add(lakara_name) 
     prakriya.add_term(lakara)
+    
+    rules.ardhadhatuke_mula_parivartanam(prakriya)
     rules.at_agama(prakriya)           
     
     for term in prakriya.terms:
@@ -103,7 +105,6 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.asti_sico_aprkte(prakriya)
     rules.hrasvad_angat(prakriya)
     
-    rules.ardhadhatuke_mula_parivartanam(prakriya)
     rules.sarvadhatukam_apit(prakriya)
     rules.adeca_upadese_asiti(prakriya)
     rules.ata_au_nalah(prakriya)

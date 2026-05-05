@@ -1322,7 +1322,8 @@ def jher_jus(prakriya: Prakriya) -> None:
             dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
             is_abhyasta = dhatu and 'gana_3' in dhatu.tags
             is_vid = dhatu and dhatu.text == 'vid'
-            if has_sic or is_abhyasta or is_vid:
+            is_aa_ending = dhatu and dhatu.text.endswith('A') and not has_sic
+            if has_sic or is_abhyasta or is_vid or is_aa_ending:
                 suffix.text = 'us'
                 suffix.upadeza = 'us' 
                 prakriya.log("Rule 3.4.109: sicabhyastavidibhyaś ca (Ji -> us)")
@@ -1467,12 +1468,16 @@ def sici_vrddhih(prakriya: Prakriya) -> None:
             dhatu.text = dhatu.text[:-1] + apply_vrddhi(dhatu.text[-1])
             prakriya.log("Rule 7.2.1: sici vṛddhiḥ -> Vṛddhi before sic")
         elif dhatu.text[-1] not in SLP1_VOWELS:
-            text = dhatu.text
-            for i in range(len(text)-1, -1, -1):
-                if is_vowel(text[i]):
-                    dhatu.text = text[:i] + apply_vrddhi(text[i]) + text[i+1:]
-                    prakriya.log("Rule 7.2.3: vadavrajahalantasyācaḥ -> Vṛddhi before sic")
-                    break
+            clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
+            if clean_dhatu == 'vaD':
+                prakriya.log("Rule 7.2.4: neṭi (No vṛddhi for seṭ root vaD)")
+            else:
+                text = dhatu.text
+                for i in range(len(text)-1, -1, -1):
+                    if is_vowel(text[i]):
+                        dhatu.text = text[:i] + apply_vrddhi(text[i]) + text[i+1:]
+                        prakriya.log("Rule 7.2.3: vadavrajahalantasyācaḥ -> Vṛddhi before sic")
+                        break
 
 def asti_sico_aprkte(prakriya: Prakriya) -> None:
     for i in range(len(prakriya.terms)-1):
@@ -1793,9 +1798,11 @@ def atas_ca(prakriya: Prakriya) -> None:
 
 def ardhadhatuke_mula_parivartanam(prakriya: Prakriya) -> None:
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    lakara = next((t for t in prakriya.terms if t.term_type == 'lakara' or t.term_type == 'pratyaya'), None)
     if not dhatu: return
     
-    is_ardha = any('ardhadhatuka' in t.tags for t in prakriya.terms) or any(t.upadeza == 'cli' for t in prakriya.terms)
+    is_ardha_lakara = lakara and any(lak in lakara.tags for lak in['liW', 'luW', 'lfW', 'luN', 'lfN', 'ASIrliN'])
+    is_ardha = is_ardha_lakara or any('ardhadhatuka' in t.tags for t in prakriya.terms) or any(t.upadeza == 'cli' for t in prakriya.terms)
     
     if is_ardha:
         clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
