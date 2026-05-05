@@ -255,7 +255,8 @@ def jhonta(prakriya: Prakriya) -> None:
         dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
         clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text) if dhatu else ''
         is_atmanepada = dhatu and 'atmanepada' in dhatu.tags
-        is_abhyasta = dhatu and 'gana_3' in dhatu.tags
+        JAKSITYADI =['jakz', 'jAgf', 'daridrA', 'cakAs', 'SAs', 'dIDI', 'vevI']
+        is_abhyasta = dhatu and ('gana_3' in dhatu.tags or clean_dhatu in JAKSITYADI)
         is_karmani = dhatu and ('karmani' in dhatu.tags or 'bhave' in dhatu.tags)
         is_anat = dhatu and any(g in dhatu.tags for g in['gana_2', 'gana_3', 'gana_5', 'gana_7', 'gana_8', 'gana_9']) and not is_karmani
         

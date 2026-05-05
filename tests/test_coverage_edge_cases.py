@@ -88,5 +88,11 @@ class TestCoverageEdgeCases(unittest.TestCase):
         prakriya = derive_krdanta('jYA', 'Satf', gana=9, upasargas=['vi'])
         self.assertEqual(prakriya.get_current_string(), 'vijAnat')
 
+
+    def test_jaksityadi_plural(self):
+        from skt_dhatu_parse.engine import derive
+        prakriya = derive('SAs', 'laW', purusha='prathama', vacana=2, gana=2)
+        self.assertEqual(prakriya.get_current_string(), 'SAsati')
+
 if __name__ == '__main__':
     unittest.main()
