@@ -1091,41 +1091,6 @@ def nascapadantasya_jhali(prakriya: Prakriya) -> None:
                 new_text += char
         term.text = new_text
 
-def stha_adi_ita(prakriya: Prakriya) -> None:
-    """Rule 7.4.40 & 7.4.46 & 6.4.66: A -> i/I/a before 'kit' affixes"""
-    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
-    if not dhatu: return
-    idx = prakriya.terms.index(dhatu)
-    if idx + 1 >= len(prakriya.terms): return
-    next_term = prakriya.terms[idx + 1]
-    
-    if 'kit' in next_term.tags or 'Nit' in next_term.tags:
-        if next_term.upadeza == 'yak':
-            if dhatu.text in['dA', 'DA', 'sTA', 'pA', 'mA', 'gA', 'hA']:
-                dhatu.text = dhatu.text[:-1] + 'I'
-                prakriya.log("Rule 6.4.66: ghumāsthāgāpā... I before yak")
-        elif next_term.text and next_term.text.startswith('t'):
-            if dhatu.text == 'sTA':
-                dhatu.text = 'sTi'
-                prakriya.log("Rule 7.4.40: sTA -> sTi before kit starting with t")
-            elif dhatu.text == 'pA':
-                dhatu.text = 'pI'
-                prakriya.log("Rule 6.4.66: pA -> pI before kit")
-            elif dhatu.text == 'dA':
-                dhatu.text = 'dat'
-                prakriya.log("Rule 7.4.46: dA -> dat before kit")
-            elif dhatu.text == 'mA':
-                dhatu.text = 'mi'
-                prakriya.log("Rule 7.4.40: mA -> mi before kit")
-            elif dhatu.text == 'DA':
-                dhatu.text = 'hi'
-                prakriya.log("Rule 7.4.42: dadhāter hiḥ (DA -> hi before ta)")
-            elif dhatu.text == 'gA':
-                dhatu.text = 'gI'
-                prakriya.log("Rule 6.4.66: ghumāsthāgāpā... (gA -> gI before kit)")
-            elif dhatu.text == 'gA':
-                dhatu.text = 'gI'
-                prakriya.log("Rule 6.4.66: ghumāsthāgāpā... (gA -> gI before kit)")
 
 def ato_yuk(prakriya: Prakriya) -> None:
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
@@ -1764,38 +1729,6 @@ def rin_sayaglinksu(prakriya: Prakriya) -> None:
                 t1.text = t1.text[:-1] + 'ri'
                 prakriya.log("Rule 7.4.28: riṅ śayaglinkṣu (ṛ -> ri)")
 
-def adeca_upadese_asiti(prakriya: Prakriya) -> None:
-    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
-    if not dhatu: return
-    idx = prakriya.terms.index(dhatu)
-    if idx + 1 >= len(prakriya.terms): return
-    next_term = prakriya.terms[idx + 1]
-    
-    is_ardha = any('ardhadhatuka' in t.tags for t in prakriya.terms[idx+1:])
-    
-    if is_ardha and 'Sit' not in next_term.tags:
-        clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
-        if clean_dhatu and clean_dhatu[-1] in['e', 'o', 'E', 'O']:
-            text = dhatu.text
-            if text and text[-1] in ['e', 'o', 'E', 'O']:
-                dhatu.text = text[:-1] + 'A'
-                prakriya.log("Rule 6.1.45: ādeca upadeśe'śiti (ec -> A)")
-
-    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
-    if not dhatu: return
-    idx = prakriya.terms.index(dhatu)
-    if idx + 1 >= len(prakriya.terms): return
-    next_term = prakriya.terms[idx + 1]
-    
-    is_ardha = any('ardhadhatuka' in t.tags for t in prakriya.terms[idx+1:])
-    
-    if is_ardha and 'Sit' not in next_term.tags:
-        clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
-        if clean_dhatu and clean_dhatu[-1] in EC_VOWELS:
-            text = dhatu.text
-            if text and text[-1] in EC_VOWELS:
-                dhatu.text = text[:-1] + 'A'
-                prakriya.log("Rule 6.1.45: ādeca upadeśe'śiti (ec -> A)")
 
 def skoh_samyogadyor_ante_ca(prakriya: Prakriya) -> None:
     word = "".join(t.text for t in prakriya.terms)
@@ -2114,3 +2047,51 @@ def jes_ca(prakriya: Prakriya) -> None:
         if clean_dhatu == 'ji' and dhatu.text.startswith('j'):
             dhatu.text = 'g' + dhatu.text[1:]
             prakriya.log("Rule 7.3.57: jeś ca (ji -> gi after abhyāsa)")
+def stha_adi_ita(prakriya: Prakriya) -> None:
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    if not dhatu: return
+    idx = prakriya.terms.index(dhatu)
+    if idx + 1 >= len(prakriya.terms): return
+    next_term = prakriya.terms[idx + 1]
+    
+    if 'kit' in next_term.tags or 'Nit' in next_term.tags:
+        if next_term.upadeza == 'yak':
+            if dhatu.text in['dA', 'DA', 'sTA', 'pA', 'mA', 'gA', 'hA']:
+                dhatu.text = dhatu.text[:-1] + 'I'
+                prakriya.log("Rule 6.4.66: ghumāsthāgāpā... I before yak")
+        elif next_term.text and next_term.text.startswith('t'):
+            if dhatu.text == 'sTA':
+                dhatu.text = 'sTi'
+                prakriya.log("Rule 7.4.40: sTA -> sTi before kit starting with t")
+            elif dhatu.text == 'pA':
+                dhatu.text = 'pI'
+                prakriya.log("Rule 6.4.66: pA -> pI before kit")
+            elif dhatu.text == 'dA':
+                dhatu.text = 'dat'
+                prakriya.log("Rule 7.4.46: dA -> dat before kit")
+            elif dhatu.text == 'mA':
+                dhatu.text = 'mi'
+                prakriya.log("Rule 7.4.40: mA -> mi before kit")
+            elif dhatu.text == 'DA':
+                dhatu.text = 'hi'
+                prakriya.log("Rule 7.4.42: dadhāter hiḥ (DA -> hi before ta)")
+            elif dhatu.text == 'gA':
+                dhatu.text = 'gI'
+                prakriya.log("Rule 6.4.66: ghumāsthāgāpā... (gA -> gI before kit)")
+
+def adeca_upadese_asiti(prakriya: Prakriya) -> None:
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    if not dhatu: return
+    idx = prakriya.terms.index(dhatu)
+    if idx + 1 >= len(prakriya.terms): return
+    next_term = prakriya.terms[idx + 1]
+    
+    is_ardha = any('ardhadhatuka' in t.tags for t in prakriya.terms[idx+1:])
+    
+    if is_ardha and 'Sit' not in next_term.tags:
+        clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
+        if clean_dhatu and clean_dhatu[-1] in ['e', 'o', 'E', 'O']:
+            text = dhatu.text
+            if text and text[-1] in ['e', 'o', 'E', 'O']:
+                dhatu.text = text[:-1] + 'A'
+                prakriya.log("Rule 6.1.45: ādeca upadeśe'śiti (ec -> A)")
