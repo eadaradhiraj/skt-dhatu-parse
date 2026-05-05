@@ -428,3 +428,8 @@ class TestPipeline(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+    def test_da_aorist_passive_yuk(self) -> None:
+        prakriya = derive('dA', 'luN', purusha='prathama', vacana=0, gana=3, voice='karmani')
+        self.assertEqual(prakriya.get_current_string(), 'adAyi')

@@ -1113,9 +1113,9 @@ def ato_yuk(prakriya: Prakriya) -> None:
     idx = prakriya.terms.index(dhatu)
     if idx + 1 >= len(prakriya.terms): return
     next_term = prakriya.terms[idx + 1]
-    if dhatu.text.endswith('A') and ('Rit' in next_term.tags or 'Yit' in next_term.tags):
+    if dhatu.text.endswith('A') and ('Rit' in next_term.tags or 'Yit' in next_term.tags) and 'tin' not in next_term.tags:
         dhatu.text = dhatu.text + 'y'
-        prakriya.log("Rule 7.3.33: Added 'yuk' augment to root ending in 'A'")
+        prakriya.log("Rule 7.3.33: āto yuk ciṇkṛtoḥ (Added 'yuk')")
 
 def id_yati(prakriya: Prakriya) -> None:
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
@@ -1908,3 +1908,17 @@ def nisthayam_seti(prakriya: Prakriya) -> None:
         if suffix.upadeza in ['kta', 'ktavatu'] and suffix.text.startswith('i'):
             dhatu.text = dhatu.text[:-1]
             prakriya.log("Rule 6.4.52: niṣṭhāyāṃ seṭi (Dropped ṇi before seṭ niṣṭhā)")
+
+def labh_rabh_num(prakriya: Prakriya) -> None:
+    """Rule 7.1.64: labheś ca. Adds 'num' to rabh/labh before Ṇic."""
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    ric_term = next((t for t in prakriya.terms if t.upadeza == 'Ric'), None)
+    if dhatu and ric_term:
+        clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
+        if clean_dhatu in['laB', 'raB'] and 'M' not in dhatu.text:
+            text = dhatu.text
+            for i in range(len(text)-1, -1, -1):
+                if is_vowel(text[i]):
+                    dhatu.text = text[:i+1] + 'M' + text[i+1:]
+                    prakriya.log(f"Rule 7.1.64: labheś ca (Added 'num' -> '{dhatu.text}')")
+                    break

@@ -29,6 +29,7 @@ def derive_secondary_root(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = No
 
     # 5. Apply Vrddhi & Augment Rules
     rules.pug_nau(prakriya)
+    rules.labh_rabh_num(prakriya)
     rules.han_ghatva_tatva(prakriya)
     rules.ata_upadhayah(prakriya)  
     rules.aco_nniti(prakriya)
