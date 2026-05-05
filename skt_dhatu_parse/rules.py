@@ -344,6 +344,9 @@ def it_agama(prakriya: Prakriya) -> None:
                 KR_ADI =['kf', 'sf', 'Bf', 'vf', 'stu', 'dru', 'sru', 'Sru']
                 if clean_dhatu in KR_ADI: is_anit_for_this = True
                 else: is_anit_for_this = False
+            if clean_dhatu == 'Svi' and term.upadeza in['kta', 'ktavatu']:
+                is_anit_for_this = True
+
             if not is_anit_for_this: 
                 if clean_dhatu == 'grah' and not is_lit:
                     term.text = 'I' + term.text
@@ -738,16 +741,6 @@ def choh_kuh(prakriya: Prakriya) -> None:
                 t.text = t.text[:-1] + map_ku[last_char]
                 prakriya.log(f"Rule 8.2.30: coH kuH ({last_char} -> {map_ku[last_char]})")
 
-def radabhyam_nishthato_nah(prakriya: Prakriya) -> None:
-    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
-    suffix = prakriya.terms[-1]
-    if dhatu and suffix and suffix.upadeza in['kta', 'ktavatu']:
-        text = dhatu.text
-        if text.endswith('d') or text.endswith('r'):
-            if suffix.text.startswith('t'):
-                suffix.text = 'n' + suffix.text[1:]
-                if text.endswith('d'): dhatu.text = text[:-1] + 'n'
-                prakriya.log("Rule 8.2.42: nizThA 't' -> 'n'")
 
 def samyogantasya_lopah(prakriya: Prakriya) -> None:
     suffix = prakriya.terms[-1]
@@ -814,55 +807,6 @@ def yuvor_anakau(prakriya: Prakriya) -> None:
                 term.text = 'aka'
                 prakriya.log("Rule 7.1.1: 'vu' -> 'aka'")
 
-def vacisvapiyajadinam_kiti(prakriya: Prakriya) -> None:
-    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
-    if not dhatu: return
-    idx = prakriya.terms.index(dhatu)
-    if idx + 1 >= len(prakriya.terms): return
-    next_term = prakriya.terms[idx + 1] 
-    clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
-    is_kit = 'kit' in next_term.tags
-    is_nit = 'Nit' in next_term.tags
-    
-    if is_kit:
-        if clean_dhatu == 'vac': 
-            dhatu.text = 'uc'
-            prakriya.log("Rule 6.1.15: Samprasarana (vac -> uc)")
-        elif clean_dhatu == 'svap': 
-            dhatu.text = 'sup'
-            prakriya.log("Rule 6.1.15: Samprasarana (svap -> sup)")
-        elif clean_dhatu == 'yaj': 
-            dhatu.text = 'ij'
-            prakriya.log("Rule 6.1.15: Samprasarana (yaj -> ij)")
-        elif clean_dhatu == 'vap': 
-            dhatu.text = 'up'
-            prakriya.log("Rule 6.1.15: Samprasarana (vap -> up)")
-        elif clean_dhatu == 'vah': 
-            dhatu.text = 'uh'
-            prakriya.log("Rule 6.1.15: Samprasarana (vah -> uh)")
-        elif clean_dhatu == 'vad': 
-            dhatu.text = 'ud'
-            prakriya.log("Rule 6.1.15: Samprasarana (vad -> ud)")
-        elif clean_dhatu == 'hve':
-            dhatu.text = 'hU'
-            prakriya.log("Rule 6.1.32: hvaḥ samprasāraṇam (hve -> hU before kit)")
-        elif clean_dhatu == 'grah':
-            dhatu.text = 'gfh'
-            prakriya.log("Rule 6.1.16: Samprasarana (grah -> gfh)")
-
-    if is_kit or is_nit:
-        if clean_dhatu == 'vraSc':
-            dhatu.text = 'vfSc'
-            prakriya.log("Rule 6.1.16: Samprasarana (vraSc -> vfSc)")
-        elif clean_dhatu == 'praC':
-            dhatu.text = 'pfC'
-            prakriya.log("Rule 6.1.16: Samprasarana (praC -> pfC)")
-        elif clean_dhatu == 'Brajj':
-            dhatu.text = 'Bfjj'
-            prakriya.log("Rule 6.1.16: Samprasarana (Brajj -> Bfjj)")
-        elif clean_dhatu == 'vyaD':
-            dhatu.text = 'viD'
-            prakriya.log("Rule 6.1.16: Samprasarana (vyaD -> viD)")
 
 def sanadyanta_dhatavah(prakriya: Prakriya) -> None:
     if len(prakriya.terms) >= 2:
@@ -1031,31 +975,29 @@ def haladi_seshah(prakriya: Prakriya) -> None:
     abhyasa = next((t for t in prakriya.terms if t.term_type == 'abhyasa'), None)
     if abhyasa:
         text = abhyasa.text
-        SAR =['S', 'z', 's']
+        SAR = ['S', 'z', 's']
         KHAY =['K', 'P', 'C', 'W', 'T', 'c', 'w', 't', 'k', 'p']
         
-        consonants_in_order = [c for c in text if c not in SLP1_VOWELS]
-        surviving_cons = None
-        if len(consonants_in_order) >= 2 and consonants_in_order[0] in SAR and consonants_in_order[1] in KHAY:
-            surviving_cons = consonants_in_order[1]
-        elif len(consonants_in_order) > 0:
-            surviving_cons = consonants_in_order[0]
-            
-        new_text = ""
-        cons_seen = False
-        for char in text:
+        initial_cluster =[]
+        for i, char in enumerate(text):
             if is_vowel(char):
-                new_text += char
-            elif surviving_cons and char == surviving_cons and not cons_seen:
-                new_text += char
-                cons_seen = True
-                
-        if new_text != text:
-            abhyasa.text = new_text
-            if surviving_cons and len(consonants_in_order) >= 2 and consonants_in_order[0] in SAR and consonants_in_order[1] in KHAY:
-                prakriya.log(f"Rule 7.4.61: śarpūrvāḥ khayaḥ -> '{abhyasa.text}'")
-            else:
-                prakriya.log(f"Rule 7.4.60: halādi śeṣaḥ -> '{abhyasa.text}'")
+                break
+            initial_cluster.append(char)
+            
+        first_v = next((c for c in text if is_vowel(c)), '')
+        
+        if not initial_cluster:
+            abhyasa.text = first_v
+            return
+            
+        surviving_cons = initial_cluster[0]
+        if len(initial_cluster) >= 2 and initial_cluster[0] in SAR and initial_cluster[1] in KHAY:
+            surviving_cons = initial_cluster[1]
+            prakriya.log(f"Rule 7.4.61: śarpūrvāḥ khayaḥ -> '{surviving_cons}'")
+        else:
+            prakriya.log(f"Rule 7.4.60: halādi śeṣaḥ -> '{surviving_cons}'")
+            
+        abhyasa.text = surviving_cons + first_v
 
 def srujidrusor_jhaly_amakiti(prakriya: Prakriya) -> None:
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
@@ -1870,13 +1812,17 @@ def revert_sh_after_abhyasa(prakriya: Prakriya) -> None:
     abhyasa = next((t for t in prakriya.terms if t.term_type == 'abhyasa'), None)
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     if abhyasa and dhatu and abhyasa.text and dhatu.text:
-        if 'original_sh' in dhatu.tags and dhatu.text.startswith('s'):
-            if abhyasa.text[-1] in IN_VOWELS:
+        if abhyasa.text[-1] in IN_VOWELS:
+            clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), '')
+            if 'original_sh' in dhatu.tags and dhatu.text.startswith('s'):
                 dhatu.text = 'z' + dhatu.text[1:]
                 if dhatu.text.startswith('zT'): dhatu.text = 'zW' + dhatu.text[2:]
                 elif dhatu.text.startswith('zt'): dhatu.text = 'zw' + dhatu.text[2:]
                 elif dhatu.text.startswith('zn'): dhatu.text = 'zR' + dhatu.text[2:]
                 prakriya.log("Rule 8.3.116: Reverted 's' to 'z' after abhyasa")
+            elif dhatu.text.startswith('s') and clean_dhatu == 'svap':
+                dhatu.text = 'z' + dhatu.text[1:]
+                prakriya.log("Rule 8.3.59: ṣatva for svap after abhyāsa")
 
 def sasa_id_anghaloh(prakriya: Prakriya) -> None:
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
@@ -1997,29 +1943,6 @@ def mrjer_vrddhih(prakriya: Prakriya) -> None:
         dhatu.text = 'mArj'
         prakriya.log("Rule 7.2.114: mṛjer vṛddhiḥ (mfj -> mArj)")
 
-def can_reduplication(prakriya: Prakriya) -> None:
-    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
-    can = next((t for t in prakriya.terms if 'caN' in t.tags), None)
-    if dhatu and can:
-        if dhatu.text.endswith('i'):
-            dhatu.text = dhatu.text[:-1]
-            prakriya.log("Rule 6.4.51: ṇer aniṭi (Dropped Ṇic before caṅ)")
-        
-        text = dhatu.text
-        for i in range(len(text)-1, -1, -1):
-            if is_vowel(text[i]):
-                short_vowel = {'A':'a', 'I':'i', 'U':'u', 'F':'f', 'X':'x', 'e':'i', 'o':'u', 'E':'i', 'O':'u'}.get(text[i], text[i])
-                if short_vowel != text[i]:
-                    dhatu.text = text[:i] + short_vowel + text[i+1:]
-                    prakriya.log("Rule 7.4.1: ṇau caṅy upadhāyā hrasvaḥ (Shortened root vowel)")
-                break
-                
-        abhyasa = Term(dhatu.upadeza, 'abhyasa')
-        abhyasa.tags.add('can_abhyasa')
-        abhyasa.text = dhatu.text
-        idx = prakriya.terms.index(dhatu)
-        prakriya.terms.insert(idx, abhyasa)
-        prakriya.log(f"Rule 6.1.11: caṅi (Reduplicated root -> '{abhyasa.text}')")
 
 def can_abhyasa_vowel(prakriya: Prakriya) -> None:
     abhyasa = next((t for t in prakriya.terms if 'can_abhyasa' in t.tags), None)
@@ -2098,3 +2021,98 @@ def adeca_upadese_asiti(prakriya: Prakriya) -> None:
             if text and text[-1] in ['e', 'o', 'E', 'O']:
                 dhatu.text = text[:-1] + 'A'
                 prakriya.log("Rule 6.1.45: ādeca upadeśe'śiti (ec -> A)")
+
+def can_reduplication(prakriya: Prakriya) -> None:
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    can = next((t for t in prakriya.terms if 'caN' in t.tags), None)
+    if dhatu and can:
+        if dhatu.text.endswith('i'):
+            dhatu.text = dhatu.text[:-1]
+            prakriya.log("Rule 6.4.51: ṇer aniṭi (Dropped Ṇic before caṅ)")
+        
+        text = dhatu.text
+        for i in range(len(text)-1, -1, -1):
+            if is_vowel(text[i]):
+                short_vowel = {'A':'a', 'I':'i', 'U':'u', 'F':'f', 'X':'x', 'e':'i', 'o':'u', 'E':'i', 'O':'u'}.get(text[i], text[i])
+                if short_vowel != text[i]:
+                    dhatu.text = text[:i] + short_vowel + text[i+1:]
+                    prakriya.log("Rule 7.4.1: ṇau caṅy upadhāyā hrasvaḥ (Shortened root vowel)")
+                break
+                
+        # Now that svApi -> svAp -> svap, we can check for it perfectly!
+        if dhatu.text == 'svap':
+            dhatu.text = 'sup'
+            prakriya.log("Rule 6.1.18: svapi... caṅi samprasāraṇam (svap -> sup)")
+            
+        abhyasa = Term(dhatu.upadeza, 'abhyasa')
+        abhyasa.tags.add('can_abhyasa')
+        abhyasa.text = dhatu.text
+        idx = prakriya.terms.index(dhatu)
+        prakriya.terms.insert(idx, abhyasa)
+        prakriya.log(f"Rule 6.1.11: caṅi (Reduplicated root -> '{abhyasa.text}')")
+
+def vacisvapiyajadinam_kiti(prakriya: Prakriya) -> None:
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    if not dhatu: return
+    idx = prakriya.terms.index(dhatu)
+    if idx + 1 >= len(prakriya.terms): return
+    next_term = prakriya.terms[idx + 1] 
+    clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
+    is_kit = 'kit' in next_term.tags
+    is_nit = 'Nit' in next_term.tags
+    
+    if is_kit:
+        if clean_dhatu == 'vac': 
+            dhatu.text = 'uc'
+            prakriya.log("Rule 6.1.15: Samprasarana (vac -> uc)")
+        elif clean_dhatu == 'svap': 
+            dhatu.text = 'sup'
+            prakriya.log("Rule 6.1.15: Samprasarana (svap -> sup)")
+        elif clean_dhatu == 'yaj': 
+            dhatu.text = 'ij'
+            prakriya.log("Rule 6.1.15: Samprasarana (yaj -> ij)")
+        elif clean_dhatu == 'vap': 
+            dhatu.text = 'up'
+            prakriya.log("Rule 6.1.15: Samprasarana (vap -> up)")
+        elif clean_dhatu == 'vah': 
+            dhatu.text = 'uh'
+            prakriya.log("Rule 6.1.15: Samprasarana (vah -> uh)")
+        elif clean_dhatu == 'vad': 
+            dhatu.text = 'ud'
+            prakriya.log("Rule 6.1.15: Samprasarana (vad -> ud)")
+        elif clean_dhatu == 'grah':
+            dhatu.text = 'gfh'
+            prakriya.log("Rule 6.1.16: Samprasarana (grah -> gfh)")
+        elif clean_dhatu == 'hve':
+            dhatu.text = 'hU'
+            prakriya.log("Rule 6.1.32: hvaḥ samprasāraṇam (hve -> hU before kit)")
+        elif clean_dhatu == 'Svi':
+            dhatu.text = 'SU'
+            prakriya.log("Rule 6.1.30 & 6.4.2: śvayaḥ samprasāraṇam & halaḥ (Svi -> SU)")
+
+    if is_kit or is_nit:
+        if clean_dhatu == 'vraSc':
+            dhatu.text = 'vfSc'
+            prakriya.log("Rule 6.1.16: Samprasarana (vraSc -> vfSc)")
+        elif clean_dhatu == 'praC':
+            dhatu.text = 'pfC'
+            prakriya.log("Rule 6.1.16: Samprasarana (praC -> pfC)")
+        elif clean_dhatu == 'Brajj':
+            dhatu.text = 'Bfjj'
+            prakriya.log("Rule 6.1.16: Samprasarana (Brajj -> Bfjj)")
+        elif clean_dhatu == 'vyaD':
+            dhatu.text = 'viD'
+            prakriya.log("Rule 6.1.16: Samprasarana (vyaD -> viD)")
+
+def radabhyam_nishthato_nah(prakriya: Prakriya) -> None:
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    suffix = prakriya.terms[-1]
+    if dhatu and suffix and suffix.upadeza in['kta', 'ktavatu']:
+        text = dhatu.text
+        clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
+        if text.endswith('d') or text.endswith('r') or clean_dhatu == 'Svi':
+            if suffix.text.startswith('t'):
+                suffix.text = 'n' + suffix.text[1:]
+                if text.endswith('d'): dhatu.text = text[:-1] + 'n'
+                prakriya.log("Rule 8.2.42/45: niṣṭhā 't' -> 'n'")
+
