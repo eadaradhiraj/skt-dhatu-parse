@@ -15,18 +15,15 @@ def resolve_it_markers(term: Term) -> None:
     # 1. INITIAL & FINAL MARKERS FOR DHATUS
     # ==========================================
     if term.term_type == 'dhatu':
-        # Custom marker for 'irit' roots (like Cidi!r) to prevent 'idit' mistagging
         if 'i!r' in term.text:
             term.tags.add('irit')
             term.text = term.text.replace('i!r', '')
             
-        # Rule 1.3.5: Adir YiWuqavaH (Initial Yi, wu, qu are 'it' markers in a root)
         for prefix in ['Yi', 'wu', 'qu']:
             if term.text.startswith(prefix):
                 term.tags.add(f"{prefix}it")
                 term.text = term.text[len(prefix):]
                 
-        # Rule 1.3.3: hal antyam (Strips the final consonant of the upadesa)
         if len(term.text) > 0 and term.upadeza[-1] in SLP1_CONSONANTS:
             if 'irit' not in term.tags: 
                 final_char = term.text[-1]
@@ -36,8 +33,7 @@ def resolve_it_markers(term: Term) -> None:
     # ==========================================
     # 2. NASALIZED VOWELS (All terms)
     # ==========================================
-    # Rule 1.3.2: upadeze'janunAsika it (Nasal vowels are 'it' markers)
-    for marker in ['!', '~']:
+    for marker in['!', '~']:
         while marker in term.text:
             idx = term.text.find(marker)
             if idx > 0:
@@ -45,15 +41,14 @@ def resolve_it_markers(term: Term) -> None:
                 term.tags.add(f"{vowel}dit")
                 term.text = term.text[:idx-1] + term.text[idx+1:]
             else:
-                # Failsafe if marker is at the very beginning
                 term.text = term.text.replace(marker, "", 1)
 
     # ==========================================
-    # 3. MARKERS FOR AFFIXES (Pratyayas, Vikaranas, Lakaras, Agamas)
+    # 3. MARKERS FOR AFFIXES
     # ==========================================
     if term.term_type in['pratyaya', 'vikaraRa', 'lakara', 'Agama']:
         
-        # Preprocessors for tricky pedagogical affixes without SLP1 nasal markers
+        # Preprocessors for tricky pedagogical affixes
         if term.upadeza == 'Satf':
             term.tags.add('fdit')
             term.text = 'Sat'
@@ -62,24 +57,28 @@ def resolve_it_markers(term: Term) -> None:
             term.text = 'ktavat'
         elif term.upadeza == 'tumun':
             term.tags.add('udit')
-            term.text = 'tumn' # hal antyam will naturally drop the 'n' leaving 'tum'
+            term.text = 'tumn'
+        elif term.upadeza == 'lyap':
+            term.tags.add('pit')
+            term.tags.add('lit') 
+            term.text = 'ya'
+        elif term.upadeza == 'SAnac':
+            term.tags.add('Sit')
+            term.tags.add('cit')
+            term.text = 'Ana'
             
-        # Rule 1.3.7: cuwU (Initial Palatals 'c-varga' and Retroflexes 'w-varga' are 'it')
         if len(term.text) > 0:
             initial_char = term.text[0]
             if initial_char in['c', 'C', 'j', 'J', 'Y', 'w', 'W', 'q', 'Q', 'R']:
                 term.tags.add(f"{initial_char}it")
                 term.text = term.text[1:]
                 
-        # Rule 1.3.8: lazakvataddhite (Initial l, S, and velars 'k-varga' are 'it')
         if len(term.text) > 0:
             initial_char = term.text[0]
             if initial_char in['l', 'S', 'k', 'K', 'g', 'G', 'N']:
                 term.tags.add(f"{initial_char}it")
                 term.text = term.text[1:]
                 
-        # Rule 1.3.3 & 1.3.4: hal antyam / na vibhaktau tusmAH
-        # Final consonants are 'it', UNLESS they are t/th/d/dh/n/s/m inside a vibhakti (inflection)!
         if len(term.text) > 0 and term.upadeza and term.upadeza[-1] in SLP1_CONSONANTS:
             final_char = term.text[-1]
             is_vibhakti = 'tin' in term.tags

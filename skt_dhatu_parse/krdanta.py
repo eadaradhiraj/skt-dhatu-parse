@@ -10,13 +10,23 @@ from . import rules
 def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_path: str = DEFAULT_DB_PATH, upasargas: list[str] = None) -> Prakriya:
     prakriya = Prakriya()
     
-    # 1. Map Upasargas
+    # 1. Map Upasargas & intercept ktvA to lyap
     if upasargas:
         for u in upasargas: prakriya.add_term(Term(u, 'upasarga'))
+        if pratyaya_upadeza == 'ktvA':
+            pratyaya_upadeza = 'lyap'
+            prakriya.log("Rule 7.1.37: samāse'nañpūrve ktvo lyap (ktvA replaced by lyap)")
         
     dhatus = get_dhatu(dhatu_slp1, gana=gana, db_path=db_path)
     if not dhatus: return None
     dhatu = dhatus[0] 
+
+    if any(t == 'gana_10' for t in dhatu.tags) and 'sanadi' not in dhatu.tags:
+        from .sanadi import derive_secondary_root
+        clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.upadeza)
+        sanadi_prakriya = derive_secondary_root(clean_dhatu, 'Ric', gana=10, db_path=db_path)
+        if sanadi_prakriya: dhatu = sanadi_prakriya.terms[0]
+
     prakriya.add_term(dhatu)
     
     resolve_it_markers(dhatu)
@@ -35,6 +45,7 @@ def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_
         rules.insert_vikarana(prakriya)
         vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa'), None)
         if vikarana: resolve_it_markers(vikarana)
+        rules.akrtsarvadhatukayor_dirghah(prakriya)
         rules.sarvadhatukam_apit(prakriya)
         rules.sna_sandhi(prakriya)
         rules.se_mucadinam(prakriya)
@@ -44,7 +55,7 @@ def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_
         rules.kr_u_morphing(prakriya)
         rules.snasor_allopah(prakriya)
 
-    # 2.5 Clean up ghost terms early so boundary rules touch the suffix!
+    # 2.5 Clean up ghost terms early
     prakriya.terms =[t for t in prakriya.terms if t.text]
 
     # 3. Augments & Internal Morphing
@@ -75,7 +86,10 @@ def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_
     rules.akah_savarne_dirghah(prakriya)
     rules.iko_yanaci(prakriya)
     
-    # 4.5 Clean up ghost terms AGAIN just in case
+    rules.aane_muk(prakriya)
+    rules.hrasvasya_piti_krti_tuk(prakriya)
+
+    # 4.5 Clean up ghost terms AGAIN
     prakriya.terms =[t for t in prakriya.terms if t.text]
     
     # 5. Consonant Sandhi

@@ -26,15 +26,27 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
         if not dhatus: return None
         dhatu = dhatus[0] 
         
-        if voice:
+        # Trigger Gana 10 (Curādi) Ṇic suffix insertion automatically
+        if any(t == 'gana_10' for t in dhatu.tags) and 'sanadi' not in dhatu.tags:
+            from .sanadi import derive_secondary_root
+            clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.upadeza)
+            sanadi_prakriya = derive_secondary_root(clean_dhatu, 'Ric', gana=10, db_path=db_path)
+            if sanadi_prakriya: dhatu = sanadi_prakriya.terms[0]
+            
+        if voice == 'karmani' or voice == 'bhave':
+            dhatu.tags.discard('parasmaipada')
+            dhatu.tags.discard('ubhayapada')
+            dhatu.tags.add('atmanepada')
+            dhatu.tags.add('karmani')
+        elif voice:
             dhatu.tags.discard('parasmaipada')
             dhatu.tags.discard('atmanepada')
             dhatu.tags.discard('ubhayapada')
             dhatu.tags.add(voice)
         elif 'ubhayapada' in dhatu.tags:
-            dhatu.tags.add('parasmaipada') # Default if no voice is forced
+            dhatu.tags.add('parasmaipada') 
             
-        if dhatu_slp1 == 'krI' and upasargas and upasargas[-1] in['vi', 'parA']:
+        if dhatu_slp1 == 'krI' and upasargas and upasargas[-1] in['vi', 'parA'] and voice != 'karmani':
             dhatu.tags.discard('parasmaipada')
             dhatu.tags.discard('ubhayapada')
             dhatu.tags.add('atmanepada')
@@ -42,29 +54,23 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
 
     prakriya.add_term(dhatu)
     
-    # 2. Resolve Dhatu Anubandhas and Preprocessing
     resolve_it_markers(dhatu)
     rules.dhatvadeh_sah_sah_no_nah(prakriya)  
     rules.idito_num_dhatoh(prakriya)  
     
-    # 3. Add Lakara and Past Tense Prefix (aW/Aw)
     lakara = Term(lakara_name, 'lakara')
     lakara.tags.add(lakara_name) 
     prakriya.add_term(lakara)
     rules.at_agama(prakriya)           
     
-    # 4. Resolve Meta-Markers for Prefix/Lakara
     for term in prakriya.terms:
         if term.term_type != 'dhatu': resolve_it_markers(term)
     
-    # 5. Substitute Lakara
     rules.substitute_lakara(prakriya, purusha=purusha, vacana=vacana)
 
-    # 5.5 Insert luN cli augment early
     rules.cli_agama(prakriya)
     rules.gatistha_sic_lopa(prakriya)
     
-    # 6. Early Suffix Replacements
     rules.mer_nih(prakriya)
     rules.lut_prathamasya_daraurasah(prakriya)
     rules.jher_jus(prakriya)
@@ -76,7 +82,6 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.ser_hi(prakriya)
     rules.at_uttasya(prakriya)
     
-    # 7. Resolve Suffix Markers and Morphing
     suffix = prakriya.terms[-1]
     resolve_it_markers(suffix)
     rules.atmanepada_tere(prakriya)   
@@ -84,21 +89,20 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.nityam_nitah(prakriya)
     rules.er_uh(prakriya)
 
-    # 8. Insert Vikarana & Special Lakara Agamas
     rules.insert_vikarana(prakriya)
     rules.lin_agamas(prakriya)
     
     vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa' and t.upadeza != 'cli'), None)
     if vikarana: resolve_it_markers(vikarana)
+    
     rules.mit_aco_antyat_parah(prakriya)
+    rules.akrtsarvadhatukayor_dirghah(prakriya)
 
-    # 8.5 Early Elisions
     rules.bruva_it(prakriya)
     rules.sici_vrddhih(prakriya)
     rules.asti_sico_aprkte(prakriya)
     rules.hrasvad_angat(prakriya)
     
-    # 9. Gana 9 and Root Substitutions
     rules.ardhadhatuke_mula_parivartanam(prakriya)
     rules.sarvadhatukam_apit(prakriya)
     rules.adeca_upadese_asiti(prakriya)
@@ -120,12 +124,10 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.it_agama(prakriya)          
     rules.ita_iti(prakriya)
 
-    # 10. Abhyasa (Reduplication)
     rules.liti_dhator_anabhyasasya(prakriya)
     rules.lity_abhyasasya(prakriya)
     rules.slau_reduplication(prakriya)
 
-    # 10.1 Remove empty terms (luk, Slu) to allow boundary checks for Abhyasa rules
     prakriya.terms =[t for t in prakriya.terms if t.text]
 
     rules.haladi_seshah(prakriya)            
@@ -139,10 +141,8 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.bhuvo_vug_lunlitoh(prakriya)
     rules.revert_sh_after_abhyasa(prakriya)
 
-    # 10.5 Remove empty terms
     prakriya.terms =[t for t in prakriya.terms if t.text]
 
-    # 11. Core Phonetics
     rules.gam_hana_jana_lopa(prakriya)
     rules.sasa_id_anghaloh(prakriya)
     rules.rdriso_ngi_gunah(prakriya)
@@ -167,7 +167,6 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.eco_yayavayah(prakriya)                 
     rules.aci_snu_dhatu_bhruvam(prakriya)
     
-    # 12. Vowel Sandhi (Strictly Ordered: Exceptions -> General)
     rules.ato_dirgho_yayi(prakriya)               
     rules.ato_nitah(prakriya) 
     rules.usy_apadantat(prakriya)                 
@@ -180,7 +179,6 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.skoh_samyogadyor_ante_ca(prakriya)
     rules.lopo_vyorvali(prakriya)
     
-    # 13. Consonant Sandhi
     rules.anunasikalopo_jhali_kniti(prakriya)
     rules.vrasca_bhrasja_sruja_mruja(prakriya)
     rules.choh_kuh(prakriya)
@@ -194,11 +192,9 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.dadhas_tathor_ca(prakriya)
     rules.jhasas_tathor_dho_dhah(prakriya)        
     
-    # --- REORDERED BLOCK ---
     rules.stuna_stuh(prakriya)
     rules.dho_dhe_lopah(prakriya)                 
     rules.jhalam_jas_jhasi(prakriya)              
-    # -----------------------
     
     rules.khari_ca(prakriya)                      
     rules.samyogantasya_lopah(prakriya)
