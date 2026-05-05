@@ -1297,6 +1297,7 @@ def cli_agama(prakriya: Prakriya) -> None:
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
     if 'luN' in suffix.tags and dhatu:
         cli = Term('cli', 'vikaraRa')
+        cli.tags.add('ardhadhatuka')
         clean_dhatu = ''
         for tag in dhatu.tags:
             if tag.startswith('clean_'): clean_dhatu = tag.split('_')[1]
