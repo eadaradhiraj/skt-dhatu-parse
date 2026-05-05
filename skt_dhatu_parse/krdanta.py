@@ -72,6 +72,7 @@ def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_
     rules.ata_upadhayah(prakriya)
     rules.rta_id_dhatoh(prakriya)
     rules.gam_hana_jana_lopa(prakriya)
+    rules.aniditam_hala_upadhayah_kniti(prakriya)
     rules.sasa_id_anghaloh(prakriya)
     rules.vacisvapiyajadinam_kiti(prakriya)
     rules.srujidrusor_jhaly_amakiti(prakriya)  

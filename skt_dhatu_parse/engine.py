@@ -147,6 +147,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     prakriya.terms =[t for t in prakriya.terms if t.text]
 
     rules.gam_hana_jana_lopa(prakriya)
+    rules.aniditam_hala_upadhayah_kniti(prakriya)
     rules.sasa_id_anghaloh(prakriya)
     rules.rdriso_ngi_gunah(prakriya)
     rules.ato_yeyah(prakriya)

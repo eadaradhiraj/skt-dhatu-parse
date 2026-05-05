@@ -94,5 +94,18 @@ class TestCoverageEdgeCases(unittest.TestCase):
         prakriya = derive('SAs', 'laW', purusha='prathama', vacana=2, gana=2)
         self.assertEqual(prakriya.get_current_string(), 'SAsati')
 
+
+    def test_aniditam_nasal_drop(self):
+        from skt_dhatu_parse.krdanta import derive_krdanta
+        prakriya = derive_krdanta('daMS', 'kta', gana=1)
+        self.assertEqual(prakriya.get_current_string(), 'dazwa')
+        
+    def test_vah_samprasarana_and_o(self):
+        from skt_dhatu_parse.krdanta import derive_krdanta
+        p_kta = derive_krdanta('vah', 'kta', gana=1)
+        self.assertEqual(p_kta.get_current_string(), 'UQa')
+        p_tumun = derive_krdanta('vah', 'tumun', gana=1)
+        self.assertEqual(p_tumun.get_current_string(), 'voQum')
+
 if __name__ == '__main__':
     unittest.main()

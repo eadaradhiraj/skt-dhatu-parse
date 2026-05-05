@@ -834,6 +834,15 @@ def vacisvapiyajadinam_kiti(prakriya: Prakriya) -> None:
         elif clean_dhatu == 'yaj': 
             dhatu.text = 'ij'
             prakriya.log("Rule 6.1.15: Samprasarana (yaj -> ij)")
+        elif clean_dhatu == 'vap': 
+            dhatu.text = 'up'
+            prakriya.log("Rule 6.1.15: Samprasarana (vap -> up)")
+        elif clean_dhatu == 'vah': 
+            dhatu.text = 'uh'
+            prakriya.log("Rule 6.1.15: Samprasarana (vah -> uh)")
+        elif clean_dhatu == 'vad': 
+            dhatu.text = 'ud'
+            prakriya.log("Rule 6.1.15: Samprasarana (vad -> ud)")
         elif clean_dhatu == 'grah':
             dhatu.text = 'gfh'
             prakriya.log("Rule 6.1.16: Samprasarana (grah -> gfh)")
@@ -1583,6 +1592,24 @@ def han_ghatva_tatva(prakriya: Prakriya) -> None:
                 prakriya.log("Rule 7.3.55: abhyāsād dhasya (h -> G after abhyasa)")
 
 def dho_dhe_lopah(prakriya: Prakriya) -> None:
+    """Rule 8.3.13: ḍho ḍhe lopaḥ & Rule 6.3.111: ḍhralope pūrvasya dīrgho'ṇaḥ"""
+    for i in range(len(prakriya.terms)-1):
+        t1 = prakriya.terms[i]
+        t2 = prakriya.terms[i+1]
+        if t1.text.endswith('Q') and t2.text.startswith('Q'):
+            t1.text = t1.text[:-1]
+            prakriya.log("Rule 8.3.13: dho dhe lopah (dropped 'Q' before 'Q')")
+            
+            if t1.text and t1.text[-1] in['a', 'i', 'u']:
+                clean_dhatu = next((tag.split('_')[1] for tag in t1.tags if tag.startswith('clean_')), '')
+                if clean_dhatu in ['sah', 'vah'] and t1.text[-1] == 'a':
+                    t1.text = t1.text[:-1] + 'o'
+                    prakriya.log("Rule 6.3.112: sahivahor od avarṇasya (a -> o instead of A)")
+                else:
+                    dirgha_map = {'a': 'A', 'i': 'I', 'u': 'U'}
+                    old_vowel = t1.text[-1]
+                    t1.text = t1.text[:-1] + dirgha_map[old_vowel]
+                    prakriya.log(f"Rule 6.3.111: dhralope purvasya dirgho'nah ({old_vowel} -> {dirgha_map[old_vowel]})")
     for i in range(len(prakriya.terms)-1):
         t1 = prakriya.terms[i]
         t2 = prakriya.terms[i+1]
@@ -1943,3 +1970,25 @@ def er_lini(prakriya: Prakriya) -> None:
         if clean_dhatu in GHU_MA_STHA and dhatu.text.endswith('A'):
             dhatu.text = dhatu.text[:-1] + 'e'
             prakriya.log("Rule 6.4.67: er liṅi (A -> e before yAs)")
+
+def aniditam_hala_upadhayah_kniti(prakriya: Prakriya) -> None:
+    """Rule 6.4.24: aniditāṃ hala upadhāyāḥ kṅiti. Drops penultimate nasal in anidit halanta roots before kit/ṅit."""
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    if not dhatu: return
+    idx = prakriya.terms.index(dhatu)
+    if idx + 1 >= len(prakriya.terms): return
+    suffix = prakriya.terms[idx + 1]
+
+    if 'kit' in suffix.tags or 'Nit' in suffix.tags:
+        if 'idit' not in dhatu.tags:
+            # Protect roots that didn't ORIGINALLY have a nasal (like muc/chid)
+            clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
+            if len(clean_dhatu) >= 2 and clean_dhatu[-2] not in['M', 'Y', 'R', 'n', 'm']: return
+            
+            if dhatu.text and dhatu.text[-1] not in SLP1_VOWELS:
+                text = dhatu.text
+                if len(text) >= 2:
+                    penultimate = text[-2]
+                    if penultimate in['M', 'Y', 'R', 'n', 'm']:
+                        dhatu.text = text[:-2] + text[-1]
+                        prakriya.log(f"Rule 6.4.24: aniditāṃ hala upadhāyāḥ (Dropped penultimate nasal '{penultimate}')")
