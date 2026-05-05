@@ -1820,9 +1820,6 @@ def revert_sh_after_abhyasa(prakriya: Prakriya) -> None:
                 elif dhatu.text.startswith('zt'): dhatu.text = 'zw' + dhatu.text[2:]
                 elif dhatu.text.startswith('zn'): dhatu.text = 'zR' + dhatu.text[2:]
                 prakriya.log("Rule 8.3.116: Reverted 's' to 'z' after abhyasa")
-            elif dhatu.text.startswith('s') and clean_dhatu == 'svap':
-                dhatu.text = 'z' + dhatu.text[1:]
-                prakriya.log("Rule 8.3.59: ṣatva for svap after abhyāsa")
 
 def sasa_id_anghaloh(prakriya: Prakriya) -> None:
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
