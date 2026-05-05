@@ -583,5 +583,20 @@ class TestPipeline(unittest.TestCase):
         self.assertEqual(p_norm.get_current_string(), 'acCEtsIt')
         self.assertEqual(p_vik.get_current_string(), 'acCidat')
 
+    def test_gam_future_set(self) -> None:
+        """Tests gam + lfW -> gamizyati (Exception: gam is seṭ in lṛṭ parasmaipada)."""
+        prakriya = derive('gam', 'lfW', purusha='prathama', vacana=0, gana=1)
+        self.assertEqual(prakriya.get_current_string(), 'gamizyati')
+
+    def test_svap_lit_reduplication_and_set(self) -> None:
+        """Tests svap + liW -> suzvApa (samprasāraṇa, revert ṣ after abhyāsa)."""
+        prakriya = derive('svap', 'liW', purusha='prathama', vacana=0, gana=2)
+        self.assertEqual(prakriya.get_current_string(), 'suzvApa')
+        
+    def test_han_lun_vadh(self) -> None:
+        """Tests han + luN -> avaDIt (Aorist han replaced by vaD, sic iṭa īṭi drop)."""
+        prakriya = derive('han', 'luN', purusha='prathama', vacana=0, gana=2)
+        self.assertEqual(prakriya.get_current_string(), 'avaDIt')
+
 if __name__ == '__main__':
     unittest.main()

@@ -96,6 +96,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.bruva_it(prakriya)
     rules.sici_vrddhih(prakriya)
     rules.asti_sico_aprkte(prakriya)
+    rules.ita_iti(prakriya)
     rules.hrasvad_angat(prakriya)
     
     # 9. Gana 9 and Root Substitutions
@@ -135,13 +136,15 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.bhavater_ah(prakriya)              
     rules.abhyase_car_ca(prakriya)
     rules.kuhos_cuh(prakriya)                
-    rules.bhuvo_vug_lunlitoh(prakriya)      
-    
+    rules.bhuvo_vug_lunlitoh(prakriya)
+    rules.revert_sh_after_abhyasa(prakriya)
+
     # 10.5 Remove empty terms
     prakriya.terms =[t for t in prakriya.terms if t.text]
 
     # 11. Core Phonetics
     rules.gam_hana_jana_lopa(prakriya)
+    rules.sasa_id_anghaloh(prakriya)
     rules.rdriso_ngi_gunah(prakriya)
     rules.ato_yeyah(prakriya)
     rules.lin_salopo_anantyasya(prakriya)

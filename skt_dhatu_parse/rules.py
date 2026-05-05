@@ -62,8 +62,9 @@ ANIT_ROOTS = {
     # Sibilants & H
     'kruS', 'daMS', 'diS', 'dfS', 'mfS', 'riS', 'ruS', 'viS', 'spfS',
     'kfz', 'tviz', 'tuz', 'dviz', 'puz', 'piz', 'viz', 'Siz', 'Suz', 'Sliz',
-    'Gas', 'vas', 'dah', 'dih', 'nah', 'mih', 'ruh', 'lih', 'vah', 'guh'
+    'Gas', 'vas', 'dah', 'dih', 'nah', 'mih', 'ruh', 'lih', 'vah', 'guh',
     # Note: 'duh' is intentionally excluded here to allow the gana_2 conditional to handle it!
+    'SAs'
 }
 
 def apply_guna(char: str) -> str:
@@ -325,37 +326,50 @@ def it_agama(prakriya: Prakriya) -> None:
     clean_dhatu = dhatu.text if dhatu else ''
     
     if dhatu:
-        # Check original clean root tag (to survive text mutations like sTA -> sTi)
         for tag in dhatu.tags:
             if tag.startswith('clean_'):
                 clean_dhatu = tag.split('_')[1]
                 
-        # Check against global master list
         if clean_dhatu in ANIT_ROOTS: is_anit = True
         elif clean_dhatu == 'duh' and 'gana_2' in dhatu.tags: is_anit = True
             
-        # Causatives and Secondary Roots (sanādi) are polysyllabic and thus always Seṭ
         if 'sanadi' in dhatu.tags:
             is_anit = False
+
+    has_lrt_lrn = any(lak in term.tags for term in prakriya.terms for lak in ['lfW', 'lfN'])
+    is_parasmai = dhatu and 'parasmaipada' in dhatu.tags
+    is_lit = any('liW' in term.tags for term in prakriya.terms)
             
     for term in prakriya.terms[1:]:
         if 'ardhadhatuka' in term.tags and term.text and term.text[0] in VAL_CONSONANTS:
             if dhatu and dhatu.text == 'kf' and 'liW' in term.tags: continue
             
-            # Rule 7.2.11 sryukah kiti: Block 'iw' for roots ending in 'uk' or 'SrI' when affix is 'kit'
             is_kit = 'kit' in term.tags
             if is_kit and dhatu and dhatu.text and (dhatu.text == 'SrI' or dhatu.text[-1] in['u', 'U', 'f', 'F', 'x', 'X']):
                 prakriya.log(f"Rule 7.2.11: sryukah kiti blocked 'iw' for '{term.upadeza}'")
                 continue
                 
-            if not is_anit: 
-            # Rule 7.2.37: graho'liṭi dīrghaḥ (Long īṭ augment for grah, except in liṬ)
-                if clean_dhatu == 'grah' and 'liW' not in term.tags:
+            is_anit_for_this = is_anit
+            
+            # Exception 1: gam is seṭ in lṛṭ/lṛṅ Parasmaipada
+            if clean_dhatu == 'gam' and has_lrt_lrn and is_parasmai:
+                is_anit_for_this = False
+                
+            # Exception 2: Only 8 specific roots are aniṭ in liṭ, all others become seṭ
+            if is_lit:
+                KR_ADI =['kf', 'sf', 'Bf', 'vf', 'stu', 'dru', 'sru', 'Sru']
+                if clean_dhatu in KR_ADI:
+                    is_anit_for_this = True
+                else:
+                    is_anit_for_this = False
+                
+            if not is_anit_for_this: 
+                if clean_dhatu == 'grah' and not is_lit:
                     term.text = 'I' + term.text
-                    prakriya.log(f"Rule 7.2.37: graho'liṭi dīrghaḥ (Added 'Iw' augment to '{term.upadeza}')")
+                    prakriya.log(f"Rule 7.2.37: graho'liṭi dīrghaḥ (Added 'Iw')")
                 else:
                     term.text = 'i' + term.text
-                    prakriya.log(f"Rule 7.2.35: Added 'iw' augment to '{term.upadeza}')")
+                    prakriya.log(f"Rule 7.2.35: Added 'iw' augment")
 
 def idito_num_dhatoh(prakriya: Prakriya) -> None:
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
@@ -804,6 +818,7 @@ def dhatvadeh_sah_sah_no_nah(prakriya: Prakriya) -> None:
     if dhatu and dhatu.text:
         text = dhatu.text
         if text.startswith('z'):
+            dhatu.tags.add('original_sh')  # <--- ADD THIS LINE
             text = 's' + text[1:]
             if text.startswith('sW'): text = 'sT' + text[2:]
             elif text.startswith('sR'): text = 'sn' + text[2:]
@@ -1933,6 +1948,17 @@ def ardhadhatuke_mula_parivartanam(prakriya: Prakriya) -> None:
             dhatu.tags.add('clean_vac')
             prakriya.log("Rule 2.4.53: bruvo vaciḥ (brU -> vac before ārdhadhātuka)")
 
+    is_lun = any('luN' in t.tags for t in prakriya.terms)
+    if is_lun:
+        dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+        clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
+        if clean_dhatu == 'han':
+            dhatu.text = 'vaD'
+            dhatu.upadeza = 'vaD'
+            dhatu.tags = set([t for t in dhatu.tags if not t.startswith('clean_')])
+            dhatu.tags.add('clean_vaD')
+            prakriya.log("Rule 2.4.43: luṅi ca (han -> vaD in Aorist)")
+
 def rdriso_ngi_gunah(prakriya: Prakriya) -> None:
     """Rule 7.4.16: ṛdṛśo'ṅi guṇaḥ. Guṇa for ṛ-ending roots and dṛś before aṅ."""
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
@@ -1976,3 +2002,42 @@ def jhalo_jhali(prakriya: Prakriya) -> None:
             if prev_char in JHAL_CONSONANTS and next_char in JHAL_CONSONANTS:
                 t_curr.text = ''
                 prakriya.log("Rule 8.2.26: jhalo jhali (Dropped 's' between jhals)")
+
+def revert_sh_after_abhyasa(prakriya: Prakriya) -> None:
+    """Rule 8.3.116: Reverts 's' to 'ṣ' after abhyāsa ending in i/u."""
+    abhyasa = next((t for t in prakriya.terms if t.term_type == 'abhyasa'), None)
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    if abhyasa and dhatu and abhyasa.text and dhatu.text:
+        if 'original_sh' in dhatu.tags and dhatu.text.startswith('s'):
+            if abhyasa.text[-1] in IN_VOWELS:
+                dhatu.text = 'z' + dhatu.text[1:]
+                if dhatu.text.startswith('zT'): dhatu.text = 'zW' + dhatu.text[2:]
+                elif dhatu.text.startswith('zt'): dhatu.text = 'zw' + dhatu.text[2:]
+                elif dhatu.text.startswith('zn'): dhatu.text = 'zR' + dhatu.text[2:]
+                prakriya.log("Rule 8.3.116: Reverted 's' to 'z' after abhyasa")
+
+def sasa_id_anghaloh(prakriya: Prakriya) -> None:
+    """Rule 6.4.34: śāsa id aṅhaloḥ. 'śās' is replaced by 'śiṣ' before a kit/ṅit halādi affix."""
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    if not dhatu: return
+    idx = prakriya.terms.index(dhatu)
+    if idx + 1 >= len(prakriya.terms): return
+    next_term = prakriya.terms[idx + 1]
+    
+    clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
+    is_kit_or_nit = 'kit' in next_term.tags or 'Nit' in next_term.tags
+    is_haladi = next_term.text and next_term.text[0] not in SLP1_VOWELS
+    
+    if clean_dhatu == 'SAs' and is_kit_or_nit and is_haladi:
+        dhatu.text = 'Siz'
+        prakriya.log("Rule 6.4.34: śāsa id aṅhaloḥ (SAs -> Siz)")
+
+def ita_iti(prakriya: Prakriya) -> None:
+    """Rule 8.2.28: iṭa īṭi. Deletes 's' of sic when preceded by iṭ and followed by īṭ."""
+    for i in range(len(prakriya.terms) - 1):
+        curr = prakriya.terms[i]
+        next_term = prakriya.terms[i+1]
+        if curr.upadeza == 'cli' and curr.text == 'is':
+            if next_term.text.startswith('I'):
+                curr.text = 'i'
+                prakriya.log("Rule 8.2.28: iṭa īṭi (Deleted 's' between iṭ and īṭ)")

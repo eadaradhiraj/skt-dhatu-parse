@@ -241,5 +241,10 @@ class TestKrdanta(unittest.TestCase):
         p = derive_krdanta('kF', 'kta', gana=6)
         self.assertEqual(p.get_current_string(), 'kIrRa')
 
+    def test_sas_kta_shis(self) -> None:
+        """Tests SAs + kta -> Sizwa (śāsa id aṅhaloḥ -> ṣṭunā ṣṭuḥ)."""
+        prakriya = derive_krdanta('SAs', 'kta', gana=2)
+        self.assertEqual(prakriya.get_current_string(), 'Sizwa')
+
 if __name__ == '__main__':
     unittest.main()
