@@ -50,7 +50,7 @@ TIN_ATMANEPADA_LIT = {
 ANIT_ROOTS = {
     'ji', 'nI', 'ci', 'Sru', 'stu', 'su', 'hu', 'dA', 'DA', 'sTA', 'pA', 'GrA', 
     'DmA', 'gA', 'yA', 'vA', 'snA', 'kf', 'hf', 'Df', 'sf', 'smf', 'stf', 'kF', 'jYA',
-    'glE', 'gE', 'mlE', 'dE', 'mE', 'sE', 'DyE', 'trE', 'Sak', 'pac', 'muc', 'ric', 'vac', 'vic', 'sic', 'praC', 'tyaj', 'nij', 'BaYj', 
+    'glE', 'gE', 'mlE', 'dE', 'mE', 'sE', 'DyE', 'trE', 'hve', 'Sak', 'pac', 'muc', 'ric', 'vac', 'vic', 'sic', 'praC', 'tyaj', 'nij', 'BaYj', 
     'Baj', 'Brajj', 'yaj', 'yuj', 'raYj', 'vij', 'svaYj', 'saYj', 'sfj', 'vraSc',
     'ad', 'kzuD', 'Kid', 'Cid', 'tud', 'nud', 'pad', 'Bid', 'vid', 'sad', 
     'svid', 'skand', 'kruD', 'buD', 'banD', 'yuD', 'ruD', 'rAD', 'vyaD', 
@@ -843,6 +843,9 @@ def vacisvapiyajadinam_kiti(prakriya: Prakriya) -> None:
         elif clean_dhatu == 'vad': 
             dhatu.text = 'ud'
             prakriya.log("Rule 6.1.15: Samprasarana (vad -> ud)")
+        elif clean_dhatu == 'hve':
+            dhatu.text = 'hU'
+            prakriya.log("Rule 6.1.32: hvaḥ samprasāraṇam (hve -> hU before kit)")
         elif clean_dhatu == 'grah':
             dhatu.text = 'gfh'
             prakriya.log("Rule 6.1.16: Samprasarana (grah -> gfh)")

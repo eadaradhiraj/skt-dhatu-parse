@@ -191,5 +191,11 @@ class TestCoverageEdgeCases(unittest.TestCase):
         rules.stha_adi_ita(p)
         self.assertEqual(p.terms[0].text, 'gI')
 
+
+    def test_hve_samprasarana(self):
+        from skt_dhatu_parse.krdanta import derive_krdanta
+        prakriya = derive_krdanta('hve', 'kta', gana=1)
+        self.assertEqual(prakriya.get_current_string(), 'hUta')
+
 if __name__ == '__main__':
     unittest.main()
