@@ -732,20 +732,6 @@ def ho_dhah_dader_ghah(prakriya: Prakriya) -> None:
             dhatu.text = dhatu.text[:-1] + 'Q'
             prakriya.log("Rule 8.2.31: 'h' -> 'Q' (ho DhaH)")
 
-    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
-    if not dhatu: return
-    idx = prakriya.terms.index(dhatu)
-    if idx + 1 >= len(prakriya.terms): return
-    suffix = prakriya.terms[idx + 1]
-
-    if dhatu.text.endswith('h') and suffix.text and suffix.text[0] in JHAL_CONSONANTS:
-        if dhatu.text.startswith('d'):
-            dhatu.text = dhatu.text[:-1] + 'G'
-            prakriya.log("Rule 8.2.32: 'h' -> 'G' (dAder dhAtor ghaH)")
-        else:
-            dhatu.text = dhatu.text[:-1] + 'Q'
-            prakriya.log("Rule 8.2.31: 'h' -> 'Q' (ho DhaH)")
-
 def choh_kuh(prakriya: Prakriya) -> None:
     for i in range(len(prakriya.terms)):
         t = prakriya.terms[i]
