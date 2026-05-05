@@ -52,7 +52,7 @@ def main() -> None:
     parser.add_argument("--krt", type=str, help="Generate a Primary Derivative (Kṛdanta)")
     parser.add_argument("--all-krt", action="store_true", help="Generate all common Kṛdanta forms")
     parser.add_argument("--causative", action="store_true", help="Generate the Causative (Ṇic) secondary root")
-    parser.add_argument("--voice", choices=["parasmaipada", "atmanepada"], help="Force a specific voice")
+    parser.add_argument("--voice", choices=["parasmaipada", "atmanepada", "karmani", "bhave"], help="Force a specific voice")
     parser.add_argument("--history", action="store_true", help="Show derivation history")
 
     args = parser.parse_args()

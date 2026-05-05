@@ -1285,11 +1285,12 @@ def ad_gunah(prakriya: Prakriya) -> None:
         t1 = prakriya.terms[i]
         t2 = prakriya.terms[i+1]
         if t1.text and t2.text:
-            if t1.text[-1] in ['a', 'A'] and t2.text[0] in['i', 'I', 'u', 'U', 'f', 'F']:
-                rep = apply_guna(t2.text[0])
+            if t1.text[-1] in['a', 'A'] and t2.text[0] in['i', 'I', 'u', 'U', 'f', 'F']:
+                old_char = t2.text[0]
+                rep = apply_guna(old_char)
                 t1.text = t1.text[:-1] + rep
                 t2.text = t2.text[1:]
-                prakriya.log(f"Rule 6.1.87: Ad guNaH (a + {t2.text[0]} -> {rep})")
+                prakriya.log(f"Rule 6.1.87: Ad guNaH (a + {old_char} -> {rep})")
 
 def lopo_vyorvali(prakriya: Prakriya) -> None:
     for i in range(len(prakriya.terms)-1):
