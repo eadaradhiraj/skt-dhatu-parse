@@ -61,8 +61,6 @@ class TestCoverageEdgeCases(unittest.TestCase):
         prakriya = derive_secondary_root('laB', 'Ric', gana=1)
         self.assertEqual(prakriya.get_current_string(), 'laMBi')
 
-if __name__ == '__main__':
-    unittest.main()
 
     def test_jhonta_passive_plural(self):
         from skt_dhatu_parse.engine import derive
@@ -73,3 +71,6 @@ if __name__ == '__main__':
         from skt_dhatu_parse.engine import derive
         prakriya = derive('dA', 'ASIrliN', purusha='prathama', vacana=0, gana=3)
         self.assertEqual(prakriya.get_current_string(), 'deyAt')
+
+if __name__ == '__main__':
+    unittest.main()
