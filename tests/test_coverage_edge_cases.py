@@ -107,5 +107,13 @@ class TestCoverageEdgeCases(unittest.TestCase):
         p_tumun = derive_krdanta('vah', 'tumun', gana=1)
         self.assertEqual(p_tumun.get_current_string(), 'voQum')
 
+
+    def test_vap_vad_samprasarana(self):
+        from skt_dhatu_parse.krdanta import derive_krdanta
+        p_vap = derive_krdanta('vap', 'kta', gana=1)
+        self.assertEqual(p_vap.get_current_string(), 'upta')
+        p_vad = derive_krdanta('vad', 'kta', gana=1)
+        self.assertEqual(p_vad.get_current_string(), 'udita')
+
 if __name__ == '__main__':
     unittest.main()
