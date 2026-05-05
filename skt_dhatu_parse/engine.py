@@ -130,6 +130,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.liti_dhator_anabhyasasya(prakriya)
     rules.lity_abhyasasya(prakriya)
     rules.slau_reduplication(prakriya)
+    rules.can_reduplication(prakriya)
 
     prakriya.terms =[t for t in prakriya.terms if t.text]
 
@@ -140,7 +141,8 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.ur_at(prakriya)                    
     rules.bhavater_ah(prakriya)              
     rules.abhyase_car_ca(prakriya)
-    rules.kuhos_cuh(prakriya)                
+    rules.kuhos_cuh(prakriya)
+    rules.can_abhyasa_vowel(prakriya)
     rules.bhuvo_vug_lunlitoh(prakriya)
     rules.revert_sh_after_abhyasa(prakriya)
 

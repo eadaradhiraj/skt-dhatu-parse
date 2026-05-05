@@ -857,6 +857,9 @@ def vacisvapiyajadinam_kiti(prakriya: Prakriya) -> None:
         elif clean_dhatu == 'Brajj':
             dhatu.text = 'Bfjj'
             prakriya.log("Rule 6.1.16: Samprasarana (Brajj -> Bfjj)")
+        elif clean_dhatu == 'vyaD':
+            dhatu.text = 'viD'
+            prakriya.log("Rule 6.1.16: Samprasarana (vyaD -> viD)")
 
 def sanadyanta_dhatavah(prakriya: Prakriya) -> None:
     if len(prakriya.terms) >= 2:
@@ -1238,7 +1241,12 @@ def cli_agama(prakriya: Prakriya) -> None:
         
         is_anit = clean_dhatu in ANIT_ROOTS or (clean_dhatu == 'duh' and 'gana_2' in dhatu.tags) or clean_dhatu in['ruh', 'lih', 'kfS']
         
-        if clean_dhatu in ['gam', 'dfS'] or ('irit' in dhatu.tags and prakriya.vikalpa):
+        if 'sanadi' in dhatu.tags:
+            cli.text = 'a'
+            cli.tags.add('caN')
+            cli.tags.add('Nit')
+            prakriya.log("Rule 3.1.48: ṇiśridrusrubhyaḥ kartari caṅ (cli -> caṅ)")
+        elif clean_dhatu in ['gam', 'dfS'] or ('irit' in dhatu.tags and prakriya.vikalpa):
             cli.text = 'a'
             cli.tags.add('Nit')
             cli.tags.add('aN') 
@@ -1984,3 +1992,63 @@ def aniditam_hala_upadhayah_kniti(prakriya: Prakriya) -> None:
                     if penultimate in['M', 'Y', 'R', 'n', 'm']:
                         dhatu.text = text[:-2] + text[-1]
                         prakriya.log(f"Rule 6.4.24: aniditāṃ hala upadhāyāḥ (Dropped penultimate nasal '{penultimate}')")
+
+def mrjer_vrddhih(prakriya: Prakriya) -> None:
+    """Rule 7.2.114: mṛjer vṛddhiḥ."""
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    if not dhatu: return
+    idx = prakriya.terms.index(dhatu)
+    if idx + 1 >= len(prakriya.terms): return
+    next_term = prakriya.terms[idx + 1]
+    if 'Nit' in next_term.tags or 'kit' in next_term.tags: return
+    
+    is_sarva_ardha = 'sarvadhatuka' in next_term.tags or 'ardhadhatuka' in next_term.tags or 'tin' in next_term.tags or 'Sit' in next_term.tags
+    clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
+    
+    if clean_dhatu == 'mfj' and is_sarva_ardha:
+        dhatu.text = 'mArj'
+        prakriya.log("Rule 7.2.114: mṛjer vṛddhiḥ (mfj -> mArj)")
+
+def can_reduplication(prakriya: Prakriya) -> None:
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    can = next((t for t in prakriya.terms if 'caN' in t.tags), None)
+    if dhatu and can:
+        if dhatu.text.endswith('i'):
+            dhatu.text = dhatu.text[:-1]
+            prakriya.log("Rule 6.4.51: ṇer aniṭi (Dropped Ṇic before caṅ)")
+        
+        text = dhatu.text
+        for i in range(len(text)-1, -1, -1):
+            if is_vowel(text[i]):
+                short_vowel = {'A':'a', 'I':'i', 'U':'u', 'F':'f', 'X':'x', 'e':'i', 'o':'u', 'E':'i', 'O':'u'}.get(text[i], text[i])
+                if short_vowel != text[i]:
+                    dhatu.text = text[:i] + short_vowel + text[i+1:]
+                    prakriya.log("Rule 7.4.1: ṇau caṅy upadhāyā hrasvaḥ (Shortened root vowel)")
+                break
+                
+        abhyasa = Term(dhatu.upadeza, 'abhyasa')
+        abhyasa.tags.add('can_abhyasa')
+        abhyasa.text = dhatu.text
+        idx = prakriya.terms.index(dhatu)
+        prakriya.terms.insert(idx, abhyasa)
+        prakriya.log(f"Rule 6.1.11: caṅi (Reduplicated root -> '{abhyasa.text}')")
+
+def can_abhyasa_vowel(prakriya: Prakriya) -> None:
+    abhyasa = next((t for t in prakriya.terms if 'can_abhyasa' in t.tags), None)
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    if abhyasa and dhatu:
+        root_vowel = next((c for c in dhatu.text if is_vowel(c)), 'a')
+        abh_vowel = 'U' if root_vowel in ['u', 'U'] else 'I'
+        
+        text = abhyasa.text
+        new_text = ""
+        vowel_seen = False
+        for char in text:
+            if is_vowel(char):
+                if not vowel_seen:
+                    new_text += abh_vowel
+                    vowel_seen = True
+            else:
+                new_text += char
+        abhyasa.text = new_text
+        prakriya.log(f"Sanvadbhāva & Dīrgho Laghoḥ for caṅ -> '{abhyasa.text}'")
