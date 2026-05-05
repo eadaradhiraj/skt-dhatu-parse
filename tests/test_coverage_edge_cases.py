@@ -165,5 +165,31 @@ class TestCoverageEdgeCases(unittest.TestCase):
         prakriya = derive_krdanta('gE', 'kta', gana=1)
         self.assertEqual(prakriya.get_current_string(), 'gIta')
 
+
+    def test_brute_force_coverage_adeca(self):
+        from skt_dhatu_parse import rules
+        from skt_dhatu_parse.models import Term, Prakriya
+        p = Prakriya()
+        d = Term('gE', 'dhatu')
+        d.tags.add('clean_gE')
+        p.add_term(d)
+        s = Term('ta', 'pratyaya')
+        s.tags.add('ardhadhatuka')
+        p.add_term(s)
+        rules.adeca_upadese_asiti(p)
+        self.assertEqual(p.terms[0].text, 'gA')
+
+    def test_brute_force_coverage_stha(self):
+        from skt_dhatu_parse import rules
+        from skt_dhatu_parse.models import Term, Prakriya
+        p = Prakriya()
+        d = Term('gA', 'dhatu')
+        p.add_term(d)
+        s = Term('ta', 'pratyaya')
+        s.tags.add('kit')
+        p.add_term(s)
+        rules.stha_adi_ita(p)
+        self.assertEqual(p.terms[0].text, 'gI')
+
 if __name__ == '__main__':
     unittest.main()
