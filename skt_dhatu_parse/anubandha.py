@@ -51,21 +51,30 @@ def resolve_it_markers(term: Term) -> None:
         # Preprocessors for tricky pedagogical affixes
         if term.upadeza == 'Satf':
             term.tags.add('fdit')
-            term.text = 'Sat'
+            term.tags.add('Sit')
+            term.text = 'at'
+            return
         elif term.upadeza == 'ktavatu':
             term.tags.add('udit')
-            term.text = 'ktavat'
+            term.tags.add('kit')
+            term.text = 'tavat'
+            return
         elif term.upadeza == 'tumun':
             term.tags.add('udit')
-            term.text = 'tumn'
+            term.tags.add('nit')
+            term.text = 'tum'
+            return
         elif term.upadeza == 'lyap':
             term.tags.add('pit')
             term.tags.add('lit') 
+            term.tags.add('kit')
             term.text = 'ya'
+            return
         elif term.upadeza == 'SAnac':
             term.tags.add('Sit')
             term.tags.add('cit')
             term.text = 'Ana'
+            return
             
         if len(term.text) > 0:
             initial_char = term.text[0]

@@ -87,7 +87,7 @@ class TestKrdanta(unittest.TestCase):
     def test_lyap_substitution(self) -> None:
         """Tests that ktvA is replaced by lyap when upasargas are present."""
         p1 = derive_krdanta('viS', 'ktvA', gana=6, upasargas=['pra'])
-        self.assertEqual(p1.get_current_string(), 'pravizya')
+        self.assertEqual(p1.get_current_string(), 'praviSya')
 
     def test_lyap_tuk_augment(self) -> None:
         """Tests Rule 6.1.71 (hrasvasya piti kṛti tuk): pra + kf + lyap -> prakftya."""

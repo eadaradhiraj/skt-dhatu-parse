@@ -92,7 +92,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.insert_vikarana(prakriya)
     rules.lin_agamas(prakriya)
     
-    vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa' and t.upadeza != 'cli'), None)
+    vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa' and t.upadeza not in ['cli', 'ciR']), None)
     if vikarana: resolve_it_markers(vikarana)
     
     rules.mit_aco_antyat_parah(prakriya)
@@ -121,6 +121,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.vikarana_guna(prakriya)
     rules.kr_u_morphing(prakriya)
     rules.snasor_allopah(prakriya)
+    rules.stha_adi_ita(prakriya)
     rules.it_agama(prakriya)          
     rules.ita_iti(prakriya)
 

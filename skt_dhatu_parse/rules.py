@@ -129,7 +129,6 @@ def insert_vikarana(prakriya: Prakriya) -> None:
     is_karmani = 'karmani' in dhatu.tags
     if is_karmani:
         vik = Term('yak', 'vikaraRa')
-        resolve_it_markers(vik)
         prakriya.terms.insert(idx, vik)
         prakriya.log("Rule 3.1.67: sārvadhātuke yak (Passive Vikaraṇa)")
         return
@@ -1202,7 +1201,9 @@ def cli_agama(prakriya: Prakriya) -> None:
         is_karmani = 'karmani' in dhatu.tags
         if is_karmani and suffix.upadeza == 'ta': 
             cli = Term('ciR', 'vikaraRa')
-            resolve_it_markers(cli)
+            cli.text = 'i'
+            cli.tags.add('Rit')
+            cli.tags.add('cit')
             prakriya.log("Rule 3.1.66: ciṇ bhāvakarmaṇoḥ (Passive Aorist ciN)")
             suffix.text = '' 
             prakriya.terms.insert(idx, cli)
@@ -1892,3 +1893,12 @@ def ita_iti(prakriya: Prakriya) -> None:
             if next_term.text.startswith('I'):
                 curr.text = 'i'
                 prakriya.log("Rule 8.2.28: iṭa īṭi (Deleted 's' between iṭ and īṭ)")
+
+def nisthayam_seti(prakriya: Prakriya) -> None:
+    """Rule 6.4.52: niṣṭhāyāṃ seṭi. Drops ṇi (final 'i') before seṭ niṣṭhā."""
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    suffix = prakriya.terms[-1]
+    if dhatu and 'sanadi' in dhatu.tags and dhatu.text.endswith('i'):
+        if suffix.upadeza in ['kta', 'ktavatu'] and suffix.text.startswith('i'):
+            dhatu.text = dhatu.text[:-1]
+            prakriya.log("Rule 6.4.52: niṣṭhāyāṃ seṭi (Dropped ṇi before seṭ niṣṭhā)")

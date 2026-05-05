@@ -64,6 +64,7 @@ def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_
     rules.yuvor_anakau(prakriya)    
     rules.stha_adi_ita(prakriya)
     rules.it_agama(prakriya)
+    rules.nisthayam_seti(prakriya)
     rules.sino_gunah(prakriya)
     rules.han_ghatva_tatva(prakriya)
     rules.aco_nniti(prakriya)
@@ -74,7 +75,9 @@ def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_
     rules.vacisvapiyajadinam_kiti(prakriya)
     rules.srujidrusor_jhaly_amakiti(prakriya)  
     rules.che_ca(prakriya)                           
-    
+    rules.aane_muk(prakriya)
+    rules.hrasvasya_piti_krti_tuk(prakriya)
+
     # 4. Phonetic Vowel Rules
     rules.sarvadhatuka_ardhadhatukayoh(prakriya)  
     rules.eco_yayavayah(prakriya)                 
@@ -85,9 +88,6 @@ def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_
     rules.vrddhir_eci(prakriya)
     rules.akah_savarne_dirghah(prakriya)
     rules.iko_yanaci(prakriya)
-    
-    rules.aane_muk(prakriya)
-    rules.hrasvasya_piti_krti_tuk(prakriya)
 
     # 4.5 Clean up ghost terms AGAIN
     prakriya.terms =[t for t in prakriya.terms if t.text]

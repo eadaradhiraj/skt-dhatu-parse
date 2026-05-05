@@ -428,3 +428,23 @@ class TestPipeline(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+    def test_passive_voice_ji(self) -> None:
+        prakriya = derive('ji', 'laW', purusha='prathama', vacana=0, gana=1, voice='karmani')
+        self.assertEqual(prakriya.get_current_string(), 'jIyate')
+
+    def test_passive_voice_stu(self) -> None:
+        prakriya = derive('stu', 'laW', purusha='prathama', vacana=0, gana=2, voice='karmani')
+        self.assertEqual(prakriya.get_current_string(), 'stUyate')
+
+    def test_gana_2_as_plural_jh_at(self) -> None:
+        prakriya = derive('As', 'laW', purusha='prathama', vacana=2, gana=2)
+        self.assertEqual(prakriya.get_current_string(), 'Asate')
+
+    def test_bhu_lit_madhyama_set(self) -> None:
+        prakriya = derive('BU', 'liW', purusha='madhyama', vacana=0, gana=1)
+        self.assertEqual(prakriya.get_current_string(), 'baBUviTa')
+
+    def test_dha_lat_dual_tathor(self) -> None:
+        prakriya = derive('DA', 'laW', purusha='prathama', vacana=1, gana=3)
+        self.assertEqual(prakriya.get_current_string(), 'DattaH')
