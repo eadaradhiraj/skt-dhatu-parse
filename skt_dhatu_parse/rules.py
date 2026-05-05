@@ -1323,6 +1323,7 @@ def cli_agama(prakriya: Prakriya) -> None:
         elif ends_in_sal and upadha in IK_VOWELS and is_anit:
             cli.text = 'sa'
             cli.tags.add('ksa')
+            cli.tags.add('kit')
             prakriya.log("Rule 3.1.45: śala igupadhādaṇiṭaḥ ksaḥ (cli -> ksa)")
         else:
             cli.text = 's'
