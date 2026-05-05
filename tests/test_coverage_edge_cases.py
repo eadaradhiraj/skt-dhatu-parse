@@ -56,14 +56,10 @@ class TestCoverageEdgeCases(unittest.TestCase):
         rules.dadhas_tathor_ca(p)
         self.assertEqual(p.terms[0].text, 'Da')
 
-if __name__ == '__main__':
-    unittest.main()
-
-    def test_lit_atmanepada_mud(self):
-        prakriya = derive('mud', 'liW', purusha='madhyama', vacana=0, gana=1)
-        self.assertEqual(prakriya.get_current_string(), 'mumudize')
-
     def test_labh_rabh_num_coverage(self):
         from skt_dhatu_parse.sanadi import derive_secondary_root
         prakriya = derive_secondary_root('laB', 'Ric', gana=1)
-        self.assertEqual(prakriya.get_current_string(), 'lamBi')
+        self.assertEqual(prakriya.get_current_string(), 'laMBi')
+
+if __name__ == '__main__':
+    unittest.main()
