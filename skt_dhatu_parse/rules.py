@@ -1613,15 +1613,7 @@ def dho_dhe_lopah(prakriya: Prakriya) -> None:
     for i in range(len(prakriya.terms)-1):
         t1 = prakriya.terms[i]
         t2 = prakriya.terms[i+1]
-        if t1.text.endswith('Q') and t2.text.startswith('Q'):
-            t1.text = t1.text[:-1]
-            prakriya.log("Rule 8.3.13: dho dhe lopah (dropped 'Q' before 'Q')")
-            
-            if t1.text and t1.text[-1] in ['a', 'i', 'u']:
-                dirgha_map = {'a': 'A', 'i': 'I', 'u': 'U'}
-                old_vowel = t1.text[-1]
-                t1.text = t1.text[:-1] + dirgha_map[old_vowel]
-                prakriya.log(f"Rule 6.3.111: dhralope purvasya dirgho'nah ({old_vowel} -> {dirgha_map[old_vowel]})")
+        pass
 
 def kramah_parasmaipadesu(prakriya: Prakriya) -> None:
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
