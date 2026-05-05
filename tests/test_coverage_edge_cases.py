@@ -63,3 +63,13 @@ class TestCoverageEdgeCases(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+    def test_jhonta_passive_plural(self):
+        from skt_dhatu_parse.engine import derive
+        prakriya = derive('ci', 'laW', purusha='prathama', vacana=2, gana=5, voice='karmani')
+        self.assertEqual(prakriya.get_current_string(), 'cIyante')
+
+    def test_er_lini_benedictive(self):
+        from skt_dhatu_parse.engine import derive
+        prakriya = derive('dA', 'ASIrliN', purusha='prathama', vacana=0, gana=3)
+        self.assertEqual(prakriya.get_current_string(), 'deyAt')

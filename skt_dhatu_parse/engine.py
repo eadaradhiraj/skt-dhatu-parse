@@ -122,6 +122,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.kr_u_morphing(prakriya)
     rules.snasor_allopah(prakriya)
     rules.stha_adi_ita(prakriya)
+    rules.er_lini(prakriya)
     rules.it_agama(prakriya)          
     rules.ita_iti(prakriya)
 

@@ -256,7 +256,8 @@ def jhonta(prakriya: Prakriya) -> None:
         clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text) if dhatu else ''
         is_atmanepada = dhatu and 'atmanepada' in dhatu.tags
         is_abhyasta = dhatu and 'gana_3' in dhatu.tags
-        is_anat = dhatu and any(g in dhatu.tags for g in['gana_2', 'gana_3', 'gana_5', 'gana_7', 'gana_8', 'gana_9'])
+        is_karmani = dhatu and ('karmani' in dhatu.tags or 'bhave' in dhatu.tags)
+        is_anat = dhatu and any(g in dhatu.tags for g in['gana_2', 'gana_3', 'gana_5', 'gana_7', 'gana_8', 'gana_9']) and not is_karmani
         
         if suffix.upadeza == 'Ja' and 'liN' in suffix.tags: pass 
         elif clean_dhatu == 'SI':
@@ -1922,3 +1923,15 @@ def labh_rabh_num(prakriya: Prakriya) -> None:
                     dhatu.text = text[:i+1] + 'M' + text[i+1:]
                     prakriya.log(f"Rule 7.1.64: labheś ca (Added 'num' -> '{dhatu.text}')")
                     break
+
+def er_lini(prakriya: Prakriya) -> None:
+    """Rule 6.4.67: er liṅi. ā -> e before y-initial ārdhadhātuka liṅ for specific roots."""
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    suffix = prakriya.terms[-1]
+    if dhatu and 'ASIrliN' in suffix.tags and 'parasmaipada' in dhatu.tags:
+        clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
+        # Inherits root list from 6.4.66
+        GHU_MA_STHA =['dA', 'DA', 'do', 'de', 'De', 'mA', 'me', 'sTA', 'gA', 'pA', 'hA', 'sA', 'so']
+        if clean_dhatu in GHU_MA_STHA and dhatu.text.endswith('A'):
+            dhatu.text = dhatu.text[:-1] + 'e'
+            prakriya.log("Rule 6.4.67: er liṅi (A -> e before yAs)")
