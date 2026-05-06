@@ -2489,12 +2489,13 @@ def ami_purvah(prakriya: Prakriya) -> None:
         prakriya.log("Rule 6.1.107: ami pūrvaḥ (a + am -> am)")
 
 def tasmac_chasah_nah_pumsi(prakriya: Prakriya) -> None:
-    """Rule 6.1.103: tasmācchaśo naḥ puṃsi. 's' of Sas -> 'n' after pūrvasavarṇa dīrgha."""
+    """Rule 6.1.103: tasmācchaśo naḥ puṃsi. 's' of Sas -> 'n' in masculine."""
     stem = prakriya.terms[0]
     sup = prakriya.terms[1]
     if sup.upadeza == 'Sas' and sup.text.startswith('s') and stem.text and stem.text[-1] in['A', 'I', 'U', 'F']:
-        sup.text = 'n' + sup.text[1:]
-        prakriya.log("Rule 6.1.103: tasmācchaśo naḥ puṃsi (Sas 's' -> 'n')")
+        if 'stri' not in stem.tags and 'napumsaka' not in stem.tags:
+            sup.text = 'n' + sup.text[1:]
+            prakriya.log("Rule 6.1.103: tasmācchaśo naḥ puṃsi (Sas 's' -> 'n')")
 
 def hrasvanadyapo_nut_and_nami(prakriya: Prakriya) -> None:
     """Rule 7.1.54: hrasvanadyāpo nuṭ & 6.4.3: nāmi (Long vowel before nām)."""
@@ -2559,11 +2560,11 @@ def stri_ap_nom_acc(prakriya: Prakriya) -> None:
     """Rules 6.1.68 & 7.1.18: Feminine Nom/Acc replacements."""
     stem = prakriya.terms[0]
     sup = prakriya.terms[1]
-    if 'stri' in stem.tags and stem.text.endswith('A'):
+    if 'stri' in stem.tags and stem.text and stem.text[-1] in ['A', 'I', 'U']:
         if sup.upadeza == 'su~':
             sup.text = ''
-            prakriya.log("Rule 6.1.68: halṅyābbhyo... (su dropped after āp)")
-        elif sup.upadeza in ['O', 'Ow']:
+            prakriya.log("Rule 6.1.68: halṅyābbhyo... (su dropped after āp/ī/ū)")
+        elif sup.upadeza in ['O', 'Ow'] and stem.text.endswith('A'):
             sup.text = 'I'
             prakriya.log("Rule 7.1.18: auṅ āpaḥ (au/auṭ -> ī)")
 
@@ -2576,18 +2577,62 @@ def aani_capah(prakriya: Prakriya) -> None:
             stem.text = stem.text[:-1] + 'e'
             prakriya.log("Rule 7.3.105: āṅi cāpaḥ (ā -> e before ṭā/os)")
 
-def stri_ap_ngit_yA(prakriya: Prakriya) -> None:
-    """Rules 7.3.116 & 7.3.113: yāṭ augment for ṅit affixes."""
+def stri_nadi_ngit_yA(prakriya: Prakriya) -> None:
+    """Rules 7.3.116 & 7.3.113 & 7.3.112: yāṭ/āṭ augment for ṅit affixes (Feminine A, i, I, u, U)."""
     stem = prakriya.terms[0]
     sup = prakriya.terms[1]
-    if 'stri' in stem.tags and stem.text.endswith('A'):
-        if sup.upadeza in ['Ne', 'Nasi', 'Nas', 'Ni']:
+    if 'stri' in stem.tags and stem.text and stem.text[-1] in['A', 'i', 'I', 'u', 'U']:
+        if sup.upadeza in['Ne', 'Nasi', 'Nas', 'Ni']:
+            is_ap = stem.text.endswith('A')
+            
             if sup.upadeza == 'Ni':
-                sup.text = 'yAm'
-                prakriya.log("Rule 7.3.116 & 7.3.113: ṅerām & yāḍāpaḥ (ṅi -> ām -> yām)")
+                sup.text = 'yAm' if is_ap else 'Am'
+                prakriya.log("Rule 7.3.116: ṅerām")
             elif sup.upadeza == 'Ne':
-                sup.text = 'yE'
-                prakriya.log("Rule 7.3.113 & Sandhi: yāḍāpaḥ (yāṭ + e -> yE)")
-            elif sup.upadeza in ['Nasi', 'Nas']:
-                sup.text = 'yAs'
-                prakriya.log("Rule 7.3.113 & Sandhi: yāḍāpaḥ (yāṭ + as -> yAs)")
+                sup.text = 'yE' if is_ap else 'E'
+                prakriya.log("Rule: yāṭ/āṭ + e -> yE/E")
+            elif sup.upadeza in['Nasi', 'Nas']:
+                sup.text = 'yAs' if is_ap else 'As'
+                prakriya.log("Rule: yāṭ/āṭ + as -> yAs/As")
+
+def jasi_ca(prakriya: Prakriya) -> None:
+    """Rule 7.3.109: jasi ca. Guṇa for i/u ending stems before jas."""
+    stem = prakriya.terms[0]
+    sup = prakriya.terms[1]
+    if sup.upadeza == 'jas' and stem.text and stem.text[-1] in ['i', 'u']:
+        stem.text = stem.text[:-1] + apply_guna(stem.text[-1])
+        prakriya.log("Rule 7.3.109: jasi ca (i/u -> Guṇa before jas)")
+
+def aango_na_astriyam(prakriya: Prakriya) -> None:
+    """Rule 7.3.120: āṅo nā'striyām. ṭā -> nā for masc/neuter ghi stems."""
+    stem = prakriya.terms[0]
+    sup = prakriya.terms[1]
+    if sup.upadeza == 'wA' and stem.text and stem.text[-1] in['i', 'u']:
+        if 'stri' not in stem.tags:
+            sup.text = 'nA'
+            prakriya.log("Rule 7.3.120: āṅo nā'striyām (ṭā -> nā)")
+
+def aut_ni(prakriya: Prakriya) -> None:
+    """Rule 7.3.118: aut. ṅi -> au for ghi stems, and stem vowel -> a."""
+    stem = prakriya.terms[0]
+    sup = prakriya.terms[1]
+    if sup.upadeza == 'Ni' and stem.text and stem.text[-1] in ['i', 'u'] and 'stri' not in stem.tags:
+        stem.text = stem.text[:-1] + 'a'
+        sup.text = 'O'
+        prakriya.log("Rule 7.3.118 & 119: acce gher (ṅi -> au, i/u -> a)")
+
+def gher_ngiti(prakriya: Prakriya) -> None:
+    """Rule 7.3.111: gher ṅiti. Guṇa for ghi stems before ṅit affixes."""
+    stem = prakriya.terms[0]
+    sup = prakriya.terms[1]
+    if sup.upadeza in ['Ne', 'Nasi', 'Nas'] and stem.text and stem.text[-1] in ['i', 'u'] and 'stri' not in stem.tags:
+        stem.text = stem.text[:-1] + apply_guna(stem.text[-1])
+        prakriya.log("Rule 7.3.111: gher ṅiti (Guṇa before ṅit)")
+
+def ngasi_ngasosh_ca(prakriya: Prakriya) -> None:
+    """Rule 6.1.110: ṅasiṅasoś ca. e/o + as -> s."""
+    stem = prakriya.terms[0]
+    sup = prakriya.terms[1]
+    if sup.upadeza in ['Nasi', 'Nas'] and stem.text and stem.text[-1] in ['e', 'o']:
+        sup.text = 's'
+        prakriya.log("Rule 6.1.110: ṅasiṅasoś ca (e/o + as -> e/o + s)")

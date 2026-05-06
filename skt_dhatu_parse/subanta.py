@@ -24,11 +24,16 @@ def derive_subanta(pratipadika: str, vibhakti: int, vacana: int, gender: str = '
     # 2. Advanced Nominal Replacements
     rules.napumsaka_nom_acc(prakriya)
     rules.stri_ap_nom_acc(prakriya)
-    rules.stri_ap_ngit_yA(prakriya)
+    rules.stri_nadi_ngit_yA(prakriya)
     
     # 2. Advanced Nominal Replacements
     rules.ta_nasi_nasam_ina_at_syah(prakriya)
     rules.aani_capah(prakriya)
+    rules.jasi_ca(prakriya)
+    rules.aango_na_astriyam(prakriya)
+    rules.aut_ni(prakriya)
+    rules.gher_ngiti(prakriya)
+    rules.ngasi_ngasosh_ca(prakriya)
     rules.neryah(prakriya)
     rules.ato_bhisa_ais(prakriya)
     rules.hrasvanadyapo_nut_and_nami(prakriya)
