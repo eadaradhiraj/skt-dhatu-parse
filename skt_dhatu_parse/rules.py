@@ -322,7 +322,7 @@ def hali_ca(prakriya: Prakriya) -> None:
         t2 = prakriya.terms[i+1]
         if t1.term_type == 'dhatu' and t1.text and t2.text and t2.text[0] in SLP1_CONSONANTS:
             clean_dhatu = next((tag.split('_')[1] for tag in t1.tags if tag.startswith('clean_')), t1.text)
-            if clean_dhatu == 'kf': continue 
+            if clean_dhatu == 'kf' and t1.text.endswith('ur'): continue 
             if t1.text == 'div':
                 t1.text = 'dIv'
                 prakriya.log("Rule 8.2.77: hali ca (div -> dIv)")
@@ -361,6 +361,7 @@ def it_agama(prakriya: Prakriya) -> None:
                 continue
             is_anit_for_this = is_anit
             if clean_dhatu == 'gam' and has_lrt_lrn and is_parasmai: is_anit_for_this = False
+            if clean_dhatu == 'gam' and term.upadeza == 'san': is_anit_for_this = False
             
             is_vet = clean_dhatu in VET_ROOTS
             if is_vet and term.upadeza in['sya', 'tAsi']:
@@ -802,10 +803,10 @@ def yuvor_anakau(prakriya: Prakriya) -> None:
 
 def sanadyanta_dhatavah(prakriya: Prakriya) -> None:
     if len(prakriya.terms) >= 2:
-        dhatu = prakriya.terms[0]
-        suffix = prakriya.terms[1]
-        dhatu.text = dhatu.text + suffix.text
-        dhatu.upadeza = dhatu.text
+        dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), prakriya.terms[0])
+        new_text = "".join(t.text for t in prakriya.terms)
+        dhatu.text = new_text
+        dhatu.upadeza = new_text
         tags_to_remove =[t for t in dhatu.tags if t.startswith('gana_') or t.startswith('clean_')]
         for t in tags_to_remove:
             dhatu.tags.remove(t)
@@ -2322,3 +2323,61 @@ def skoh_samyogadyor_ante_ca(prakriya: Prakriya) -> None:
                     prakriya.terms[i].text = prakriya.terms[i].text[:-1]
                     prakriya.log("Rule 8.2.29: skoḥ saṃyogādyor ante ca (Dropped 's')")
                     break
+
+
+def sanyan_reduplication(prakriya: Prakriya) -> None:
+    """Rule 6.1.9: sanyaṅoḥ. Reduplicates the root for san and yaṅ."""
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    san_or_yan = next((t for t in prakriya.terms if t.upadeza in['san', 'yaN']), None)
+    if dhatu and san_or_yan:
+        abhyasa = Term(dhatu.upadeza, 'abhyasa')
+        abhyasa.text = dhatu.text
+        idx = prakriya.terms.index(dhatu)
+        prakriya.terms.insert(idx, abhyasa)
+        prakriya.log(f"Rule 6.1.9: sanyaṅoḥ (Reduplicated root -> '{abhyasa.text}')")
+
+def sany_atah(prakriya: Prakriya) -> None:
+    """Rule 7.4.79: sany ataḥ. 'a' in the abhyāsa becomes 'i' before san."""
+    abhyasa = next((t for t in prakriya.terms if t.term_type == 'abhyasa'), None)
+    san = next((t for t in prakriya.terms if t.upadeza == 'san'), None)
+    if abhyasa and san:
+        if abhyasa.text.endswith('a'):
+            abhyasa.text = abhyasa.text[:-1] + 'i'
+            prakriya.log("Rule 7.4.79: sany ataḥ (abhyāsa 'a' -> 'i')")
+
+def iko_jhal(prakriya: Prakriya) -> None:
+    """Rule 1.2.9: iko jhal. san becomes kit after iganta roots or jhal-ending roots with ik penultimate."""
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    san = next((t for t in prakriya.terms if t.upadeza == 'san'), None)
+    if dhatu and san and 'i' not in san.text:
+        clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
+        is_iganta = clean_dhatu[-1] in IK_VOWELS
+        is_igupadha_jhalanta = len(clean_dhatu) >= 2 and clean_dhatu[-1] in JHAL_CONSONANTS and clean_dhatu[-2] in IK_VOWELS
+        if is_iganta or is_igupadha_jhalanta:
+            san.tags.add('kit')
+            prakriya.log("Rule 1.2.9: iko jhal (san becomes kit)")
+
+def ajjhanagamam_sani(prakriya: Prakriya) -> None:
+    """Rule 6.4.16: aj hanagamāṃ sani. Lengthens ajanta, han, gam before kit/ṅit/aniṭ san."""
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    san = next((t for t in prakriya.terms if t.upadeza == 'san'), None)
+    if dhatu and san and 'i' not in san.text: # Must be aniṭ (iṭ wasn't added)
+        clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
+        if dhatu.text[-1] in SLP1_VOWELS or clean_dhatu in ['han', 'gam']:
+            if dhatu.text[-1] in['i', 'u', 'f', 'x', 'a']:
+                dirgha_map = {'a': 'A', 'i': 'I', 'u': 'U', 'f': 'F', 'x': 'X'}
+                dhatu.text = dhatu.text[:-1] + dirgha_map[dhatu.text[-1]]
+                prakriya.log("Rule 6.4.16: ajjhanagamāṃ sani (Lengthened before san)")
+
+def sanyan_rta_id_dhatoh(prakriya: Prakriya) -> None:
+    """Rule 7.1.100: ṛta id dhātoḥ. ṛ/ṝ -> ir/ur before san."""
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    san = next((t for t in prakriya.terms if t.upadeza == 'san'), None)
+    if dhatu and san and (dhatu.text.endswith('f') or dhatu.text.endswith('F')):
+        text = dhatu.text
+        if len(text) >= 2 and text[-2] in['p', 'P', 'b', 'B', 'm', 'v']:
+            dhatu.text = text[:-1] + 'ur'
+            prakriya.log("Rule 7.1.102: ud oṣṭhyapūrvasya (ṛ/ṝ -> ur)")
+        else:
+            dhatu.text = text[:-1] + 'ir'
+            prakriya.log("Rule 7.1.100: ṛta id dhātoḥ (ṛ/ṝ -> ir)")

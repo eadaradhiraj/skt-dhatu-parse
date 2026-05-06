@@ -302,6 +302,17 @@ class TestCoverageEdgeCases(unittest.TestCase):
         rules.skoh_samyogadyor_ante_ca(p)
         self.assertEqual(p.terms[0].text, 'maj')
 
+    def test_san_fallbacks(self):
+        from skt_dhatu_parse import rules
+        from skt_dhatu_parse.models import Term, Prakriya
+        p = Prakriya()
+        p.add_term(Term('a', 'Agama'))
+        rules.sanyan_reduplication(p)
+        rules.sany_atah(p)
+        rules.iko_jhal(p)
+        rules.ajjhanagamam_sani(p)
+        rules.sanyan_rta_id_dhatoh(p)
+
     def test_direct_skoh_yasut(self):
         from skt_dhatu_parse import rules
         from skt_dhatu_parse.models import Term, Prakriya

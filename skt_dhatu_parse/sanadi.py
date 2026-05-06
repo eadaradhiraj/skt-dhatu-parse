@@ -28,14 +28,38 @@ def derive_secondary_root(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = No
     resolve_it_markers(pratyaya)       # Strips 'Ric' to 'i' + Rit
 
     # 5. Apply Vrddhi & Augment Rules
-    rules.pug_nau(prakriya)
-    rules.labh_rabh_num(prakriya)
-    rules.han_ghatva_tatva(prakriya)
-    rules.ata_upadhayah(prakriya)  
-    rules.aco_nniti(prakriya)
-    rules.sarvadhatuka_ardhadhatukayoh(prakriya)   
-    
-    rules.eco_yayavayah(prakriya)  
+    if pratyaya_upadeza == 'Ric':
+        rules.pug_nau(prakriya)
+        rules.labh_rabh_num(prakriya)
+        rules.han_ghatva_tatva(prakriya)
+        rules.ata_upadhayah(prakriya)  
+        rules.aco_nniti(prakriya)
+        rules.sarvadhatuka_ardhadhatukayoh(prakriya)   
+        rules.eco_yayavayah(prakriya)  
+    elif pratyaya_upadeza == 'san':
+        rules.iko_jhal(prakriya)      # MUST run first to apply 'kit' tag
+        rules.it_agama(prakriya)      # Can now accurately block iṭ due to 'kit'
+        rules.ajjhanagamam_sani(prakriya)
+        
+        rules.sanyan_rta_id_dhatoh(prakriya)
+        rules.hali_ca(prakriya)
+        rules.sarvadhatuka_ardhadhatukayoh(prakriya)
+        
+        rules.sanyan_reduplication(prakriya)
+        rules.jes_ca(prakriya)
+        rules.haladi_seshah(prakriya)
+        rules.hrasvah(prakriya)
+        rules.ur_at(prakriya)
+        rules.abhyase_car_ca(prakriya)
+        rules.kuhos_cuh(prakriya)
+        rules.sany_atah(prakriya)
+        
+        rules.jhasas_tathor_dho_dhah(prakriya)
+        rules.jhalam_jas_jhasi(prakriya)
+        rules.ekaco_baso_bhas(prakriya)
+        rules.sadhoh_kas_si(prakriya)
+        rules.khari_ca(prakriya)
+        rules.adesa_pratyayayoh(prakriya)
     rules.sanadyanta_dhatavah(prakriya)
     
     return prakriya

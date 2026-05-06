@@ -52,6 +52,7 @@ def main() -> None:
     parser.add_argument("--krt", type=str, help="Generate a Primary Derivative (Kṛdanta)")
     parser.add_argument("--all-krt", action="store_true", help="Generate all common Kṛdanta forms")
     parser.add_argument("--causative", action="store_true", help="Generate the Causative (Ṇic) secondary root")
+    parser.add_argument("--desiderative", action="store_true", help="Generate the Desiderative (san) secondary root")
     parser.add_argument("--voice", choices=["parasmaipada", "atmanepada", "karmani", "bhave"], help="Force a specific voice")
     parser.add_argument("--history", action="store_true", help="Show derivation history")
 
@@ -75,8 +76,21 @@ def main() -> None:
     custom_root = None
     prakriya = None
 
-    # 1. Causative Generation
-    if args.causative:
+    # 1. Secondary Root Generation
+    if args.desiderative:
+        sanadi_prakriya = derive_secondary_root(raw_dhatu, 'san', gana=gana)
+        if sanadi_prakriya:
+            custom_root = sanadi_prakriya.terms[0]
+            print(f"\n✨ Forged Secondary Root (San): {custom_root.text}\n")
+            if args.history:
+                print("[San Derivation History]")
+                sanadi_prakriya.print_history()
+                print("-" * 40)
+        else:
+            print("❌ Failed to generate desiderative root.")
+            sys.exit(1)
+            
+    elif args.causative:
         causative_prakriya = derive_secondary_root(raw_dhatu, 'Ric', gana=gana)
         if causative_prakriya:
             custom_root = causative_prakriya.terms[0]
