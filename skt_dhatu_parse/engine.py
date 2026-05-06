@@ -197,6 +197,7 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
     rules.ekaco_baso_bhas(prakriya)
     rules.sadhoh_kas_si(prakriya)
     rules.mo_no_dhatoh(prakriya)
+    rules.anunasikasya_kvijhaloh_kniti(prakriya)
     rules.adesa_pratyayayoh(prakriya)             
     rules.sasivasighasinam_ca(prakriya)
     rules.rashabhyam_no_nah(prakriya)

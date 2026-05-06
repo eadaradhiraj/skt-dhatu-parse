@@ -50,7 +50,7 @@ TIN_ATMANEPADA_LIT = {
 ANIT_ROOTS = {
     'ji', 'nI', 'ci', 'Sru', 'stu', 'su', 'hu', 'dA', 'DA', 'sTA', 'pA', 'GrA', 
     'DmA', 'gA', 'yA', 'vA', 'snA', 'kf', 'hf', 'Df', 'sf', 'smf', 'stf', 'kF', 'jYA',
-    'glE', 'gE', 'mlE', 'dE', 'mE', 'sE', 'DyE', 'trE', 'hve', 'Sak', 'pac', 'muc', 'ric', 'vac', 'vic', 'sic', 'praC', 'tyaj', 'nij', 'BaYj', 
+    'glE', 'gE', 'mlE', 'dE', 'mE', 'sE', 'DyE', 'trE', 'hve', 'Sak', 'pac', 'kram', 'muc', 'ric', 'vac', 'vic', 'sic', 'praC', 'tyaj', 'nij', 'BaYj', 
     'Baj', 'Brajj', 'yaj', 'yuj', 'raYj', 'vij', 'svaYj', 'saYj', 'sfj', 'vraSc',
     'ad', 'kzuD', 'Kid', 'Cid', 'tud', 'nud', 'pad', 'Bid', 'vid', 'sad', 
     'svid', 'skand', 'kruD', 'buD', 'banD', 'yuD', 'ruD', 'rAD', 'vyaD', 
@@ -655,36 +655,6 @@ def khari_ca(prakriya: Prakriya) -> None:
                 t1.text = t1.text[:-1] + char_map[last_char]
                 prakriya.log(f"Rule 8.4.55: Changed '{last_char}' to '{char_map[last_char]}' (khari ca)")
 
-def rashabhyam_no_nah(prakriya: Prakriya) -> None:
-    has_trigger = False
-    blocked = False
-    allowed_intervening = set(SLP1_VOWELS).union(set('hyvrkKgGNpPbBmM'))
-    for term_idx, term in enumerate(prakriya.terms):
-        new_text = ""
-        for i, char in enumerate(term.text):
-            if char in['r', 'z', 'f', 'F']:
-                has_trigger = True
-                blocked = False 
-                new_text += char
-            elif has_trigger and not blocked:
-                if char == 'n': 
-                    next_char = term.text[i+1] if i + 1 < len(term.text) else ''
-                    is_padanta = (term_idx == len(prakriya.terms) - 1) and (i == len(term.text) - 1)
-                    if is_padanta:
-                        new_text += 'n'
-                        prakriya.log("Rule 8.4.37: padAntasya blocked Natva at word-end")
-                    elif next_char in['t', 'T', 'd', 'D', 's']:
-                        new_text += 'n'
-                    else:
-                        new_text += 'R'
-                        prakriya.log("Rule 8.4.1 (Natva): 'n' -> 'R'")
-                elif char not in allowed_intervening:
-                    blocked = True
-                    new_text += char
-                else: new_text += char
-            else: new_text += char
-        if term.text != new_text:
-            term.text = new_text
 
 def stuna_stuh(prakriya: Prakriya) -> None:
     for i in range(len(prakriya.terms)-1):
@@ -916,40 +886,6 @@ def upasarga_satva(prakriya: Prakriya) -> None:
                 dhatu.text = 'z' + dhatu.text[1:]
                 prakriya.log("Rule 8.3.65/66: Upasarga Satva (s -> z)")
 
-def upasarga_sandhi(prakriya: Prakriya) -> None:
-    upasarga_indices =[i for i, t in enumerate(prakriya.terms) if t.term_type == 'upasarga']
-    for idx in reversed(upasarga_indices):
-        upasarga = prakriya.terms[idx]
-        next_term = None
-        for j in range(idx + 1, len(prakriya.terms)):
-            if prakriya.terms[j].text:
-                next_term = prakriya.terms[j]
-                break
-        if next_term and is_vowel(next_term.text[0]):
-            first_vowel = next_term.text[0]
-            if upasarga.text.endswith('a') or upasarga.text.endswith('A'):
-                if first_vowel in ['a', 'A']:
-                    upasarga.text = upasarga.text[:-1]
-                    next_term.text = 'A' + next_term.text[1:]
-                    prakriya.log("Rule 6.1.101: Upasarga Savarna Dirgha (A)")
-                elif first_vowel in ['i', 'I']:
-                    upasarga.text = upasarga.text[:-1]
-                    next_term.text = 'e' + next_term.text[1:]
-                    prakriya.log("Rule 6.1.87: Upasarga Guna (e)")
-                elif first_vowel in ['u', 'U']:
-                    upasarga.text = upasarga.text[:-1]
-                    next_term.text = 'o' + next_term.text[1:]
-                    prakriya.log("Rule 6.1.87: Upasarga Guna (o)")
-                elif first_vowel in ['f', 'F']:
-                    upasarga.text = upasarga.text[:-1]
-                    next_term.text = 'Ar' + next_term.text[1:]
-                    prakriya.log("Rule 6.1.87: Upasarga Guna (Ar)")
-            elif upasarga.text.endswith('i') or upasarga.text.endswith('I'):
-                upasarga.text = upasarga.text[:-1] + 'y'
-                prakriya.log("Rule 6.1.77: Upasarga YaN (y)")
-            elif upasarga.text.endswith('u') or upasarga.text.endswith('U'):
-                upasarga.text = upasarga.text[:-1] + 'v'
-                prakriya.log("Rule 6.1.77: Upasarga YaN (v)")
 
 def vikarana_guna(prakriya: Prakriya) -> None:
     vikarana = next((t for t in prakriya.terms if t.term_type == 'vikaraRa'), None)
@@ -1503,30 +1439,6 @@ def sino_gunah(prakriya: Prakriya) -> None:
             dhatu.text = 'Se'
             prakriya.log("Rule 7.4.22: śiṅo guṇaḥ (SI -> Se)")
 
-def han_ghatva_tatva(prakriya: Prakriya) -> None:
-    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
-    if not dhatu: return
-    idx = prakriya.terms.index(dhatu)
-    if idx + 1 >= len(prakriya.terms): return
-    next_term = prakriya.terms[idx + 1]
-    
-    clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
-    
-    if clean_dhatu == 'han':
-        if ('Rit' in next_term.tags or 'Yit' in next_term.tags) and next_term.upadeza != 'Ral':
-            if dhatu.text.endswith('n'):
-                dhatu.text = dhatu.text[:-1] + 't'
-                prakriya.log("Rule 7.3.32: hanato ṇinnali (n -> t)")
-                
-        if ('Rit' in next_term.tags or 'Yit' in next_term.tags or (next_term.text and next_term.text.startswith('n'))):
-            if dhatu.text.startswith('h'):
-                dhatu.text = 'G' + dhatu.text[1:]
-                prakriya.log("Rule 7.3.54: ho hanter ñṇinneṣu (h -> G)")
-                
-        if any(t.term_type == 'abhyasa' for t in prakriya.terms):
-            if dhatu.text.startswith('h'):
-                dhatu.text = 'G' + dhatu.text[1:]
-                prakriya.log("Rule 7.3.55: abhyāsād dhasya (h -> G after abhyasa)")
 
 def dho_dhe_lopah(prakriya: Prakriya) -> None:
     """Rule 8.3.13: ḍho ḍhe lopaḥ & Rule 6.3.111: ḍhralope pūrvasya dīrgho'ṇaḥ"""
@@ -1739,41 +1651,6 @@ def atas_ca(prakriya: Prakriya) -> None:
             t2.text = t2.text[1:]
             prakriya.log(f"Rule 6.1.90: āṭaś ca (A + {old_vowel} -> {rep})")
 
-def ardhadhatuke_mula_parivartanam(prakriya: Prakriya) -> None:
-    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
-    lakara = next((t for t in prakriya.terms if t.term_type == 'lakara' or t.term_type == 'pratyaya'), None)
-    if not dhatu: return
-    
-    is_ardha_lakara = lakara and any(lak in lakara.tags for lak in['liW', 'luW', 'lfW', 'luN', 'lfN', 'ASIrliN'])
-    is_ardha = is_ardha_lakara or any('ardhadhatuka' in t.tags for t in prakriya.terms) or any(t.upadeza == 'cli' for t in prakriya.terms)
-    
-    if is_ardha:
-        clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
-        if clean_dhatu == 'as':
-            dhatu.text = 'BU'
-            dhatu.upadeza = 'BU'
-            dhatu.tags = set([t for t in dhatu.tags if not t.startswith('clean_')])
-            dhatu.tags.add('clean_BU')
-            prakriya.log("Rule 2.4.52: aster bhūḥ (as -> BU before ārdhadhātuka)")
-        elif clean_dhatu == 'brU':
-            dhatu.text = 'vac'
-            dhatu.upadeza = 'vac'
-            dhatu.tags = set([t for t in dhatu.tags if not t.startswith('clean_')])
-            dhatu.tags.add('clean_vac')
-            prakriya.log("Rule 2.4.53: bruvo vaciḥ (brU -> vac before ārdhadhātuka)")
-
-    is_lun = any('luN' in t.tags for t in prakriya.terms)
-    if is_lun:
-        dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
-        clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
-        if clean_dhatu == 'han':
-            dhatu.text = 'vaD'
-            dhatu.upadeza = 'vaD'
-            tags_to_remove =[t for t in dhatu.tags if t.startswith('clean_')]
-            for t in tags_to_remove: dhatu.tags.remove(t)
-            dhatu.tags.add('clean_vaD')
-            dhatu.tags.add('clean_vaD')
-            prakriya.log("Rule 2.4.43: luṅi ca (han -> vaD in Aorist)")
 
 def rdriso_ngi_gunah(prakriya: Prakriya) -> None:
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
@@ -2194,3 +2071,171 @@ def sasivasighasinam_ca(prakriya: Prakriya) -> None:
             if idx > 0 and dhatu.text[idx-1] in IN_VOWELS.union(set(['k','K','g','G','N'])):
                 dhatu.text = dhatu.text[:idx] + 'z' + dhatu.text[idx+1:]
                 prakriya.log("Rule 8.3.60: śāsivasighasīnāṃ ca (s -> ṣ)")
+
+def anunasikasya_kvijhaloh_kniti(prakriya: Prakriya) -> None:
+    """Rule 6.4.15: anunāsikasya kvijhaloḥ kṅiti. Lengthens penultimate vowel of nasal roots before jhal kit/ṅit."""
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    if not dhatu: return
+    idx = prakriya.terms.index(dhatu)
+    if idx + 1 >= len(prakriya.terms): return
+    next_term = prakriya.terms[idx + 1]
+    
+    if ('kit' in next_term.tags or 'Nit' in next_term.tags) and next_term.text and next_term.text[0] in JHAL_CONSONANTS:
+        if dhatu.text.endswith('m') or dhatu.text.endswith('n'):
+            text = dhatu.text
+            if len(text) >= 2 and text[-2] == 'a':
+                dhatu.text = text[:-2] + 'A' + text[-1]
+                prakriya.log("Rule 6.4.15: anunāsikasya kvijhaloḥ kṅiti (a -> A)")
+
+
+
+
+
+
+
+
+def ardhadhatuke_mula_parivartanam(prakriya: Prakriya) -> None:
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    lakara = next((t for t in prakriya.terms if t.term_type == 'lakara' or t.term_type == 'pratyaya'), None)
+    if not dhatu: return
+    
+    is_ardha_lakara = lakara and any(lak in lakara.tags for lak in['liW', 'luW', 'lfW', 'luN', 'lfN', 'ASIrliN'])
+    is_ardha = is_ardha_lakara or any('ardhadhatuka' in t.tags for t in prakriya.terms) or any(t.upadeza == 'cli' for t in prakriya.terms)
+    
+    if is_ardha:
+        clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
+        if clean_dhatu == 'as':
+            dhatu.text = 'BU'
+            dhatu.upadeza = 'BU'
+            dhatu.tags = set([t for t in dhatu.tags if not t.startswith('clean_')])
+            dhatu.tags.add('clean_BU')
+            prakriya.log("Rule 2.4.52: aster bhūḥ (as -> BU)")
+        elif clean_dhatu == 'brU':
+            dhatu.text = 'vac'
+            dhatu.upadeza = 'vac'
+            dhatu.tags = set([t for t in dhatu.tags if not t.startswith('clean_')])
+            dhatu.tags.add('clean_vac')
+            prakriya.log("Rule 2.4.53: bruvo vaciḥ (brU -> vac)")
+
+    is_lun = any('luN' in t.tags for t in prakriya.terms)
+    if is_lun:
+        dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+        clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
+        is_karmani = 'karmani' in dhatu.tags or 'bhave' in dhatu.tags
+        if clean_dhatu == 'han' and not is_karmani:
+            dhatu.text = 'vaD'
+            dhatu.upadeza = 'vaD'
+            tags_to_remove =[t for t in dhatu.tags if t.startswith('clean_')]
+            for t in tags_to_remove: dhatu.tags.remove(t)
+            dhatu.tags.add('clean_vaD')
+            prakriya.log("Rule 2.4.43: luṅi ca (han -> vaD in Aorist)")
+        elif clean_dhatu == 'i' and 'parasmaipada' in dhatu.tags:
+            dhatu.text = 'gA'
+            dhatu.upadeza = 'gA'
+            tags_to_remove =[t for t in dhatu.tags if t.startswith('clean_')]
+            for t in tags_to_remove: dhatu.tags.remove(t)
+            dhatu.tags.add('clean_gA')
+            prakriya.log("Rule 2.4.45: iṇo gā luṅi (i -> gA)")
+
+def han_ghatva_tatva(prakriya: Prakriya) -> None:
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    if not dhatu: return
+    idx = prakriya.terms.index(dhatu)
+    if idx + 1 >= len(prakriya.terms): return
+    next_term = prakriya.terms[idx + 1]
+    clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
+    
+    if clean_dhatu == 'han':
+        if ('Rit' in next_term.tags or 'Yit' in next_term.tags) and next_term.upadeza not in['Ral', 'ciR']:
+            if dhatu.text.endswith('n'):
+                dhatu.text = dhatu.text[:-1] + 't'
+                prakriya.log("Rule 7.3.32: hanato ñṇinnali (n -> t)")
+                
+        if ('Rit' in next_term.tags or 'Yit' in next_term.tags or (next_term.text and next_term.text.startswith('n'))):
+            if dhatu.text.startswith('h'):
+                dhatu.text = 'G' + dhatu.text[1:]
+                prakriya.log("Rule 7.3.54: ho hanter ñṇinneṣu (h -> G)")
+                
+        if any(t.term_type == 'abhyasa' for t in prakriya.terms):
+            if dhatu.text.startswith('h'):
+                dhatu.text = 'G' + dhatu.text[1:]
+                prakriya.log("Rule 7.3.55: abhyāsād dhasya (h -> G after abhyasa)")
+
+def upasarga_sandhi(prakriya: Prakriya) -> None:
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    upasarga_indices =[i for i, t in enumerate(prakriya.terms) if t.term_type == 'upasarga']
+    
+    if dhatu and upasarga_indices:
+        clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
+        upa_term = prakriya.terms[upasarga_indices[-1]]
+        if clean_dhatu == 'kf' and upa_term.text in ['sam', 'saM', 'saN', 'pari', 'upa']:
+            dhatu.text = 's' + dhatu.text
+            if upa_term.text.startswith('sa'):
+                upa_term.text = 'saM' # Revert to saM before suT
+            prakriya.log("Rule 6.1.137: samparyupebhyaḥ... (suṭ augment for kṛ)")
+            
+    for idx in reversed(upasarga_indices):
+        upasarga = prakriya.terms[idx]
+        next_term = None
+        for j in range(idx + 1, len(prakriya.terms)):
+            if prakriya.terms[j].text:
+                next_term = prakriya.terms[j]
+                break
+                
+        if next_term and is_vowel(next_term.text[0]):
+            first_vowel = next_term.text[0]
+            if upasarga.text.endswith('a') or upasarga.text.endswith('A'):
+                if first_vowel in['a', 'A']:
+                    upasarga.text = upasarga.text[:-1]
+                    next_term.text = 'A' + next_term.text[1:]
+                elif first_vowel in ['i', 'I']:
+                    upasarga.text = upasarga.text[:-1]
+                    next_term.text = 'e' + next_term.text[1:]
+                elif first_vowel in ['u', 'U']:
+                    upasarga.text = upasarga.text[:-1]
+                    next_term.text = 'o' + next_term.text[1:]
+                elif first_vowel in ['f', 'F']:
+                    upasarga.text = upasarga.text[:-1]
+                    next_term.text = 'Ar' + next_term.text[1:]
+            elif upasarga.text.endswith('i') or upasarga.text.endswith('I'):
+                upasarga.text = upasarga.text[:-1] + 'y'
+            elif upasarga.text.endswith('u') or upasarga.text.endswith('U'):
+                upasarga.text = upasarga.text[:-1] + 'v'
+        
+        if upasarga.text == 'sam' and next_term and next_term.text and next_term.text[0] not in SLP1_VOWELS:
+            upasarga.text = 'saM'
+
+def rashabhyam_no_nah(prakriya: Prakriya) -> None:
+    has_trigger = False
+    blocked = False
+    allowed_intervening = set(SLP1_VOWELS).union(set('hyvrkKgGNpPbBmM'))
+    
+    full_str = "".join(t.text for t in prakriya.terms)
+    char_idx = 0
+    for term_idx, term in enumerate(prakriya.terms):
+        new_text = ""
+        for i, char in enumerate(term.text):
+            if char in['r', 'z', 'f', 'F']:
+                has_trigger = True
+                blocked = False 
+                new_text += char
+            elif has_trigger and not blocked:
+                if char == 'n':
+                    next_char = full_str[char_idx+1] if char_idx + 1 < len(full_str) else ''
+                    is_padanta = (char_idx == len(full_str) - 1)
+                    if is_padanta:
+                        new_text += 'n'
+                    elif next_char in['t', 'T', 'd', 'D', 's']:
+                        new_text += 'n'
+                    else:
+                        new_text += 'R'
+                elif char not in allowed_intervening:
+                    blocked = True
+                    new_text += char
+                else: new_text += char
+            else: new_text += char
+            char_idx += 1
+            
+        if term.text != new_text:
+            term.text = new_text
+

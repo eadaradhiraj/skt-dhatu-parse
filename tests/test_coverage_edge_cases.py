@@ -226,5 +226,26 @@ class TestCoverageEdgeCases(unittest.TestCase):
         prakriya = derive_krdanta('vas', 'kta', gana=1)
         self.assertEqual(prakriya.get_current_string(), 'uzita')
 
+
+    def test_ino_ga_luni(self):
+        from skt_dhatu_parse.engine import derive
+        prakriya = derive('i', 'luN', purusha='prathama', vacana=0, gana=2, voice='parasmaipada')
+        self.assertEqual(prakriya.get_current_string(), 'agAt')
+
+    def test_sut_augment_samskrta(self):
+        from skt_dhatu_parse.krdanta import derive_krdanta
+        prakriya = derive_krdanta('kf', 'kta', gana=8, upasargas=['sam'])
+        self.assertEqual(prakriya.get_current_string(), 'saMskfta')
+
+    def test_anunasikasya_kvijhaloh_kniti(self):
+        from skt_dhatu_parse.krdanta import derive_krdanta
+        prakriya = derive_krdanta('kram', 'kta', gana=1)
+        self.assertEqual(prakriya.get_current_string(), 'krAnta')
+
+    def test_han_aorist_passive_ciN(self):
+        from skt_dhatu_parse.engine import derive
+        prakriya = derive('han', 'luN', purusha='prathama', vacana=0, gana=2, voice='karmani')
+        self.assertEqual(prakriya.get_current_string(), 'aGAni')
+
 if __name__ == '__main__':
     unittest.main()

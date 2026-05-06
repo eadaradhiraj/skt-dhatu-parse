@@ -100,7 +100,8 @@ def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_
     # 5. Consonant Sandhi
     rules.hali_ca(prakriya)
     rules.sasivasighasinam_ca(prakriya)
-    rules.anunasikalopo_jhali_kniti(prakriya)  
+    rules.anunasikalopo_jhali_kniti(prakriya)
+    rules.anunasikasya_kvijhaloh_kniti(prakriya)  
     rules.radabhyam_nishthato_nah(prakriya)
     rules.vrasca_bhrasja_sruja_mruja(prakriya) 
     rules.choh_kuh(prakriya)                
