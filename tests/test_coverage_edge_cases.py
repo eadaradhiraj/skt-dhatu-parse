@@ -278,5 +278,41 @@ class TestCoverageEdgeCases(unittest.TestCase):
         p = derive('i', 'laW', purusha='prathama', vacana=1, gana=2, voice='atmanepada')
         self.assertEqual(p.get_current_string(), 'iyAte')
 
+
+    def test_direct_radabhyam(self):
+        from skt_dhatu_parse import rules
+        from skt_dhatu_parse.models import Term, Prakriya
+        p = Prakriya()
+        d = Term('Svi', 'dhatu')
+        d.tags.add('clean_Svi')
+        p.add_term(d)
+        s = Term('ta', 'pratyaya')
+        s.upadeza = 'kta'
+        p.add_term(s)
+        rules.radabhyam_nishthato_nah(p)
+        self.assertEqual(p.terms[1].text, 'na')
+
+    def test_direct_skoh_masj(self):
+        from skt_dhatu_parse import rules
+        from skt_dhatu_parse.models import Term, Prakriya
+        p = Prakriya()
+        p.add_term(Term('masj', 'dhatu'))
+        p.add_term(Term('', 'vikaraRa'))
+        p.add_term(Term('ta', 'pratyaya'))
+        rules.skoh_samyogadyor_ante_ca(p)
+        self.assertEqual(p.terms[0].text, 'maj')
+
+    def test_direct_skoh_yasut(self):
+        from skt_dhatu_parse import rules
+        from skt_dhatu_parse.models import Term, Prakriya
+        p = Prakriya()
+        p.add_term(Term('BU', 'dhatu'))
+        y = Term('yAs', 'Agama')
+        y.tags.add('yAsuW')
+        p.add_term(y)
+        p.add_term(Term('t', 'pratyaya'))
+        rules.skoh_samyogadyor_ante_ca(p)
+        self.assertEqual(p.terms[1].text, 'yA')
+
 if __name__ == '__main__':
     unittest.main()
