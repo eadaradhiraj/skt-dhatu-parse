@@ -46,11 +46,10 @@ def derive(dhatu_slp1: str = None, lakara_name: str = 'laW', purusha: str = 'pra
         elif 'ubhayapada' in dhatu.tags:
             dhatu.tags.add('parasmaipada') 
             
-        if dhatu_slp1 == 'krI' and upasargas and upasargas[-1] in['vi', 'parA'] and voice != 'karmani':
-            dhatu.tags.discard('parasmaipada')
-            dhatu.tags.discard('ubhayapada')
-            dhatu.tags.add('atmanepada')
-            prakriya.log(f"Rule 1.3.44: 'krI' becomes Atmanepada after '{upasargas[-1]}'")
+        # Apply Upasarga voice shifts if the user didn't force a specific voice
+        if not voice:
+            clean_dhatu_text = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
+            rules.apply_upasarga_voice_shifts(clean_dhatu_text, dhatu.tags, upasargas, prakriya)
 
     prakriya.add_term(dhatu)
     

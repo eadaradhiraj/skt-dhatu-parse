@@ -61,6 +61,27 @@ ANIT_ROOTS = {
     'Gas', 'vas', 'dah', 'dih', 'nah', 'mih', 'ruh', 'lih', 'vah', 'guh', 'SAs'
 }
 
+VET_ROOTS = {
+    'syand', 'kxp', 'raD', 'naS', 'tfp', 'dfp', 'druh', 'muh', 'snih', 'snuh'
+}
+
+def apply_upasarga_voice_shifts(dhatu_text: str, tags: set, upasargas: list[str], prakriya: Prakriya) -> None:
+    """Rules 1.3.14 to 1.3.77: Shifts Parasmaipada/Atmanepada based on Upasargas."""
+    if not upasargas: return
+    last_upa = upasargas[-1]
+    
+    shifted = False
+    if dhatu_text == 'ji' and last_upa in ['vi', 'parA']: shifted = True
+    elif dhatu_text == 'gam' and last_upa == 'sam': shifted = True
+    elif dhatu_text == 'sTA' and last_upa in['sam', 'ava', 'pra', 'vi', 'upa']: shifted = True
+    elif dhatu_text == 'viS' and last_upa == 'ni': shifted = True
+    elif dhatu_text == 'krI' and last_upa in ['vi', 'parA']: shifted = True
+        
+    if shifted and 'parasmaipada' in tags:
+        tags.discard('parasmaipada')
+        tags.add('atmanepada')
+        prakriya.log(f"Rule 1.3.x (Voice Shift): '{last_upa} + {dhatu_text}' triggers Atmanepada.")
+
 def apply_guna(char: str) -> str:
     if char in['i', 'I']: return 'e'
     if char in ['u', 'U']: return 'o'
@@ -340,7 +361,16 @@ def it_agama(prakriya: Prakriya) -> None:
                 continue
             is_anit_for_this = is_anit
             if clean_dhatu == 'gam' and has_lrt_lrn and is_parasmai: is_anit_for_this = False
-            if is_lit:
+            
+            is_vet = clean_dhatu in VET_ROOTS
+            if is_vet and term.upadeza in['sya', 'tAsi']:
+                if prakriya.vikalpa:
+                    is_anit_for_this = True
+                    prakriya.log(f"Rule 7.2.42-45: Applied Aniṭ vikalpa for Veṭ root '{clean_dhatu}'")
+                else:
+                    is_anit_for_this = False
+                    prakriya.log(f"Rule 7.2.42-45: Applied Seṭ vikalpa for Veṭ root '{clean_dhatu}'")
+            elif is_lit:
                 KR_ADI =['kf', 'sf', 'Bf', 'vf', 'stu', 'dru', 'sru', 'Sru']
                 if clean_dhatu in KR_ADI: is_anit_for_this = True
                 else: is_anit_for_this = False

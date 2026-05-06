@@ -75,6 +75,21 @@ def resolve_it_markers(term: Term) -> None:
             term.tags.add('cit')
             term.text = 'Ana'
             return
+        elif term.upadeza == 'ktin':
+            term.tags.add('kit')
+            term.tags.add('nit')
+            term.text = 'ti'
+            return
+        elif term.upadeza == 'kyap':
+            term.tags.add('kit')
+            term.tags.add('pit')
+            term.text = 'ya'
+            return
+        elif term.upadeza == 'Ramul':
+            term.tags.add('Rit')
+            term.tags.add('lit') 
+            term.text = 'am'
+            return
             
         if len(term.text) > 0:
             initial_char = term.text[0]
