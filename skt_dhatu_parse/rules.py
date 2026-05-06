@@ -736,11 +736,14 @@ def ho_dhah_dader_ghah(prakriya: Prakriya) -> None:
 
 
 def samyogantasya_lopah(prakriya: Prakriya) -> None:
-    suffix = prakriya.terms[-1]
-    text = suffix.text
-    if len(text) >= 2 and text[-1] in SLP1_CONSONANTS and text[-2] in SLP1_CONSONANTS:
-        suffix.text = text[:-1]
-        prakriya.log(f"Rule 8.2.23: Dropped final consonant -> '{suffix.text}'")
+    """Rule 8.2.23: saṃyogāntasya lopaḥ. Drops final consonant of a padānta cluster."""
+    word = "".join(t.text for t in prakriya.terms)
+    if len(word) >= 2 and word[-1] in SLP1_CONSONANTS and word[-2] in SLP1_CONSONANTS:
+        for t in reversed(prakriya.terms):
+            if len(t.text) > 0:
+                t.text = t.text[:-1]
+                prakriya.log(f"Rule 8.2.23: saṃyogāntasya lopaḥ (Dropped final consonant of cluster)")
+                break
 
 def rutva_visarga(prakriya: Prakriya) -> None:
     suffix = prakriya.terms[-1]
@@ -2636,3 +2639,21 @@ def ngasi_ngasosh_ca(prakriya: Prakriya) -> None:
     if sup.upadeza in ['Nasi', 'Nas'] and stem.text and stem.text[-1] in ['e', 'o']:
         sup.text = 's'
         prakriya.log("Rule 6.1.110: ṅasiṅasoś ca (e/o + as -> e/o + s)")
+
+def at_stem_num_augment(prakriya: Prakriya) -> None:
+    """Rule 7.1.70: ugidacāṃ sarvanāmasthāne... Adds 'num' (n) to '-at' stems in strong masculine cases."""
+    stem = prakriya.terms[0]
+    sup = prakriya.terms[1]
+    if stem.text.endswith('at') and 'puman' in stem.tags:
+        # Strong cases (Sarvanāmasthāna): su, O, jas, am, Ow
+        if sup.upadeza in['su~', 'O', 'jas', 'am', 'Ow']:
+            stem.text = stem.text[:-1] + 'nt'
+            prakriya.log("Rule 7.1.70: ugidacāṃ sarvanāmasthāne (Added 'num' to -at stem)")
+
+def hal_su_lopa(prakriya: Prakriya) -> None:
+    """Rule 6.1.68: halṅyābbhyo... Drops 'su' after a consonant."""
+    stem = prakriya.terms[0]
+    sup = prakriya.terms[1]
+    if stem.text and stem.text[-1] not in SLP1_VOWELS and sup.upadeza == 'su~':
+        sup.text = ''
+        prakriya.log("Rule 6.1.68: halṅyābbhyo (Dropped 'su' after consonant)")

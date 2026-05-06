@@ -8,8 +8,11 @@ def print_declension(pratipadika: str, gender: str = 'm') -> None:
     if gender == 'f' and pratipadika.endswith('a'):
         pratipadika = pratipadika[:-1] + 'A'
         print(f"\n✨ Auto-applied feminine ṭāp (ā) suffix: {pratipadika}")
+    stem_type = f"{pratipadika[-1]}-stem" if pratipadika[-1] in "aAiIuUfFxX" else "Consonant-stem"
+    g_str = "Masculine" if gender == 'm' else "Feminine" if gender == 'f' else "Neuter"
+    
     print(f"\n=======================================================")
-    print(f" Declension (Subanta): {pratipadika} | {'Masculine a-stem' if gender == 'm' else 'Neuter a-stem' if gender == 'n' else 'Feminine ā-stem'}")
+    print(f" Declension (Subanta): {pratipadika} | {g_str} {stem_type}")
     print(f"=======================================================")
     
     vibhaktis =['1st (Nom)', '2nd (Acc)', '3rd (Inst)', '4th (Dat)', '5th (Abl)', '6th (Gen)', '7th (Loc)']

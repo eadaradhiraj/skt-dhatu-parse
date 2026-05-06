@@ -90,6 +90,10 @@ def resolve_it_markers(term: Term) -> None:
             term.tags.add('lit') 
             term.text = 'am'
             return
+        elif term.upadeza == 'Nasi':
+            term.tags.add('Nit')
+            term.text = 'as'
+            return
             
         if len(term.text) > 0:
             initial_char = term.text[0]

@@ -12,6 +12,7 @@ def derive_subanta(pratipadika: str, vibhakti: int, vacana: int, gender: str = '
     stem = Term(pratipadika, 'pratipadika')
     if gender == 'n': stem.tags.add('napumsaka')
     elif gender == 'f': stem.tags.add('stri')
+    else: stem.tags.add('puman') # puman = masculine
     prakriya.add_term(stem)
     
     sup = Term('sup', 'pratyaya')
@@ -27,6 +28,8 @@ def derive_subanta(pratipadika: str, vibhakti: int, vacana: int, gender: str = '
     rules.stri_nadi_ngit_yA(prakriya)
     
     # 2. Advanced Nominal Replacements
+    rules.at_stem_num_augment(prakriya)
+    rules.hal_su_lopa(prakriya)
     rules.ta_nasi_nasam_ina_at_syah(prakriya)
     rules.aani_capah(prakriya)
     rules.jasi_ca(prakriya)
@@ -54,8 +57,11 @@ def derive_subanta(pratipadika: str, vibhakti: int, vacana: int, gender: str = '
     rules.iko_yanaci(prakriya)
     
     # 5. Consonant Sandhi & Cleanup
+    rules.jhalam_jas_jhasi(prakriya)    # t -> d before bh
+    rules.khari_ca(prakriya)            # d -> t before s
     rules.adesa_pratyayayoh(prakriya) # ṣatva for rāmeṣu
     rules.natva_sandhi(prakriya)      # ṇatva for rāmeṇa, rāmāṇām
+    rules.samyogantasya_lopah(prakriya) # Drops 't' in gacchant -> gacchan
     rules.rutva_visarga(prakriya)     # s -> H
     
     return prakriya
