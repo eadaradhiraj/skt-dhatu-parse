@@ -2239,3 +2239,19 @@ def rashabhyam_no_nah(prakriya: Prakriya) -> None:
         if term.text != new_text:
             term.text = new_text
 
+
+def cjoh_ku_ghinnyatoh(prakriya: Prakriya) -> None:
+    """Rule 7.3.52: cjoḥ ku ghiṇṇyatoḥ. c/j -> k/g before ghit or ṇyat."""
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    if not dhatu: return
+    idx = prakriya.terms.index(dhatu)
+    if idx + 1 >= len(prakriya.terms): return
+    suffix = prakriya.terms[idx + 1]
+
+    if 'Git' in suffix.tags or suffix.upadeza == 'Ryat':
+        if dhatu.text.endswith('c'):
+            dhatu.text = dhatu.text[:-1] + 'k'
+            prakriya.log("Rule 7.3.52: cjoḥ ku ghiṇṇyatoḥ (c -> k)")
+        elif dhatu.text.endswith('j'):
+            dhatu.text = dhatu.text[:-1] + 'g'
+            prakriya.log("Rule 7.3.52: cjoḥ ku ghiṇṇyatoḥ (j -> g)")
