@@ -9,7 +9,7 @@ def print_declension(pratipadika: str, gender: str = 'm') -> None:
         pratipadika = pratipadika[:-1] + 'A'
         print(f"\n✨ Auto-applied feminine ṭāp (ā) suffix: {pratipadika}")
     stem_type = f"{pratipadika[-1]}-stem" if pratipadika[-1] in "aAiIuUfFxX" else "Consonant-stem"
-    g_str = "Masculine" if gender == 'm' else "Feminine" if gender == 'f' else "Neuter"
+    g_str = "Masculine" if gender == 'm' else "Feminine" if gender == 'f' else "Pronoun" if gender == 'p' else "Neuter"
     
     print(f"\n=======================================================")
     print(f" Declension (Subanta): {pratipadika} | {g_str} {stem_type}")

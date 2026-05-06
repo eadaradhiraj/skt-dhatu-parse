@@ -341,5 +341,18 @@ class TestCLI(unittest.TestCase):
         prints = [str(c.args[0]) for c in mock_print.call_args_list if c.args]
         self.assertTrue(any('rAmA' in s for s in prints))
 
+
+    @patch('sys.argv', ['cli.py', '--analyze', 'Bavati'])
+    @patch('builtins.print')
+    def test_cli_analyze(self, mock_print):
+        from skt_dhatu_parse.cli import main
+        with self.assertRaises(SystemExit): main()
+        
+    @patch('sys.argv',['cli.py', 'ziva', '--taddhita', 'aR'])
+    @patch('builtins.print')
+    def test_cli_taddhita(self, mock_print):
+        from skt_dhatu_parse.cli import main
+        main()
+
 if __name__ == '__main__':
     unittest.main()

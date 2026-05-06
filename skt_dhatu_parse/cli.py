@@ -43,7 +43,7 @@ def resolve_gana(dhatu_slp1: str, user_gana: int = None) -> int:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="🕉️  Paninian Sanskrit Derivation Engine")
-    parser.add_argument("dhatu", help="The SLP1 root to conjugate")
+    parser.add_argument("dhatu", nargs="?", default="dummy", help="The SLP1 root/stem to process")
     parser.add_argument("-g", "--gana", type=int, help="Specify the Gaṇa (1-10) for homonyms")
     parser.add_argument("-l", "--lakara", default="laW", help="Lakāra (Tense/Mood)")
     parser.add_argument("-p", "--purusha", default="prathama", choices=["prathama", "madhyama", "uttama"], help="Person")
@@ -56,7 +56,9 @@ def main() -> None:
     parser.add_argument("--voice", choices=["parasmaipada", "atmanepada", "karmani", "bhave"], help="Force a specific voice")
     parser.add_argument("--history", action="store_true", help="Show derivation history")
     parser.add_argument("--decline", action="store_true", help="Decline a nominal stem (Subanta)")
-    parser.add_argument("--gender", choices=['m', 'f', 'n'], default='m', help="Gender for declension (m/f/n)")
+    parser.add_argument("--taddhita", type=str, help="Generate a Secondary Derivative (Taddhita)")
+    parser.add_argument("--analyze", type=str, help="Analyze a form (Reverse Lookup MVP)")
+    parser.add_argument("--gender", choices=['m', 'f', 'n', 'p'], default='m', help="Gender for declension (m/f/n)")
 
     args = parser.parse_args()
 
@@ -73,7 +75,7 @@ def main() -> None:
                 print(f"⚠️ Warning: '{p}' is not a recognized Pāṇinian Upasarga. Attempting to process anyway.")
                 upasargas.append(p)
 
-    if args.decline and not args.krt:
+    if (getattr(args, 'decline', False) or getattr(args, 'taddhita', False) or getattr(args, 'analyze', False)) and not getattr(args, 'krt', False):
         gana = None
     else:
         gana = resolve_gana(raw_dhatu, args.gana)
@@ -127,6 +129,22 @@ def main() -> None:
                 print(f"{p:<20} | Failed")
         print()
         
+    if args.analyze:
+        from .analyzer import analyze_word
+        res = analyze_word(args.analyze)
+        print(f"\n🔬 Analysis for '{args.analyze}':")
+        for r in res['analysis']:
+            print(f"  - {r}")
+        sys.exit(0)
+        
+    elif args.taddhita:
+        from .taddhita import derive_taddhita
+        prakriya = derive_taddhita(raw_dhatu, args.taddhita)
+        if prakriya:
+            print(f"\n✨ Taddhita Result: {prakriya.get_current_string()}\n")
+            if args.history:
+                prakriya.print_history()
+                
     elif args.krt:
         prakriya = derive_krdanta(raw_dhatu, args.krt, gana=gana, upasargas=upasargas) 
         if prakriya:

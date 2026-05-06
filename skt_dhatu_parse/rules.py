@@ -2408,61 +2408,45 @@ def substitute_sup(prakriya: Prakriya, vibhakti: int, vacana: int) -> None:
     prakriya.log(f"Rule 4.1.2: Added sup affix '{new_suffix}'")
 
 def ta_nasi_nasam_ina_at_syah(prakriya: Prakriya) -> None:
-    """Rule 7.1.12: ṭāṅasiṅasāminātsyāḥ. a-stem replacements for Inst/Abl/Gen singular."""
     stem = prakriya.terms[0]
     sup = prakriya.terms[1]
-    if stem.text.endswith('a'):
-        if sup.upadeza == 'wA':
-            sup.text = 'ina'
-            prakriya.log("Rule 7.1.12: ṭā -> ina")
-        elif sup.upadeza == 'Nasi':
-            sup.text = 'At'
-            prakriya.log("Rule 7.1.12: ṅasi -> āt")
-        elif sup.upadeza == 'Nas':
-            sup.text = 'sya'
-            prakriya.log("Rule 7.1.12: ṅas -> sya")
-            
+    if stem.upadeza.endswith('a') and stem.text.endswith('a'):
+        if sup.upadeza == 'wA': sup.text = 'ina'
+        elif sup.upadeza == 'Nasi': sup.text = 'At'
+        elif sup.upadeza == 'Nas': sup.text = 'sya'
+
 def neryah(prakriya: Prakriya) -> None:
-    """Rule 7.1.13: ṅeryaḥ. a-stem + ṅe -> ya."""
     stem = prakriya.terms[0]
     sup = prakriya.terms[1]
-    if stem.text.endswith('a') and sup.upadeza == 'Ne':
+    if stem.upadeza.endswith('a') and stem.text.endswith('a') and sup.upadeza == 'Ne':
         sup.text = 'ya'
-        prakriya.log("Rule 7.1.13: ṅeryaḥ (ṅe -> ya)")
 
 def ato_bhisa_ais(prakriya: Prakriya) -> None:
-    """Rule 7.1.9: ato bhisa ais. a-stem + bhis -> ais."""
     stem = prakriya.terms[0]
     sup = prakriya.terms[1]
-    if stem.text.endswith('a') and sup.upadeza == 'Bis':
+    if stem.upadeza.endswith('a') and stem.text.endswith('a') and sup.upadeza == 'Bis':
         sup.text = 'Es'
         prakriya.log("Rule 7.1.9: ato bhisa ais (bhis -> ais)")
 
 def suti_ca_yanyi(prakriya: Prakriya) -> None:
-    """Rule 7.3.102: suṭi ca & 7.3.101: ato dīrgho yañi. Lengthens 'a' before yañ sup."""
     stem = prakriya.terms[0]
     sup = prakriya.terms[1]
-    if stem.text.endswith('a') and sup.text and sup.text[0] in YAY_CONSONANTS:
+    if stem.upadeza.endswith('a') and stem.text.endswith('a') and sup.text and sup.text[0] in YAY_CONSONANTS:
         if 'bahu' not in sup.tags or sup.upadeza == 'Bis':
             stem.text = stem.text[:-1] + 'A'
-            prakriya.log("Rule 7.3.102: suṭi ca (a -> Ā before yañ)")
 
 def bahuvacane_jhalyet(prakriya: Prakriya) -> None:
-    """Rule 7.3.103: bahuvacane jhalyet. a -> e before plural jhal-initial sup."""
     stem = prakriya.terms[0]
     sup = prakriya.terms[1]
-    if stem.text.endswith('a') and 'bahu' in sup.tags and sup.text and sup.text[0] in JHAL_CONSONANTS: 
+    if stem.upadeza.endswith('a') and stem.text.endswith('a') and 'bahu' in sup.tags and sup.text and sup.text[0] in JHAL_CONSONANTS:
         if sup.upadeza != 'Bis':
             stem.text = stem.text[:-1] + 'e'
-            prakriya.log("Rule 7.3.103: bahuvacane jhalyet (a -> e before plural jhal)")
 
 def osi_ca(prakriya: Prakriya) -> None:
-    """Rule 7.3.104: osi ca. a -> e before os."""
     stem = prakriya.terms[0]
     sup = prakriya.terms[1]
-    if stem.text.endswith('a') and sup.upadeza == 'os':
+    if stem.upadeza.endswith('a') and stem.text.endswith('a') and sup.upadeza == 'os':
         stem.text = stem.text[:-1] + 'e'
-        prakriya.log("Rule 7.3.104: osi ca (a -> e before os)")
 
 def prathamayoh_purvasavarnah(prakriya: Prakriya) -> None:
     """Rule 6.1.102: prathamayoḥ pūrvasavarṇaḥ. ak + ac in Nom/Acc -> long pūrva."""
@@ -2657,3 +2641,85 @@ def hal_su_lopa(prakriya: Prakriya) -> None:
     if stem.text and stem.text[-1] not in SLP1_VOWELS and sup.upadeza == 'su~':
         sup.text = ''
         prakriya.log("Rule 6.1.68: halṅyābbhyo (Dropped 'su' after consonant)")
+
+# --- ADVANCED SUBANTA & PRONOUNS ---
+def sarvanama_smay_smat_smin(prakriya: Prakriya) -> None:
+    """Rules 7.1.14, 7.1.15, 7.1.17, 7.1.52: Pronoun replacements."""
+    stem = prakriya.terms[0]
+    sup = prakriya.terms[1]
+    if 'sarvanama' in stem.tags and stem.text.endswith('a'):
+        if sup.upadeza == 'Ne': sup.text = 'smE'; sup.upadeza = 'smE'
+        elif sup.upadeza == 'Nasi': sup.text = 'smAt'; sup.upadeza = 'smAt'
+        elif sup.upadeza == 'Ni': sup.text = 'smin'; sup.upadeza = 'smin'
+        elif sup.upadeza == 'jas': sup.text = 'I'; sup.upadeza = 'I'
+        elif sup.upadeza == 'Am': sup.text = 'sAm'; sup.upadeza = 'sAm'
+        prakriya.log("Rule 7.1.x: Sarvanāma affix replacement applied.")
+
+def an_in_as_stems(prakriya: Prakriya) -> None:
+    """Rules for rājan, yogin, manas."""
+    stem = prakriya.terms[0]
+    sup = prakriya.terms[1]
+    
+    if stem.text.endswith('as') and sup.text.startswith('B'):
+        stem.text = stem.text[:-2] + 'o'
+        prakriya.log("Rule: as -> o before bhis/bhyām")
+        
+    if stem.text.endswith('n'):
+        if sup.upadeza == 'su~':
+            if stem.text.endswith('an'): stem.text = stem.text[:-2] + 'A'
+            elif stem.text.endswith('in'): stem.text = stem.text[:-2] + 'I'
+            sup.text = ''
+            prakriya.log("Rule 8.2.7 & 6.4.8: Dropped n and lengthened")
+        elif sup.text.startswith('B'):
+            stem.text = stem.text[:-1]
+            prakriya.log("Rule 8.2.7: Dropped n before pada consonant")
+        elif stem.text.endswith('an') and sup.text and is_vowel(sup.text[0]) and sup.upadeza not in['O', 'jas', 'am', 'Ow', 'su~']:
+            stem.text = stem.text[:-2] + 'n'
+            prakriya.log("Rule 6.4.134: allopo'naḥ (Dropped 'a')")
+        elif stem.text.endswith('an') and sup.upadeza in ['O', 'jas', 'am', 'Ow']:
+            stem.text = stem.text[:-2] + 'An'
+            prakriya.log("Rule 6.4.8: Lengthened 'a' to 'Ā' in strong cases")
+
+def scuna_scuh(prakriya: Prakriya) -> None:
+    """Rule 8.4.40: stoḥ ścunā ścuḥ (Dental + Palatal -> Palatal)."""
+    for term in prakriya.terms:
+        if 'jn' in term.text:
+            term.text = term.text.replace('jn', 'jY')
+            prakriya.log("Rule 8.4.40: stoḥ ścunā ścuḥ (j + n -> j + ñ)")
+    for i in range(len(prakriya.terms)-1):
+        t1 = prakriya.terms[i]
+        t2 = prakriya.terms[i+1]
+        if t1.text.endswith('j') and t2.text.startswith('n'):
+            t2.text = 'Y' + t2.text[1:]
+            prakriya.log("Rule 8.4.40: stoḥ ścunā ścuḥ (j + n -> j + ñ)")
+
+def taddhita_adivrddhi(prakriya: Prakriya) -> None:
+    """Rule 7.2.117: taddhiteṣvacāmādeḥ. Vṛddhi of first vowel."""
+    stem = prakriya.terms[0]
+    suf = prakriya.terms[1]
+    if 'taddhita' in suf.tags and ('Rit' in suf.tags or 'Yit' in suf.tags or 'kit' in suf.tags):
+        text = stem.text
+        for i, char in enumerate(text):
+            if is_vowel(char):
+                stem.text = text[:i] + apply_vrddhi(char) + text[i+1:]
+                prakriya.log(f"Rule 7.2.117: taddhiteṣvacāmādeḥ (Ādivṛddhi -> {stem.text})")
+                break
+
+def or_gunah(prakriya: Prakriya) -> None:
+    """Rule 6.4.146: or guṇaḥ."""
+    stem = prakriya.terms[0]
+    suf = prakriya.terms[1]
+    if 'taddhita' in suf.tags and stem.text.endswith('u'):
+        if suf.text and (suf.text[0] in SLP1_VOWELS or suf.text[0] == 'y'):
+            stem.text = stem.text[:-1] + 'o'
+            prakriya.log("Rule 6.4.146: or guṇaḥ (u -> o before taddhita in bha state)")
+
+def bhasya_ter_lopah(prakriya: Prakriya) -> None:
+    """Rule 6.4.148: yasyeti ca. Drops final a/i."""
+    stem = prakriya.terms[0]
+    suf = prakriya.terms[1]
+    if 'taddhita' in suf.tags and suf.text and (is_vowel(suf.text[0]) or suf.text[0] == 'y'):
+        if stem.text.endswith('a') or stem.text.endswith('i'):
+            dropped = stem.text[-1]
+            stem.text = stem.text[:-1]
+            prakriya.log(f"Rule 6.4.148: yasyeti ca (Dropped '{dropped}')")
