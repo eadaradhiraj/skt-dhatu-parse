@@ -55,6 +55,8 @@ def main() -> None:
     parser.add_argument("--desiderative", action="store_true", help="Generate the Desiderative (san) secondary root")
     parser.add_argument("--voice", choices=["parasmaipada", "atmanepada", "karmani", "bhave"], help="Force a specific voice")
     parser.add_argument("--history", action="store_true", help="Show derivation history")
+    parser.add_argument("--decline", action="store_true", help="Decline a nominal stem (Subanta)")
+    parser.add_argument("--gender", choices=['m', 'f', 'n'], default='m', help="Gender for declension (m/f/n)")
 
     args = parser.parse_args()
 
@@ -71,7 +73,10 @@ def main() -> None:
                 print(f"⚠️ Warning: '{p}' is not a recognized Pāṇinian Upasarga. Attempting to process anyway.")
                 upasargas.append(p)
 
-    gana = resolve_gana(raw_dhatu, args.gana)
+    if args.decline and not args.krt:
+        gana = None
+    else:
+        gana = resolve_gana(raw_dhatu, args.gana)
     
     custom_root = None
     prakriya = None
@@ -125,10 +130,18 @@ def main() -> None:
     elif args.krt:
         prakriya = derive_krdanta(raw_dhatu, args.krt, gana=gana, upasargas=upasargas) 
         if prakriya:
-            print(f"\n✨ Kṛdanta Result: {prakriya.get_current_string()}\n")
+            krt_stem = prakriya.get_current_string()
+            print(f"\n✨ Kṛdanta Result: {krt_stem}\n")
+            if args.decline:
+                from .decline import print_declension
+                print_declension(krt_stem, args.gender)
             
     elif args.table:
         print_conjugation(raw_dhatu, lakara_name=args.lakara, gana=gana, upasargas=upasargas, custom_dhatu=custom_root, voice=args.voice) 
+        
+    elif args.decline and not args.krt:
+        from .decline import print_declension
+        print_declension(raw_dhatu, args.gender)
         
     else:
         prakriya = derive(raw_dhatu, lakara_name=args.lakara, purusha=args.purusha, vacana=args.vacana, gana=gana, upasargas=upasargas, custom_dhatu=custom_root, voice=args.voice)

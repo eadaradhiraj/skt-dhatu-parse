@@ -105,7 +105,7 @@ def resolve_it_markers(term: Term) -> None:
                 
         if len(term.text) > 0 and term.upadeza and term.upadeza[-1] in SLP1_CONSONANTS:
             final_char = term.text[-1]
-            is_vibhakti = 'tin' in term.tags
+            is_vibhakti = 'tin' in term.tags or any(tag.startswith('vibhakti_') for tag in term.tags)
             is_tusmah = final_char in['t', 'T', 'd', 'D', 'n', 's', 'm']
             
             if not (is_vibhakti and is_tusmah):

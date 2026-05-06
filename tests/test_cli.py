@@ -272,5 +272,74 @@ class TestCLI(unittest.TestCase):
         prints = [str(c.args[0]) for c in mock_print.call_args_list if c.args]
         self.assertTrue(any('acCEtsIt/acCidat' in s for s in prints))
 
+
+    @patch('sys.argv',['cli.py', 'BU', '--desiderative'])
+    @patch('skt_dhatu_parse.cli.derive_secondary_root')
+    @patch('builtins.print')
+    def test_cli_desiderative_success(self, mock_print, mock_derive_sec) -> None:
+        mock_p = __import__('unittest.mock').mock.MagicMock()
+        mock_p.__bool__.return_value = True
+        mock_p.terms =[__import__('unittest.mock').mock.MagicMock(text='buBUza')]
+        mock_derive_sec.return_value = mock_p
+        from skt_dhatu_parse.cli import main
+        main()
+        mock_derive_sec.assert_called_once()
+
+    @patch('sys.argv',['cli.py', 'xyz_invalid', '--desiderative'])
+    @patch('skt_dhatu_parse.cli.derive_secondary_root')
+    @patch('builtins.print')
+    def test_cli_desiderative_failure(self, mock_print, mock_derive_sec) -> None:
+        mock_derive_sec.return_value = None
+        from skt_dhatu_parse.cli import main
+        with self.assertRaises(SystemExit):
+            main()
+
+
+    @patch('sys.argv', ['cli.py', 'BU', '--desiderative'])
+    @patch('skt_dhatu_parse.cli.derive_secondary_root', return_value=None)
+    @patch('builtins.print')
+    def test_cli_desid_failure_branch(self, mock_print, mock_derive_sec) -> None:
+        with self.assertRaises(SystemExit):
+            from skt_dhatu_parse.cli import main
+            main()
+
+    @patch('sys.argv', ['cli.py', 'BU', '--desiderative', '--history'])
+    @patch('builtins.print')
+    def test_cli_desid_history_branch(self, mock_print) -> None:
+        from skt_dhatu_parse.cli import main
+        main()
+
+
+    @patch('sys.argv',['cli.py', 'rAma', '--decline'])
+    @patch('skt_dhatu_parse.decline.print_declension')
+    def test_cli_decline_only(self, mock_print_dec) -> None:
+        from skt_dhatu_parse.cli import main
+        main()
+        mock_print_dec.assert_called_once()
+
+    @patch('sys.argv',['cli.py', 'gam', '--krt', 'kta', '--decline'])
+    @patch('skt_dhatu_parse.decline.print_declension')
+    def test_cli_krt_and_decline(self, mock_print_dec) -> None:
+        from skt_dhatu_parse.cli import main
+        main()
+        mock_print_dec.assert_called_once()
+        
+    @patch('skt_dhatu_parse.decline.derive_subanta', return_value=None)
+    @patch('builtins.print')
+    def test_decline_print_failure_branch(self, mock_print, mock_derive) -> None:
+        from skt_dhatu_parse.decline import print_declension
+        print_declension('rAma')
+        prints = [str(c.args[0]) for c in mock_print.call_args_list if c.args]
+        self.assertTrue(any('Failed' in s for s in prints))
+
+
+    @patch('sys.argv',['cli.py', 'rAma', '--decline', '--gender', 'f'])
+    @patch('builtins.print')
+    def test_cli_decline_feminine_auto_tap(self, mock_print) -> None:
+        from skt_dhatu_parse.cli import main
+        main()
+        prints = [str(c.args[0]) for c in mock_print.call_args_list if c.args]
+        self.assertTrue(any('rAmA' in s for s in prints))
+
 if __name__ == '__main__':
     unittest.main()
