@@ -123,7 +123,7 @@ class TestKrdanta(unittest.TestCase):
 
     def test_vrasc_samprasarana_and_retroflexion(self) -> None:
         prakriya = derive_krdanta('vraSc', 'kta', gana=6)
-        self.assertEqual(prakriya.get_current_string(), 'vfzwa')
+        self.assertEqual(prakriya.get_current_string(), 'vfkRa')
 
     def test_prac_tavya_and_satr(self) -> None:
         p_tavya = derive_krdanta('praC', 'tavya', gana=6)

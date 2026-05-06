@@ -93,6 +93,7 @@ def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_
     rules.krpo_ro_lah(prakriya)
     rules.vrddhir_eci(prakriya)
     rules.akah_savarne_dirghah(prakriya)
+    rules.aci_snu_dhatu_bhruvam(prakriya)
     rules.iko_yanaci(prakriya)
 
     # 4.5 Clean up ghost terms AGAIN
@@ -105,7 +106,8 @@ def derive_krdanta(dhatu_slp1: str, pratyaya_upadeza: str, gana: int = None, db_
     rules.anunasikasya_kvijhaloh_kniti(prakriya)  
     rules.radabhyam_nishthato_nah(prakriya)
     rules.vrasca_bhrasja_sruja_mruja(prakriya) 
-    rules.choh_kuh(prakriya)                
+    rules.skoh_samyogadyor_ante_ca(prakriya)
+    rules.choh_kuh(prakriya)
     rules.ho_dhah_dader_ghah(prakriya)      
     rules.jhasas_tathor_dho_dhah(prakriya)  
     

@@ -50,7 +50,7 @@ TIN_ATMANEPADA_LIT = {
 ANIT_ROOTS = {
     'ji', 'nI', 'ci', 'Sru', 'stu', 'su', 'hu', 'dA', 'DA', 'sTA', 'pA', 'GrA', 
     'DmA', 'gA', 'yA', 'vA', 'snA', 'kf', 'hf', 'Df', 'sf', 'smf', 'stf', 'kF', 'jYA',
-    'glE', 'gE', 'mlE', 'dE', 'mE', 'sE', 'DyE', 'trE', 'hve', 'Sak', 'pac', 'kram', 'muc', 'ric', 'vac', 'vic', 'sic', 'praC', 'tyaj', 'nij', 'BaYj', 
+    'glE', 'gE', 'mlE', 'dE', 'mE', 'sE', 'DyE', 'trE', 'hve', 'Sak', 'pac', 'kram', 'masj', 'muc', 'ric', 'vac', 'vic', 'sic', 'praC', 'tyaj', 'nij', 'BaYj', 
     'Baj', 'Brajj', 'yaj', 'yuj', 'raYj', 'vij', 'svaYj', 'saYj', 'sfj', 'vraSc',
     'ad', 'kzuD', 'Kid', 'Cid', 'tud', 'nud', 'pad', 'Bid', 'vid', 'sad', 
     'svid', 'skand', 'kruD', 'buD', 'banD', 'yuD', 'ruD', 'rAD', 'vyaD', 
@@ -702,21 +702,6 @@ def ho_dhah_dader_ghah(prakriya: Prakriya) -> None:
             dhatu.text = dhatu.text[:-1] + 'Q'
             prakriya.log("Rule 8.2.31: 'h' -> 'Q' (ho DhaH)")
 
-def choh_kuh(prakriya: Prakriya) -> None:
-    for i in range(len(prakriya.terms)):
-        t = prakriya.terms[i]
-        if not t.text: continue
-        last_char = t.text[-1]
-        if last_char in['c', 'C', 'j', 'J']:
-            is_padanta = (i == len(prakriya.terms) - 1)
-            next_char_is_jhal = False
-            if not is_padanta and prakriya.terms[i+1].text:
-                next_char_is_jhal = prakriya.terms[i+1].text[0] in JHAL_CONSONANTS
-            
-            if is_padanta or next_char_is_jhal:
-                map_ku = {'c':'k', 'C':'K', 'j':'g', 'J':'G'}
-                t.text = t.text[:-1] + map_ku[last_char]
-                prakriya.log(f"Rule 8.2.30: coH kuH ({last_char} -> {map_ku[last_char]})")
 
 
 def samyogantasya_lopah(prakriya: Prakriya) -> None:
@@ -1418,17 +1403,6 @@ def snabhyastayor_atah(prakriya: Prakriya) -> None:
         dhatu.text = dhatu.text[:-1]
         prakriya.log("Rule 6.4.112: śnābhyastayor ātaḥ (Dropped A)")
 
-def aci_snu_dhatu_bhruvam(prakriya: Prakriya) -> None:
-    for i in range(len(prakriya.terms)-1):
-        t1 = prakriya.terms[i]
-        t2 = prakriya.terms[i+1]
-        if t1.term_type == 'dhatu' and t1.text and t1.text[-1] in['u', 'U'] and t2.text and is_vowel(t2.text[0]):
-            clean_dhatu = next((tag.split('_')[1] for tag in t1.tags if tag.startswith('clean_')), t1.text)
-            is_lit = any('liW' in t.tags for t in prakriya.terms)
-            
-            if clean_dhatu == 'brU' or (is_lit and clean_dhatu in['Sru', 'stu', 'su', 'hu']):
-                t1.text = t1.text[:-1] + 'uv'
-                prakriya.log("Rule 6.4.77: aci śnudhātubhruvāṃ (u/U -> uv before vowel)")
 
 def sino_gunah(prakriya: Prakriya) -> None:
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
@@ -1594,16 +1568,6 @@ def rin_sayaglinksu(prakriya: Prakriya) -> None:
                 prakriya.log("Rule 7.4.28: riṅ śayaglinkṣu (ṛ -> ri)")
 
 
-def skoh_samyogadyor_ante_ca(prakriya: Prakriya) -> None:
-    word = "".join(t.text for t in prakriya.terms)
-    if len(word) >= 2 and word[-1] in SLP1_CONSONANTS and word[-2] in ['s', 'k']:
-        for i in range(len(prakriya.terms)):
-            if 'yAsuW' in prakriya.terms[i].tags and prakriya.terms[i].text.endswith('s'):
-                subsequent_text = "".join(t.text for t in prakriya.terms[i+1:])
-                if len(subsequent_text) == 1 and subsequent_text[0] in SLP1_CONSONANTS:
-                    prakriya.terms[i].text = prakriya.terms[i].text[:-1]
-                    prakriya.log("Rule 8.2.29: skoḥ saṃyogādyor ante ca (Dropped 's')")
-                    break
 
 def damsa_sanja_svanjam_sapi(prakriya: Prakriya) -> None:
     dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
@@ -2043,6 +2007,17 @@ def radabhyam_nishthato_nah(prakriya: Prakriya) -> None:
     if dhatu and suffix and suffix.upadeza in['kta', 'ktavatu']:
         text = dhatu.text
         clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
+        if text.endswith('d') or text.endswith('r') or clean_dhatu == 'Svi' or 'odit' in dhatu.tags:
+            if suffix.text.startswith('t'):
+                suffix.text = 'n' + suffix.text[1:]
+                if text.endswith('d'): dhatu.text = text[:-1] + 'n'
+                prakriya.log("Rule 8.2.42/45: niṣṭhā 't' -> 'n'")
+
+    dhatu = next((t for t in prakriya.terms if t.term_type == 'dhatu'), None)
+    suffix = prakriya.terms[-1]
+    if dhatu and suffix and suffix.upadeza in['kta', 'ktavatu']:
+        text = dhatu.text
+        clean_dhatu = next((tag.split('_')[1] for tag in dhatu.tags if tag.startswith('clean_')), dhatu.text)
         if text.endswith('d') or text.endswith('r') or clean_dhatu == 'Svi':
             if suffix.text.startswith('t'):
                 suffix.text = 'n' + suffix.text[1:]
@@ -2255,3 +2230,97 @@ def cjoh_ku_ghinnyatoh(prakriya: Prakriya) -> None:
         elif dhatu.text.endswith('j'):
             dhatu.text = dhatu.text[:-1] + 'g'
             prakriya.log("Rule 7.3.52: cjoḥ ku ghiṇṇyatoḥ (j -> g)")
+
+def aci_snu_dhatu_bhruvam(prakriya: Prakriya) -> None:
+    for i in range(len(prakriya.terms)-1):
+        t1 = prakriya.terms[i]
+        if not t1.text: continue
+        t2 = None
+        for j in range(i+1, len(prakriya.terms)):
+            if prakriya.terms[j].text:
+                t2 = prakriya.terms[j]
+                break
+        if t1.term_type == 'dhatu' and t2 and t2.text and t2.text[0] in['a', 'A', 'i', 'I', 'u', 'U', 'f', 'F', 'e', 'o', 'E', 'O', 'x', 'X']:
+            clean_dhatu = next((tag.split('_')[1] for tag in t1.tags if tag.startswith('clean_')), t1.text)
+            is_lit = any('liW' in t.tags for t in prakriya.terms)
+            if t1.text[-1] in ['u', 'U']:
+                if clean_dhatu == 'brU' or (is_lit and clean_dhatu in['Sru', 'stu', 'su', 'hu']):
+                    t1.text = t1.text[:-1] + 'uv'
+                    prakriya.log("Rule 6.4.77: aci śnudhātubhruvāṃ (u/U -> uv)")
+            elif t1.text[-1] in ['i', 'I']:
+                if clean_dhatu == 'i' and 'atmanepada' in t1.tags:
+                    t1.text = t1.text[:-1] + 'iy'
+                    prakriya.log("Rule 6.4.77: aci śnudhātubhruvāṃ (i/I -> iy)")
+
+def choh_kuh(prakriya: Prakriya) -> None:
+    for i in range(len(prakriya.terms)):
+        t = prakriya.terms[i]
+        if not t.text: continue
+        last_char = t.text[-1]
+        if last_char in['c', 'C', 'j', 'J']:
+            next_term = None
+            for j in range(i+1, len(prakriya.terms)):
+                if prakriya.terms[j].text:
+                    next_term = prakriya.terms[j]
+                    break
+            is_padanta = not next_term
+            next_char_is_jhal_or_n = False
+            if next_term:
+                nc = next_term.text[0]
+                # JHAL_CONSONANTS or 'n' or 'm'
+                next_char_is_jhal_or_n = nc in['J', 'B', 'G', 'Q', 'D', 'j', 'b', 'g', 'q', 'd', 'K', 'P', 'C', 'W', 'T', 'c', 'w', 't', 'k', 'p', 'S', 'z', 's', 'h', 'n', 'm']
+            
+            if is_padanta or next_char_is_jhal_or_n:
+                map_ku = {'c':'k', 'C':'K', 'j':'g', 'J':'G'}
+                if t.text.endswith('Sc'):
+                    t.text = t.text[:-2] + 'k'
+                else:
+                    t.text = t.text[:-1] + map_ku[last_char]
+                prakriya.log(f"Rule 8.2.30: coH kuH ({last_char} -> {map_ku.get(last_char, 'k')})")
+
+def skoh_samyogadyor_ante_ca(prakriya: Prakriya) -> None:
+    for i in range(len(prakriya.terms)):
+        t1 = prakriya.terms[i]
+        if not t1.text: continue
+        if t1.term_type == 'dhatu' and t1.text.startswith('mas') and t1.text[-1] in ['j', 'g']:
+            next_term = None
+            for j in range(i+1, len(prakriya.terms)):
+                if prakriya.terms[j].text:
+                    next_term = prakriya.terms[j]
+                    break
+            if next_term and next_term.text[0] in['J', 'B', 'G', 'Q', 'D', 'j', 'b', 'g', 'q', 'd', 'K', 'P', 'C', 'W', 'T', 'c', 'w', 't', 'k', 'p', 'S', 'z', 's', 'h', 'n', 'm']:
+                t1.text = 'ma' + t1.text[-1]
+                prakriya.log("Rule 8.2.29: skoḥ saṃyogādyor ante ca (masj -> maj)")
+
+    word = "".join(t.text for t in prakriya.terms)
+    if len(word) >= 2 and word[-1] not in['a','A','i','I','u','U','f','F','e','o','E','O','x','X'] and word[-2] in ['s', 'k']:
+        for i in range(len(prakriya.terms)):
+            if 'yAsuW' in prakriya.terms[i].tags and prakriya.terms[i].text.endswith('s'):
+                subs = "".join(t.text for t in prakriya.terms[i+1:])
+                if len(subs) == 1 and subs[0] not in['a','A','i','I','u','U','f','F','e','o','E','O','x','X']:
+                    prakriya.terms[i].text = prakriya.terms[i].text[:-1]
+                    prakriya.log("Rule 8.2.29: skoḥ saṃyogādyor ante ca (Dropped 's')")
+                    break
+
+    for i in range(len(prakriya.terms)):
+        t1 = prakriya.terms[i]
+        if not t1.text: continue
+        if t1.term_type == 'dhatu' and t1.text.startswith('mas') and t1.text[-1] in ['j', 'g']:
+            next_term = None
+            for j in range(i+1, len(prakriya.terms)):
+                if prakriya.terms[j].text:
+                    next_term = prakriya.terms[j]
+                    break
+            if next_term and next_term.text[0] in['J', 'B', 'G', 'Q', 'D', 'j', 'b', 'g', 'q', 'd', 'K', 'P', 'C', 'W', 'T', 'c', 'w', 't', 'k', 'p', 'S', 'z', 's', 'h', 'n', 'm']:
+                t1.text = 'ma' + t1.text[-1]
+                prakriya.log("Rule 8.2.29: skoḥ saṃyogādyor ante ca (masj -> maj)")
+
+    word = "".join(t.text for t in prakriya.terms)
+    if len(word) >= 2 and word[-1] in['h', 'l', 'y', 'v', 'r', 'k', 'p', 'S', 'z', 's'] and word[-2] in ['s', 'k']:
+        for i in range(len(prakriya.terms)):
+            if 'yAsuW' in prakriya.terms[i].tags and prakriya.terms[i].text.endswith('s'):
+                subs = "".join(t.text for t in prakriya.terms[i+1:])
+                if len(subs) == 1 and subs[0] not in['a','A','i','I','u','U','f','F','e','o','E','O','x','X']:
+                    prakriya.terms[i].text = prakriya.terms[i].text[:-1]
+                    prakriya.log("Rule 8.2.29: skoḥ saṃyogādyor ante ca (Dropped 's')")
+                    break

@@ -262,5 +262,21 @@ class TestCoverageEdgeCases(unittest.TestCase):
         prakriya = derive('rakz', 'laW', purusha='prathama', vacana=0, gana=1, upasargas=['sam'])
         self.assertEqual(prakriya.get_current_string(), 'saMrakzati')
 
+
+    def test_masj_kta(self):
+        from skt_dhatu_parse.krdanta import derive_krdanta
+        p = derive_krdanta('masj', 'kta', gana=6)
+        self.assertEqual(p.get_current_string(), 'magna')
+
+    def test_bhanj_kta(self):
+        from skt_dhatu_parse.krdanta import derive_krdanta
+        p = derive_krdanta('BaYj', 'kta', gana=7)
+        self.assertEqual(p.get_current_string(), 'Bagna')
+
+    def test_i_atmanepada_iyan(self):
+        from skt_dhatu_parse.engine import derive
+        p = derive('i', 'laW', purusha='prathama', vacana=1, gana=2, voice='atmanepada')
+        self.assertEqual(p.get_current_string(), 'iyAte')
+
 if __name__ == '__main__':
     unittest.main()
