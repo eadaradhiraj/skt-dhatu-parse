@@ -256,5 +256,11 @@ class TestCoverageEdgeCases(unittest.TestCase):
         prakriya2 = derive_krdanta('yuj', 'GaY', gana=7)
         self.assertEqual(prakriya2.get_current_string(), 'yoga')
 
+
+    def test_sam_mo_anusvarah_coverage(self):
+        from skt_dhatu_parse.engine import derive
+        prakriya = derive('rakz', 'laW', purusha='prathama', vacana=0, gana=1, upasargas=['sam'])
+        self.assertEqual(prakriya.get_current_string(), 'saMrakzati')
+
 if __name__ == '__main__':
     unittest.main()
