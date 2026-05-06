@@ -1092,5 +1092,15 @@ class TestRules(unittest.TestCase):
         rules.hali_ca(p2)
         self.assertEqual(p2.terms[0].text, 'pUr')
 
+
+    def test_scuna_scuh_inter_term(self):
+        from skt_dhatu_parse.models import Term, Prakriya
+        from skt_dhatu_parse import rules
+        p = Prakriya()
+        p.add_term(Term('yaj', 'dhatu'))
+        p.add_term(Term('na', 'pratyaya'))
+        rules.scuna_scuh(p)
+        self.assertEqual(p.terms[1].text, 'Ya')
+
 if __name__ == '__main__':
     unittest.main()

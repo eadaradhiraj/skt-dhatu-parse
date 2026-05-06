@@ -19,3 +19,16 @@ class TestAdvancedSubanta(unittest.TestCase):
     def test_manas_stem(self):
         p1 = derive_subanta('manas', 3, 2, 'n')
         self.assertEqual(p1.get_current_string(), 'manoBiH')
+
+
+    def test_sarva_genitive_plural(self):
+        p = derive_subanta('sarva', 6, 2, 'p')
+        self.assertEqual(p.get_current_string(), 'sarvezAm')
+
+    def test_yogin_stem(self):
+        p = derive_subanta('yogin', 1, 0, 'm')
+        self.assertEqual(p.get_current_string(), 'yogI')
+
+    def test_rajan_strong(self):
+        p = derive_subanta('rAjan', 1, 1, 'm')
+        self.assertEqual(p.get_current_string(), 'rAjAnO')

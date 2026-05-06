@@ -13,3 +13,8 @@ class TestAnalyzer(unittest.TestCase):
     def test_analyze_fail(self):
         res = analyze_word('xyz')
         self.assertTrue(any('Unrecognized' in s for s in res['analysis']))
+
+
+    def test_analyze_inst(self):
+        res = analyze_word('rAmeRa')
+        self.assertTrue(any('Instrumental' in s for s in res['analysis']))

@@ -354,5 +354,12 @@ class TestCLI(unittest.TestCase):
         from skt_dhatu_parse.cli import main
         main()
 
+
+    @patch('sys.argv',['cli.py', 'ziva', '--taddhita', 'aR', '--history'])
+    @patch('builtins.print')
+    def test_cli_taddhita_history_branch(self, mock_print):
+        from skt_dhatu_parse.cli import main
+        main()
+
 if __name__ == '__main__':
     unittest.main()
